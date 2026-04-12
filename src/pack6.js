@@ -1252,3 +1252,240 @@ The reconstructive nature of memory carries significant implications across mult
     },
   ],
 });
+
+// ═══════════════════════════════════════════════════════
+// MODULE 6 — Language & Communication (Language Acquisition)
+// ═══════════════════════════════════════════════════════
+pack6.modules.push({
+  id: 'pack6-m6',
+  name: 'Module 6',
+  time: 9 * 60,
+  sections: [
+    // --- Complete the Words ---
+    {
+      type: 'complete_words',
+      id: 'pack6-m6-cw',
+      title: 'Human Communication',
+      instructions: 'Fill in the missing letters in the paragraph.',
+      paragraph: [
+        { text: 'Language is one of the most complex and distinctly human abilities. Children ' },
+        { blank: 'uire', prefix: 'acq', answer: 'acquire' },
+        { text: ' their native language naturally, without formal ' },
+        { blank: 'uction', prefix: 'instr', answer: 'instruction' },
+        { text: ', simply through ' },
+        { blank: 'osure', prefix: 'exp', answer: 'exposure' },
+        { text: ' to speech in their environment. Linguists have long debated whether this ability is primarily ' },
+        { blank: 'etic', prefix: 'gen', answer: 'genetic' },
+        { text: ' — hardwired into the brain — or ' },
+        { blank: 'ned', prefix: 'lear', answer: 'learned' },
+        { text: ' through social interaction. Most researchers today ' },
+        { blank: 'ee', prefix: 'agr', answer: 'agree' },
+        { text: ' that both biology and environment play essential roles in language ' },
+        { blank: 'lopment', prefix: 'deve', answer: 'development' },
+        { text: '. The speed and accuracy with which young children ' },
+        { blank: 'ster', prefix: 'ma', answer: 'master' },
+        { text: ' grammar rules they were never explicitly taught remains one of the most ' },
+        { blank: 'ling', prefix: 'compel', answer: 'compelling' },
+        { text: ' puzzles in cognitive science.' },
+      ],
+    },
+
+    // --- Read in Daily Life: Language Exchange Program ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m6-dl1',
+      title: 'Language Exchange Partnership Notice',
+      material_type: 'email',
+      material: {
+        subject: 'Join the Spring Language Exchange Program – Sign-Ups Now Open',
+        from: 'International Student Services',
+        to: 'All Enrolled Students',
+        body: "Dear Students,\n\nWe are pleased to announce that sign-ups for the Spring Language Exchange Program are now open. This program pairs domestic and international students for weekly conversation practice sessions in each other's native languages.\n\nHow it works:\n• Each pair meets once or twice per week for 60–90 minutes.\n• Each session is divided equally: half the time is spent speaking one partner's language, half in the other's.\n• Partners are matched based on language background and scheduling availability.\n\nBenefits include improved conversational fluency, cultural exchange, and friendship. Participants who complete at least eight sessions will receive a Certificate of Participation, which can be included in resumes and scholarship applications.\n\nTo register, visit the International Student Services portal by April 25. Spaces are limited to 60 pairs this semester.\n\nIf you have questions, contact us at languageexchange@university.edu.\n\nInternational Student Services",
+      },
+      questions: [
+        {
+          id: 11,
+          text: 'What do participants receive after completing the required number of sessions?',
+          options: [
+            'Academic credit toward a foreign language course',
+            'A formal certificate they can use in applications',
+            'Free enrollment in an advanced language class',
+            'Priority placement in future exchange programs',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The email states participants who complete at least eight sessions receive "a Certificate of Participation, which can be included in resumes and scholarship applications." This is a formal document for applications, not academic credit, course enrollment, or future placement priority.',
+        },
+        {
+          id: 12,
+          text: 'What can be inferred about how session time is structured?',
+          options: [
+            'Partners can decide freely how to divide their time each session.',
+            'Each partner spends equal time practicing their target language.',
+            'Sessions are conducted entirely in the less-proficient partner\'s language.',
+            'The program requires partners to alternate languages each week.',
+          ],
+          correct: 1,
+          question_type: 'inference',
+          explanation: 'The email states "half the time is spent speaking one partner\'s language, half in the other\'s" — meaning each partner gets equal time practicing the other\'s language in every session. The format is fixed (equal split per session), not freely decided, not one-language-only, and not alternated weekly.',
+        },
+      ],
+    },
+
+    // --- Read in Daily Life: Writing Center Policy ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m6-dl2',
+      title: 'Writing Center Services Notice',
+      material_type: 'email',
+      material: {
+        subject: 'Writing Center – Updated Policies for the Fall Semester',
+        from: 'University Writing Center',
+        to: 'All Students',
+        body: "Dear Students,\n\nWe are writing to inform you of updated policies at the University Writing Center, effective this fall semester.\n\n1. Appointment Length: All appointments are now standardized at 50 minutes. Same-day drop-in sessions remain available but are limited to 25 minutes.\n\n2. Submission Requirement: Students must submit their draft at least 24 hours before their appointment. Consultants will not review drafts submitted after this deadline.\n\n3. Scope of Assistance: Writing Center consultants will help with structure, argument development, and clarity. They will not proofread or correct grammar errors directly; this is to encourage students to develop independent editing skills.\n\n4. ESL Support: Students writing in a language other than their native language may request a consultant who specializes in ESL writing.\n\nAppointments can be booked through the student portal. Walk-in availability is posted daily at 8:00 AM.\n\nWe look forward to supporting your writing.\nUniversity Writing Center",
+      },
+      questions: [
+        {
+          id: 13,
+          text: 'According to the notice, which of the following is NOT a service provided by Writing Center consultants?',
+          options: [
+            'Helping students improve the structure of their writing',
+            'Assisting with argument development',
+            'Directly correcting grammar mistakes',
+            'Supporting ESL students with specialized consultants',
+          ],
+          correct: 2,
+          question_type: 'negative_fact',
+          explanation: 'The notice explicitly states consultants "will not proofread or correct grammar errors directly." Structure, argument development, and ESL support are all listed as services the center does provide.',
+        },
+        {
+          id: 14,
+          text: 'What must students do before a scheduled Writing Center appointment?',
+          options: [
+            'Attend an orientation session about writing strategies',
+            'Submit their draft at least one day in advance',
+            'Complete a grammar review checklist provided by the center',
+            'Confirm their appointment within 12 hours of booking',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The notice states "Students must submit their draft at least 24 hours before their appointment." 24 hours equals one day. No orientation, grammar checklist, or 12-hour confirmation is mentioned.',
+        },
+        {
+          id: 15,
+          text: 'What can be inferred about why consultants do not correct grammar errors directly?',
+          options: [
+            'Consultants are not trained to identify grammar errors.',
+            'The center lacks enough staff to provide grammar instruction.',
+            'The policy is intended to help students build their own editing abilities.',
+            'Grammar correction is reserved for ESL specialists only.',
+          ],
+          correct: 2,
+          question_type: 'inference',
+          explanation: 'The notice explains the reason directly: "this is to encourage students to develop independent editing skills." The policy is pedagogical — building student autonomy — not a staffing or qualification issue.',
+        },
+      ],
+    },
+
+    // --- Read an Academic Passage: Critical Period Hypothesis ---
+    {
+      type: 'academic_passage',
+      id: 'pack6-m6-ap',
+      title: 'The Critical Period Hypothesis in Language Acquisition',
+      passage: `The Critical Period Hypothesis (CPH) proposes that there is a biologically determined window of time — typically from infancy through early adolescence — during which the human brain is especially receptive to language acquisition. First formally articulated by neurologist Wilder Penfield in the 1950s and later expanded by linguist Eric Lenneberg in 1967, the hypothesis draws on evidence from neuroscience, developmental psychology, and case studies of individuals who learned language under unusual circumstances. Lenneberg argued that language acquisition must occur before puberty, after which the brain's neural plasticity — its ability to reorganize and form new connections — declines significantly.
+
+The most widely cited evidence for the CPH comes from studies of children who were severely isolated from language during their early years. The case of Genie, a girl discovered in 1970 who had been confined and denied linguistic input until age thirteen, is particularly instructive. Despite years of subsequent language therapy, Genie never acquired normal grammatical competence, though she developed a substantial vocabulary. Critics of the CPH note, however, that Genie's profound psychological trauma and cognitive deprivation may have confounded results, making it difficult to isolate the effect of age from other variables. Second language acquisition research presents a more nuanced picture: adult learners can achieve high levels of proficiency, especially in vocabulary and reading, though they rarely attain native-like phonological accuracy.
+
+The CPH has important implications for education policy and language teaching. If a sensitive period for language acquisition exists, early childhood language programs may yield disproportionate long-term benefits. Some researchers have applied CPH reasoning to argue for bilingual education beginning in kindergarten rather than secondary school. However, others caution that the hypothesis has been overgeneralized — not all aspects of language are equally sensitive to age, and motivation, instruction quality, and amount of exposure remain powerful predictors of success at any age.`,
+      questions: [
+        {
+          id: 16,
+          paragraph: 0,
+          text: 'The word "plasticity" in paragraph 1 is closest in meaning to:',
+          options: [
+            'the brain\'s capacity to adapt and form new neural pathways',
+            'the physical flexibility of the brain\'s outer surface',
+            'a measure of how quickly information is processed',
+            'the ability to store long-term memories permanently',
+          ],
+          correct: 0,
+          question_type: 'vocab',
+          explanation: '"Neural plasticity" refers to the brain\'s ability to reorganize itself by forming new connections — the passage defines it as "its ability to reorganize and form new connections." This matches capacity to adapt and form new neural pathways. Physical flexibility, processing speed, and memory storage are related but distinct concepts.',
+        },
+        {
+          id: 17,
+          paragraph: 1,
+          text: 'According to the passage, what was a limitation of the Genie case study as evidence for the CPH?',
+          options: [
+            'Genie was too young when discovered to provide useful linguistic data.',
+            'Genie eventually developed full grammatical competence, contradicting the CPH.',
+            'Other factors such as trauma may have influenced Genie\'s language outcomes.',
+            'Genie\'s case was never formally studied by linguists.',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'The passage states critics note that "Genie\'s profound psychological trauma and cognitive deprivation may have confounded results, making it difficult to isolate the effect of age from other variables." Genie was 13 when discovered (not too young), never achieved full grammatical competence (not contradicting CPH), and was formally studied extensively.',
+        },
+        {
+          id: 18,
+          paragraph: 1,
+          text: 'Based on paragraph 2, what can be inferred about adult second language learners?',
+          options: [
+            'Adults are incapable of reaching high proficiency in a second language.',
+            'Adults can become highly proficient but may retain a foreign accent.',
+            'Adults who study intensively can match native speakers in all aspects of language.',
+            'Phonological accuracy is easier for adults to acquire than vocabulary.',
+          ],
+          correct: 1,
+          question_type: 'inference',
+          explanation: 'The passage says adult learners "can achieve high levels of proficiency, especially in vocabulary and reading, though they rarely attain native-like phonological accuracy." This supports: high proficiency is possible, but accent (phonology) is harder — inferring adults can be highly proficient yet retain an accent. Option A overstates the limitation. Option C contradicts "rarely native-like." Option D reverses the relative difficulty.',
+        },
+        {
+          id: 19,
+          paragraph: 0,
+          text: 'Which of the following best expresses the essential information in the highlighted sentence? Incorrect choices change the meaning or leave out essential information.',
+          highlighted_word: 'Lenneberg argued that language acquisition must occur before puberty, after which the brain\'s neural plasticity — its ability to reorganize and form new connections — declines significantly.',
+          options: [
+            'Lenneberg believed all learning becomes impossible once the brain loses plasticity after puberty.',
+            'According to Lenneberg, the brain\'s decreasing flexibility after puberty makes early language learning essential.',
+            'Lenneberg found that children who learn language before puberty have larger vocabularies than those who learn later.',
+            'The brain reaches peak plasticity at puberty, which is why teenage years are the best time to learn a language.',
+          ],
+          correct: 1,
+          question_type: 'sentence_simplification',
+          explanation: 'The original sentence has two claims: (1) language must be acquired before puberty, and (2) this is because brain plasticity declines after puberty. Option B captures both accurately. Option A overgeneralizes to "all learning." Option C introduces vocabulary size, which is not mentioned. Option D reverses the claim — plasticity declines at puberty, not peaks.',
+        },
+        {
+          id: 20,
+          paragraph: 2,
+          text: 'According to paragraph 3, which of the following represents a criticism of how the CPH has been applied?',
+          options: [
+            'It has been used to argue against any form of early language education.',
+            'Researchers have applied it too broadly, ignoring that age affects different language skills differently.',
+            'The hypothesis has been rejected by most educators as scientifically invalid.',
+            'CPH supporters have ignored the role of genetics in language development.',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The passage states "others caution that the hypothesis has been overgeneralized — not all aspects of language are equally sensitive to age." This means critics argue the CPH has been applied too broadly without accounting for variation across language domains. The passage does not say it argues against early education, has been rejected, or ignores genetics.',
+        },
+        {
+          id: 21,
+          paragraph: 1,
+          text: 'Look at the four squares [■] that indicate where the following sentence could be added to the passage. Where would the sentence best fit?',
+          insert_sentence: 'This gap between lexical and grammatical development has since become a key data point in debates about what the critical period actually governs.',
+          insertion_points: [
+            'The case of Genie, a girl discovered',
+            'Genie never acquired normal grammatical competence, though she developed a substantial vocabulary',
+            'Critics of the CPH note, however',
+            'Second language acquisition research presents',
+          ],
+          options: ['■A', '■B', '■C', '■D'],
+          correct: 1,
+          question_type: 'text_insertion',
+          explanation: 'The inserted sentence refers to "this gap between lexical and grammatical development" — a direct reference to the preceding clause about Genie having vocabulary but lacking grammar (■B). Inserting here creates a logical bridge: Genie\'s split profile (vocabulary yes, grammar no) → that split is a key data point in CPH debates. ■A comes before Genie\'s outcomes are described. ■C and ■D shift to criticism and adult learners, moving away from Genie\'s specific case.',
+        },
+      ],
+    },
+  ],
+});

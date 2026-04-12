@@ -1,5 +1,9 @@
 import { validWords } from './wordlist.js'
-import { getEnglishWords } from './english-words.js'
+
+// Lazy-load the 2.7MB dictionary only when a writing page is active.
+// Falls back to the 15k wordlist until the chunk is ready.
+let _englishWords = null
+import('./english-words.js').then(m => { _englishWords = m.getEnglishWords() })
 
 export function score(text) {
   const tokens = text.match(/[a-zA-Z']+/g) || []
@@ -20,7 +24,7 @@ export function score(text) {
     const lower = token.toLowerCase().replace(/^'+|'+$/g, '')
     if (lower.length < 3) return
     if (skipWords.has(lower)) return
-    if (getEnglishWords().has(lower)) return
+    if (_englishWords && _englishWords.has(lower)) return
     if (validWords.has(lower)) return
 
     errors.push(`Possible misspelling: "${token}"`)

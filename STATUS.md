@@ -78,7 +78,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 
 ## 已知问题
 - english-words.js 2.7MB，首次加载可能较慢
-- Reading.jsx 超过 1200 行，需要拆分
+- Reading.jsx 已拆分为 4 个组件 (affb832) ✓
 - Git remote URL 已使用 HTTPS（无嵌入 token），凭证由系统 credential helper 管理
 
 ## 快速上手

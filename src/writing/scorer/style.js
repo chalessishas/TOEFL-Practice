@@ -1,9 +1,16 @@
 // Casual/informal register terms that ETS penalizes in academic writing
+// Words here use word-boundary regex so "cause" doesn't match "because",
+// "thing" doesn't match "something/anything/everything/nothing", etc.
 const CASUAL_TERMS = [
   'kinda','gonna','wanna','gotta','dunno','cuz','cause','cmon',
-  'lol','btw','omg','stuff','thing','things','like,','you know',
+  'lol','btw','omg','stuff','thing','things','you know',
   'pretty much','sort of','kind of',
 ]
+// Pre-build word-boundary regexes for single-word terms to avoid substring false positives
+const CASUAL_TERM_REGEXES = CASUAL_TERMS.map(t => ({
+  term: t,
+  re: new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i'),
+}))
 
 // Function words excluded from repetition analysis
 const FUNCTION_WORDS = new Set([
@@ -64,8 +71,8 @@ export function score(text) {
   const syntacticVariety = patternHits / COMPLEX_PATTERNS.length  // 0–1
 
   // Casual register penalty — ETS penalizes informal language in academic writing
-  const lowerText = text.toLowerCase()
-  const casualHits = CASUAL_TERMS.filter(t => lowerText.includes(t)).length
+  // Use regex with word boundaries to avoid "cause" matching "because", etc.
+  const casualHits = CASUAL_TERM_REGEXES.filter(({ re }) => re.test(text)).length
   const casualPenalty = Math.min(0.3, casualHits * 0.07)
 
   const ttr = rawTtr // keep raw for display

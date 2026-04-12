@@ -64,8 +64,10 @@ export function score(text, taskType = 'general') {
   // Paragraph count score
   const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(p => p.length > 0)
   const paragraphCount = paragraphs.length
-  let paragraphScore = 0.4
-  if (paragraphCount >= 2) paragraphScore = 0.7
+  // Short 120-word responses legitimately fit in 1 paragraph — don't penalise as heavily.
+  // Old: 1→0.4, 2→0.7, 3→1.0. New: 1→0.65, 2→0.85, 3→1.0
+  let paragraphScore = 0.65
+  if (paragraphCount >= 2) paragraphScore = 0.85
   if (paragraphCount >= 3) paragraphScore = 1.0
 
   // Task-specific bonuses
@@ -80,7 +82,7 @@ export function score(text, taskType = 'general') {
     // ETS: genuine peer engagement = name-reference + build-on/contrast, not just bare opinion
     const PEER_NAMES = /\b(Sarah|Mark|Liam|Maya|Alex|Priya|Emma|James|Sophie|Ethan|Noah|Chloe|Hannah|Marcus|Fatima|Carlos|Amara|Ben|Isabelle|David)\b/
     const hasPeerName = PEER_NAMES.test(text)
-    const engagementVerb = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up)/i.test(text)
+    const engagementVerb = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up|identifies?|overlooks?|is (correct|right|wrong|compelling|mistaken|valid|flawed))/i.test(text)
     const buildOn = /\b(building on|adding to|unlike|while [A-Z]|although [A-Z]|I (also )?(agree|disagree) with)\b/i.test(text)
     const hasOpinion = /\b(i agree|i disagree|i think|in my opinion|i believe)\b/i.test(text)
 

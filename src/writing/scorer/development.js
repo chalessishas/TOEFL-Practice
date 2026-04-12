@@ -21,10 +21,13 @@ const REASON_MARKERS = [
   'nevertheless','nonetheless','despite','while','yet',
 ]
 
-// Word count ranges per task type
+// Word count ranges per task type.
+// Discussion target lowered from 160 to 130: ETS minimum is 120 words and the
+// rubric rewards quality of argument, not length — 120-word well-argued responses
+// should not be penalised for being below an inflated 160-word target.
 const WORD_COUNT_TARGETS = {
   email:      { min: 50,  target: 120, max: 200 },
-  discussion: { min: 80,  target: 160, max: 300 },
+  discussion: { min: 80,  target: 130, max: 300 },
   general:    { min: 100, target: 200, max: 400 },
 }
 
@@ -59,13 +62,24 @@ function sentenceCountScore(count, taskType) {
   return 1.0
 }
 
+// Peer names used in discussion prompts — engagement-as-thesis is valid for this task
+const DISCUSSION_PEER_NAMES = /\b(sarah|mark|liam|maya|alex|priya|emma|james|sophie|ethan|noah|chloe|hannah|marcus|fatima|carlos|amara|ben|isabelle|david)\b/i
+
 function argumentStructureScore(text, wordCount, taskType) {
   // Email tasks use transactional structure (request/reply/apology), not opinion/thesis
   if (taskType === 'email') return 1.0
   // Only penalise essays long enough that thin ideas are a choice, not a length issue
   if (wordCount < 120) return 1.0
   const lower = text.toLowerCase()
-  const hasThesis = THESIS_MARKERS.some(m => lower.includes(m))
+  let hasThesis = THESIS_MARKERS.some(m => lower.includes(m))
+
+  // Discussion: peer-engagement-as-thesis — "Chloe identifies...", "Carlos raises..." —
+  // referencing a classmate + assessing their argument = valid thesis form for this task.
+  if (taskType === 'discussion' && !hasThesis) {
+    const hasPeer = DISCUSSION_PEER_NAMES.test(lower)
+    const hasAssessment = /(correct|right|wrong|flaw|compelling|valid|mistaken|important|raises?|identifies?|points? out|argues?|overlooks?|underestimates?)/i.test(lower)
+    if (hasPeer && hasAssessment) hasThesis = true
+  }
   const detailCount = DETAIL_MARKERS.filter(m => lower.includes(m)).length
   const reasonCount = REASON_MARKERS.filter(m => lower.includes(m)).length
 
@@ -85,10 +99,19 @@ function argumentStructureScore(text, wordCount, taskType) {
   // Full score: has thesis + ≥2 examples/details + ≥2 reason markers
   // Thin essay penalty: long but ≤1 example marker and ≤1 reason marker
   let base
-  if (!hasThesis && detailCount <= 1 && reasonCount <= 1) base = 0.35
-  else if (detailCount === 0 && reasonCount <= 1) base = 0.5
-  else if (detailCount <= 1 && reasonCount <= 1) base = 0.65
-  else base = 1.0
+  if (taskType === 'discussion' && hasThesis) {
+    // Discussion: stating a position (or engaging with a peer) is the primary criterion.
+    // Details/reasons are secondary — only penalise if truly undeveloped (zero of both).
+    base = (detailCount === 0 && reasonCount === 0) ? 0.65 : 1.0
+  } else if (!hasThesis && detailCount <= 1 && reasonCount <= 1) {
+    base = 0.35
+  } else if (detailCount === 0 && reasonCount <= 1) {
+    base = 0.5
+  } else if (detailCount <= 1 && reasonCount <= 1) {
+    base = 0.65
+  } else {
+    base = 1.0
+  }
   return Math.max(0, base - repetitionPenalty)
 }
 
@@ -99,12 +122,26 @@ export function score(text, taskType = 'general') {
   const sentenceCount = sentences.length
 
   const wcScore  = wordCountScore(wordCount, taskType)
-  const dmScore  = detailMarkersScore(text)
   const scScore  = sentenceCountScore(sentenceCount, taskType)
   const argScore = argumentStructureScore(text, wordCount, taskType)
 
+  // Task-specific formula weights:
+  // - Email: dmScore bypassed (transactional writing — no "for example" expected)
+  // - Discussion: dmScore de-weighted (academic reasoning often uses implicit examples,
+  //   not "for example/for instance" markers); wcScore boosted to compensate.
+  //   ETS rubric rewards quality of argument over word count or marker quantity.
+  // - General: standard weighting
+  let dmScore, wcW, dmW, scW
+  if (taskType === 'email') {
+    dmScore = 1.0; wcW = 0.50; dmW = 0.30; scW = 0.20
+  } else if (taskType === 'discussion') {
+    dmScore = detailMarkersScore(text); wcW = 0.60; dmW = 0.15; scW = 0.25
+  } else {
+    dmScore = detailMarkersScore(text); wcW = 0.50; dmW = 0.30; scW = 0.20
+  }
+
   // argScore gates the ceiling: thin ideas cap development at ~0.65 regardless of word count
-  const value = Math.min(argScore, Math.min(1, wcScore * 0.5 + dmScore * 0.3 + scScore * 0.2))
+  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW))
 
   return {
     value,

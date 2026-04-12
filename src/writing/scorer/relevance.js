@@ -36,8 +36,10 @@ function extractGoalKeywords(goalText) {
     .filter(w => w.length > 3 && !STOP_WORDS.has(w))
 }
 
-// Per-goal scoring for email tasks: each goal is scored as covered (≥1 keyword match) or not
-function scoreByGoals(responseText, goals) {
+// Per-goal scoring for email tasks: each goal is scored as covered (≥1 keyword match) or not.
+// A situation-based floor prevents false penalties when students paraphrase goal verbs
+// (e.g. "describe the problem" → "I am writing to report a serious issue").
+function scoreByGoals(responseText, goals, promptText) {
   const responseTokens = (responseText.match(/[a-zA-Z]+/g) || []).map(w => w.toLowerCase())
   const responseStems = new Set(responseTokens.map(stem))
 
@@ -46,13 +48,26 @@ function scoreByGoals(responseText, goals) {
     const stemmed = keywords.map(stem)
     const matches = stemmed.filter(s => responseStems.has(s)).length
     // A goal is covered if at least 1 of its content words (stemmed) appears in the response.
-    // For 2-4 word goals, matching 1 content word is a reasonable proxy for addressing the intent.
     const covered = matches >= 1
     return { goal, covered }
   })
 
   const coveredCount = goalResults.filter(r => r.covered).length
-  const value = goals.length > 0 ? coveredCount / goals.length : 0.7
+  let value = goals.length > 0 ? coveredCount / goals.length : 0.7
+
+  // Situation floor: if the response clearly addresses the situation topic (even via
+  // paraphrase), prevent the score from falling below ~0.5.
+  // Cap at 0.67 so missing goals still costs something.
+  if (promptText && promptText.trim().length > 0) {
+    const promptKws = extractKeywords(promptText, 10)
+    const promptStems = new Set(promptKws.map(stem))
+    if (promptStems.size > 0) {
+      const sitMatches = [...promptStems].filter(s => responseStems.has(s)).length
+      const sitCoverage = sitMatches / promptStems.size
+      const situationFloor = Math.min(0.67, Math.max(0, (sitCoverage - 0.15) / 0.55))
+      value = Math.max(value, situationFloor)
+    }
+  }
 
   const uncoveredGoals = goalResults.filter(r => !r.covered).map(r => r.goal)
   const errors = uncoveredGoals.map(g => `Goal not clearly addressed: "${g}"`)
@@ -90,7 +105,7 @@ function stem(word) {
 export function score(responseText, promptText = '', goals = null) {
   // Email tasks: score per goal bullet for precise task-completion feedback
   if (goals && goals.length > 0) {
-    return scoreByGoals(responseText, goals)
+    return scoreByGoals(responseText, goals, promptText)
   }
 
   if (!promptText || promptText.trim().length === 0) {

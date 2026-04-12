@@ -108,11 +108,15 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark })
             Complete practice sets to see your score history here.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {['Reading', 'Writing', 'Vocabulary'].map(skill => (
-              <div key={skill}>
+            {[
+              { label: 'Reading', max: 30 },
+              { label: 'Writing', max: 6 },
+              { label: 'Vocabulary', max: 30 },
+            ].map(skill => (
+              <div key={skill.label}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: c.textMid }}>{skill}</span>
-                  <span style={{ fontSize: 11, color: c.textMuted }}>--/30</span>
+                  <span style={{ fontSize: 11, color: c.textMid }}>{skill.label}</span>
+                  <span style={{ fontSize: 11, color: c.textMuted }}>--/{skill.max}</span>
                 </div>
                 <div style={{ height: 4, background: c.trackBg, borderRadius: 2 }}>
                   <div style={{ height: '100%', width: '0%', background: c.teal, borderRadius: 2 }} />
@@ -195,7 +199,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark })
         </div>
         {sectionTitle('Goals')}
         <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted, lineHeight: 1.8 }}>
-          <div>Target score: <span style={{ fontWeight: 600, color: c.textPrimary }}>25/30</span></div>
+          <div>Target score: <span style={{ fontWeight: 600, color: c.textPrimary }}>24/30 Reading · 5/6 Writing</span></div>
           <div>Daily practice: <span style={{ fontWeight: 600, color: c.textPrimary }}>30 min</span></div>
           <div>Test date: <span style={{ fontWeight: 600, color: c.textPrimary }}>Not set</span></div>
         </div>

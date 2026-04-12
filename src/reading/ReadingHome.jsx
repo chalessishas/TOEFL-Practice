@@ -143,6 +143,29 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
             )}
           </div>
 
+          {/* Next Up banner */}
+          {nextUpIndex !== -1 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(0,105,92,0.05)', border: '1px solid rgba(0,105,92,0.15)',
+              borderRadius: 10, padding: '10px 16px', marginBottom: 10,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13 }}>▶</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: colors.primary }}>Next Up: </span>
+                <span style={{ fontSize: 12, color: colors.text }}>{pack6.modules[nextUpIndex].name}</span>
+              </div>
+              <button
+                onClick={() => onStartPack(pack6, nextUpIndex)}
+                style={{
+                  fontSize: 12, fontWeight: 600, color: 'white', background: colors.primary,
+                  border: 'none', borderRadius: 7, padding: '6px 16px', cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
+              >Start →</button>
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {pack6.modules.map((mod, mi) => {
               const done = history[mod.id];

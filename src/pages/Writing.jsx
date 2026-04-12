@@ -78,21 +78,21 @@ export default function Writing() {
         <TaskCard
           icon="M12 2a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3zm7 9c0-2.5-4.5-4-7-4s-7 1.5-7 4v1h14v-1zM5 14v6h14v-6H5zm2 2h10v2H7v-2z"
           title="Build a Sentence"
-          details={['10 items, 7 min', 'Grammar and word order']}
+          details={['10 of 20 items, 7 min', 'Grammar and word order']}
           tagColor="#00695c"
           onStart={() => navigate('/writing/build-sentence')}
         />
         <TaskCard
           icon="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
           title="Write an Email"
-          details={['1 prompt, 7 min', '130-140 words']}
+          details={['6 prompts, 7 min', '130-140 words']}
           tagColor="#00897b"
           onStart={() => navigate('/writing/email')}
         />
         <TaskCard
           icon="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"
           title="Academic Discussion"
-          details={['1 prompt, 10 min', '120+ words']}
+          details={['6 prompts, 10 min', '120+ words']}
           tagColor="#004d40"
           onStart={() => navigate('/writing/discussion')}
         />

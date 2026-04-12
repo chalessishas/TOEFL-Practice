@@ -138,8 +138,8 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
             <span style={{
               fontSize: 10, color: '#b45309', background: 'rgba(180,83,9,0.07)',
               padding: '2px 8px', borderRadius: 4, fontWeight: 500, border: '1px solid rgba(180,83,9,0.15)',
-            }} title="TOEFL 2026 uses ~200-word passages. These extended passages offer deeper practice beyond the exam format.">
-              Extended Practice
+            }} title="Real TOEFL passages are ~700 words. These shorter excerpts (200–500 words) are great for focused practice before building up to full-length passages.">
+              Shorter Than Exam
             </span>
             {completedSets > 0 && (
               <span style={{

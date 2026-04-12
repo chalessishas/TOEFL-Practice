@@ -68,12 +68,28 @@ function argumentStructureScore(text, wordCount, taskType) {
   const hasThesis = THESIS_MARKERS.some(m => lower.includes(m))
   const detailCount = DETAIL_MARKERS.filter(m => lower.includes(m)).length
   const reasonCount = REASON_MARKERS.filter(m => lower.includes(m)).length
+
+  // Claim repetition detection: sentences starting with opinion markers but
+  // containing no detail/reason marker in the same sentence signal restatement
+  // without development — ETS penalizes this as "inadequate elaboration".
+  const sentences = text.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(s => s.length > 0)
+  const bareClaims = sentences.filter(s => {
+    const hasOpinion = THESIS_MARKERS.some(m => s.includes(m))
+    if (!hasOpinion) return false
+    const hasSupport = DETAIL_MARKERS.some(m => s.includes(m)) || REASON_MARKERS.some(m => s.includes(m))
+    return !hasSupport
+  })
+  // 3+ bare claim sentences = repetition pattern, penalize
+  const repetitionPenalty = bareClaims.length >= 3 ? 0.15 : 0
+
   // Full score: has thesis + ≥2 examples/details + ≥2 reason markers
   // Thin essay penalty: long but ≤1 example marker and ≤1 reason marker
-  if (!hasThesis && detailCount <= 1 && reasonCount <= 1) return 0.35
-  if (detailCount === 0 && reasonCount <= 1) return 0.5
-  if (detailCount <= 1 && reasonCount <= 1) return 0.65
-  return 1.0
+  let base
+  if (!hasThesis && detailCount <= 1 && reasonCount <= 1) base = 0.35
+  else if (detailCount === 0 && reasonCount <= 1) base = 0.5
+  else if (detailCount <= 1 && reasonCount <= 1) base = 0.65
+  else base = 1.0
+  return Math.max(0, base - repetitionPenalty)
 }
 
 export function score(text, taskType = 'general') {

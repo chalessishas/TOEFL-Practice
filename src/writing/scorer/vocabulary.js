@@ -1,5 +1,27 @@
 import { commonWords } from './wordlist.js'
 
+// Core Academic Word List (AWL) — high-frequency academic vocabulary ETS rewards.
+// Based on Coxhead (2000) AWL sublist 1-3 (most frequent academic headwords).
+const AWL_CORE = new Set([
+  'analyze','analysis','approach','area','assessment','assume','assumption',
+  'authority','available','benefit','concept','consistent','context','contract',
+  'contribute','create','data','define','demonstrate','distribute','economic',
+  'environment','establish','evidence','export','factor','financial','formula',
+  'function','identify','income','indicate','individual','interpret','involve',
+  'issue','labor','legal','major','method','occur','percent','period','policy',
+  'principle','procedure','process','require','research','respond','role',
+  'section','significant','similar','source','specific','structure','theory',
+  'vary','achieve','acquire','administrate','affect','appropriate','aspect',
+  'assist','category','chapter','commission','community','complex','compute',
+  'conclude','conduct','consequent','constitute','consume','credit','culture',
+  'design','distinct','element','evaluate','evident','export','final','focus',
+  'impact','implement','imply','initial','integrate','interact','justify',
+  'layer','link','locate','maximize','mechanism','minimize','norm','obtain',
+  'participate','perceive','positive','potential','previous','primary','promote',
+  'propose','range','regulate','relevant','reside','restrict','select','shift',
+  'sustain','target','transfer','unique','utilize','valid','volume','welfare',
+])
+
 // Function words to exclude from content-word analysis
 const FUNCTION_POS = new Set([
   'the','a','an','is','are','was','were','be','been','being','have','has','had',
@@ -46,10 +68,14 @@ export function score(text) {
   // 0%→0.2, 5%→0.4, 10%→0.6, 15%→0.8, 20%→1.0
   const rareScore = linearMap(rareRatio, 0, 0.2, 0.2, 1.0)
 
-  const value = Math.min(1, (avgLenScore + rareScore) / 2)
+  // AWL bonus: reward use of academic vocabulary (capped at +0.2)
+  const awlCount = contentTokens.filter(w => AWL_CORE.has(w)).length
+  const awlBonus = Math.min(0.2, awlCount * 0.025)
+
+  const value = Math.min(1, (avgLenScore + rareScore) / 2 + awlBonus)
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, rare word ratio: ${(rareRatio * 100).toFixed(1)}%`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, rare word ratio: ${(rareRatio * 100).toFixed(1)}%, AWL words: ${awlCount}`,
   }
 }
 

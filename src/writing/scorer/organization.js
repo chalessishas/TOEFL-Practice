@@ -63,14 +63,25 @@ export function score(text, taskType = 'general') {
     taskSpecific = (hasOpener ? 0.5 : 0) + (hasCloser ? 0.5 : 0)
   }
 
+  // Closing marker placement: reward conclusion markers in last paragraph,
+  // penalize them appearing in the first paragraph (structural incoherence).
+  const CLOSING_MARKERS = ['in conclusion','to summarize','in summary','to sum up']
+  let placementBonus = 0
+  if (paragraphCount >= 2) {
+    const firstPara = paragraphs[0].toLowerCase()
+    const lastPara  = paragraphs[paragraphCount - 1].toLowerCase()
+    if (CLOSING_MARKERS.some(m => lastPara.includes(m)))  placementBonus =  0.1
+    if (CLOSING_MARKERS.some(m => firstPara.includes(m))) placementBonus = -0.1
+  }
+
   const value = Math.min(
     1,
-    markerScore * 0.5 + paragraphScore * 0.3 + taskSpecific * 0.2,
+    Math.max(0, markerScore * 0.5 + paragraphScore * 0.3 + taskSpecific * 0.2 + placementBonus),
   )
 
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}`,
+    details: `${uniqueMarkers} unique discourse markers, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}`,
   }
 }
 

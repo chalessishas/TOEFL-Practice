@@ -760,3 +760,238 @@ Beyond individual species, ocean acidification threatens entire food webs. Ptero
     },
   ],
 };
+
+// ═══════════════════════════════════════════════════════
+// Append m4 into pack6.modules at runtime is done below
+// ═══════════════════════════════════════════════════════
+pack6.modules.push({
+  id: 'pack6-m4',
+  name: 'Module 4',
+  time: 9 * 60,
+  sections: [
+    // --- Complete the Words ---
+    {
+      type: 'complete_words',
+      id: 'pack6-m4-cw',
+      title: 'Ancient Trade Routes',
+      instructions: 'Fill in the missing letters in the paragraph.',
+      paragraph: [
+        { text: 'Long before modern transportation, merchants traveled vast distances to ' },
+        { blank: 'ange', prefix: 'exch', answer: 'exchange' },
+        { text: ' goods across continents. The Silk Road was one of the most ' },
+        { blank: 'ificant', prefix: 'sign', answer: 'significant' },
+        { text: ' trade ' },
+        { blank: 'orks', prefix: 'netw', answer: 'networks' },
+        { text: ' in history, connecting China, Central Asia, and the Mediterranean for over a thousand years. Along these routes, not only ' },
+        { blank: 'odities', prefix: 'comm', answer: 'commodities' },
+        { text: ' such as silk, spices, and precious metals were ' },
+        { blank: 'ported', prefix: 'trans', answer: 'transported' },
+        { text: ', but also ideas, religions, and technologies. The ' },
+        { blank: 'ead', prefix: 'spr', answer: 'spread' },
+        { text: ' of Buddhism and Islam along these routes ' },
+        { blank: 'onstrates', prefix: 'dem', answer: 'demonstrates' },
+        { text: ' how trade fostered cultural ' },
+        { blank: 'ange', prefix: 'exch', answer: 'exchange' },
+        { text: ' far beyond mere commerce.' },
+      ],
+    },
+
+    // --- Read in Daily Life: Museum Lecture Invitation ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m4-dl1',
+      title: 'Museum Lecture Series Invitation',
+      material_type: 'email',
+      material: {
+        subject: 'Invitation: "Seeds of Change" Lecture – Riverside History Museum',
+        from: 'Riverside History Museum',
+        to: 'Museum Members',
+        body: "Dear Museum Member,\n\nWe are pleased to invite you to the next installment of our Autumn Lecture Series: \"Seeds of Change: How the Columbian Exchange Transformed the World,\" presented by Dr. Elena Vasquez of the University of Western Ontario.\n\nDate: Saturday, October 18\nTime: 2:00 PM – 3:30 PM\nLocation: The Hartley Auditorium, Riverside History Museum\n\nDr. Vasquez will explore how the exchange of crops, animals, and diseases between the Americas and Europe following 1492 reshaped global diets, economies, and populations. The lecture will be followed by a 30-minute Q&A session.\n\nAdmission is free for museum members. Non-members may purchase tickets at the door for $12. Seating is limited to 150 guests, so early arrival is encouraged.\n\nLight refreshments will be served in the lobby from 1:30 PM.\n\nWe hope to see you there.\nRiverside History Museum",
+      },
+      questions: [
+        {
+          id: 11,
+          text: 'What is indicated about non-members who wish to attend the lecture?',
+          options: [
+            'They must register online in advance to reserve a seat.',
+            'They can attend for free if accompanied by a member.',
+            'They can pay for admission when they arrive.',
+            'They are not permitted to attend the Q&A session.',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'The email states non-members "may purchase tickets at the door for $12." This means walk-in ticket purchase is available at the venue — no advance registration is mentioned, and no restrictions on accompanying a member or attending the Q&A are stated.',
+        },
+        {
+          id: 12,
+          text: 'What can be inferred about the lecture venue?',
+          options: [
+            'It has a seating capacity larger than 150 people.',
+            'It is located outside the museum building.',
+            'It will not have enough seats for all attendees.',
+            'It was recently renovated to accommodate larger audiences.',
+          ],
+          correct: 0,
+          question_type: 'inference',
+          explanation: 'The email says "seating is limited to 150 guests." This implies 150 is the cap being set for this event, not that the venue holds exactly 150. The phrase "early arrival is encouraged" suggests demand may approach that limit, but the venue itself must have capacity of at least 150.',
+        },
+      ],
+    },
+
+    // --- Read in Daily Life: Library Archive Notice ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m4-dl2',
+      title: 'Library Special Collection Notice',
+      material_type: 'email',
+      material: {
+        subject: 'Special Collection Access – Age of Exploration Archive Now Open',
+        from: 'Hartfield University Library – Special Collections',
+        to: 'Faculty and Graduate Students',
+        body: "Dear Faculty and Graduate Students,\n\nWe are pleased to announce that the Age of Exploration Archive is now open to researchers in Special Collections, Room 214. The collection includes original correspondence, navigation charts, and botanical illustrations from the 15th to 18th centuries related to European exploration of the Americas, Africa, and Asia.\n\nAccess Policy:\n• Appointments are required. Walk-in access is not permitted.\n• Researchers must present a valid university ID and complete a handling agreement form.\n• Cameras and personal scanners are not allowed. High-resolution scans can be requested from staff at $0.20 per page.\n\nThe archive is open Tuesday through Friday, 10:00 AM to 4:00 PM. We recommend booking at least one week in advance, as appointment slots fill quickly.\n\nTo schedule an appointment, email special.collections@hartfield.edu or call extension 4821.\n\nWe look forward to supporting your research.\nSpecial Collections Staff",
+      },
+      questions: [
+        {
+          id: 13,
+          text: 'What must researchers do before visiting the special collection?',
+          options: [
+            'Submit a written research proposal to the library committee.',
+            'Arrange a scheduled visit in advance.',
+            'Obtain written approval from their academic department.',
+            'Attend an orientation session on document handling.',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The notice states "Appointments are required. Walk-in access is not permitted." Researchers must schedule a visit in advance. Submitting a research proposal, departmental approval, and orientation sessions are not mentioned.',
+        },
+        {
+          id: 14,
+          text: 'What is indicated about bringing personal photography equipment to the archive?',
+          options: [
+            'It is allowed if researchers sign a permission form.',
+            'It is permitted only for faculty members, not students.',
+            'It is prohibited, but digital copies can be obtained through staff.',
+            'It is allowed for up to 30 minutes per visit.',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'The policy states "Cameras and personal scanners are not allowed." However, the notice adds that "High-resolution scans can be requested from staff at $0.20 per page." Personal equipment is banned entirely, but an official scanning service exists as an alternative.',
+        },
+        {
+          id: 15,
+          text: 'What can be inferred about the demand for appointments at the archive?',
+          options: [
+            'Appointments are rarely needed because few researchers use the collection.',
+            'The archive is so new that appointment slots have not yet been filled.',
+            'Researchers who wait too long to book may not get their preferred time.',
+            'The staff limits appointments to prevent overuse of fragile materials.',
+          ],
+          correct: 2,
+          question_type: 'inference',
+          explanation: 'The notice recommends "booking at least one week in advance, as appointment slots fill quickly." This implies slots get taken fast — researchers who delay may miss preferred times. The note suggests high demand, not low use or staff-imposed artificial limits.',
+        },
+      ],
+    },
+
+    // --- Read an Academic Passage: The Columbian Exchange ---
+    {
+      type: 'academic_passage',
+      id: 'pack6-m4-ap',
+      title: 'The Columbian Exchange',
+      passage: `The Columbian Exchange refers to the widespread transfer of plants, animals, culture, human populations, technology, and diseases between the Americas and the Old World — Europe, Africa, and Asia — following Christopher Columbus's voyages beginning in 1492. Historian Alfred Crosby, who coined the term in 1972, argued that this biological and cultural exchange was among the most consequential events in human history, fundamentally reshaping the world's ecosystems, demographics, and economies. The exchange was largely asymmetrical: while the Americas contributed crops such as maize, potatoes, tomatoes, and cacao, Europe introduced horses, cattle, wheat, and a range of pathogens to which Indigenous populations had no prior immunity.
+
+The demographic consequences were catastrophic for Indigenous peoples of the Americas. European diseases — particularly smallpox, measles, and typhus — swept through populations that had no acquired resistance, causing mortality rates in some regions estimated at 50 to 90 percent within a century of contact. Some historians argue that this demographic collapse, rather than military conquest alone, was the primary mechanism by which European colonial powers were able to establish dominance. The depopulation of vast regions also altered land use patterns, allowing dense forests to regenerate across formerly cultivated areas — a phenomenon that may have temporarily lowered atmospheric CO₂ by absorbing carbon from the atmosphere.
+
+The nutritional and agricultural dimensions of the Columbian Exchange were equally transformative. The introduction of the potato to Europe helped sustain population growth in cool, northern climates where traditional grain crops underperformed. Maize became a caloric staple across parts of Africa. Meanwhile, Old World crops like sugarcane and coffee, transplanted to tropical regions of the Americas, generated plantation economies that drove the Atlantic slave trade. These cascading effects illustrate how a set of biological transfers initiated in the late fifteenth century continued to reshape political, economic, and social structures for centuries thereafter.`,
+      questions: [
+        {
+          id: 16,
+          paragraph: 0,
+          text: 'The word "asymmetrical" in paragraph 1 is closest in meaning to:',
+          options: [
+            'unequal or not balanced between the two sides',
+            'occurring gradually over a long period of time',
+            'involving hidden or secret motivations',
+            'relating to biological processes in nature',
+          ],
+          correct: 0,
+          question_type: 'vocab',
+          explanation: '"Asymmetrical" means not equal or balanced between parties. The passage uses it to describe how the exchange was one-sided: the Americas sent crops, while Europe sent crops AND devastating diseases. The imbalance is both in type and in consequence.',
+        },
+        {
+          id: 17,
+          paragraph: 1,
+          text: 'According to the passage, which of the following is NOT mentioned as a cause of Indigenous population decline?',
+          options: [
+            'Lack of immunity to European diseases',
+            'Military conflict with European colonizers',
+            'Forced relocation by colonial authorities',
+            'Spread of smallpox, measles, and typhus',
+          ],
+          correct: 2,
+          question_type: 'negative_fact',
+          explanation: 'The passage mentions lack of immunity (no prior resistance), military conquest (mentioned as secondary to disease), and the specific diseases smallpox, measles, and typhus. Forced relocation is never mentioned in the passage as a cause of population decline.',
+        },
+        {
+          id: 18,
+          paragraph: 1,
+          text: 'Based on paragraph 2, what can be inferred about the relationship between Indigenous population decline and European colonization?',
+          options: [
+            'Military force was the sole reason Europeans gained control over the Americas.',
+            'Disease may have made European dominance easier to establish than it would otherwise have been.',
+            'European colonizers deliberately spread disease to weaken Indigenous resistance.',
+            'Population collapse in the Americas had no lasting effect on land use or ecology.',
+          ],
+          correct: 1,
+          question_type: 'inference',
+          explanation: 'The passage states that some historians argue the demographic collapse "was the primary mechanism by which European colonial powers were able to establish dominance" — implying disease facilitated colonial conquest. Option A contradicts this by claiming only military force mattered. Option C introduces intent (deliberate spread), which the passage does not claim. Option D is contradicted by the passage\'s description of forest regeneration.',
+        },
+        {
+          id: 19,
+          paragraph: 0,
+          text: 'Which of the following best expresses the essential information in the highlighted sentence? Incorrect choices change the meaning or leave out essential information.',
+          highlighted_word: 'The exchange was largely asymmetrical: while the Americas contributed crops such as maize, potatoes, tomatoes, and cacao, Europe introduced horses, cattle, wheat, and a range of pathogens to which Indigenous populations had no prior immunity.',
+          options: [
+            'Both the Americas and Europe contributed equally useful plants and animals during the Columbian Exchange.',
+            'The Columbian Exchange was imbalanced — the Americas primarily sent food crops while Europe sent both agricultural goods and deadly diseases.',
+            'Europe\'s introduction of horses and cattle was more important to the Americas than the food crops the Americas sent to Europe.',
+            'The Columbian Exchange benefited Europe because the Americas had no animals of economic value to offer.',
+          ],
+          correct: 1,
+          question_type: 'sentence_simplification',
+          explanation: 'The original sentence makes two points: the exchange was unequal (asymmetrical), and the imbalance is illustrated by the Americas sending crops while Europe sent crops plus pathogens. Option B captures both accurately. Option A says "equally useful" — contradicting asymmetry. Option C makes a comparative value judgment not in the sentence. Option D claims the Americas had no economic animals, which is not stated.',
+        },
+        {
+          id: 20,
+          paragraph: 2,
+          text: 'According to paragraph 3, how did the introduction of the potato affect Europe?',
+          options: [
+            'It replaced wheat as the main crop across all of Europe.',
+            'It enabled population growth in colder regions where grain crops were less productive.',
+            'It caused widespread famine when harvests failed due to disease.',
+            'It was primarily used to feed livestock rather than people.',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The passage states the potato "helped sustain population growth in cool, northern climates where traditional grain crops underperformed." It supported growth in specific cold-climate areas — not a continent-wide wheat replacement. The passage does not mention famine or livestock use in this context.',
+        },
+        {
+          id: 21,
+          paragraph: 1,
+          text: 'Look at the four squares [■] that indicate where the following sentence could be added to the passage. Where would the sentence best fit?',
+          insert_sentence: 'In some areas, entire communities were destroyed before they ever had direct contact with European settlers.',
+          insertion_points: [
+            'European diseases — particularly smallpox',
+            'causing mortality rates in some regions',
+            'this demographic collapse, rather than military conquest',
+            'The depopulation of vast regions',
+          ],
+          options: ['■A', '■B', '■C', '■D'],
+          correct: 1,
+          question_type: 'text_insertion',
+          explanation: 'The inserted sentence describes communities destroyed before direct contact — a consequence of disease spreading ahead of settlers. This follows most naturally after the clause describing high mortality rates (■B), amplifying the severity before the passage moves to historical interpretation. ■A comes before mortality rates are introduced. ■C shifts to historians\' arguments about colonialism. ■D discusses land-use and ecology, a different sub-topic.',
+        },
+      ],
+    },
+  ],
+});

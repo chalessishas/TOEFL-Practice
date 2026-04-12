@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './writing.css'
+import { useTheme } from '../shared/ThemeContext.jsx'
 import Timer from '../shared/Timer.jsx'
 import { discussionPrompts } from './data/discussionData.js'
 import { scoreWriting } from './scorer/index.js'
@@ -30,6 +31,7 @@ const countWords = (text) =>
 
 const AcademicDiscussion = () => {
   const navigate = useNavigate()
+  const { colors } = useTheme()
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
@@ -82,7 +84,7 @@ const AcademicDiscussion = () => {
     const hasResume = !!savedData.current
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
@@ -105,7 +107,7 @@ const AcademicDiscussion = () => {
 
           <h1 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 42, fontWeight: 400, color: '#1a1a1a',
+            fontSize: 42, fontWeight: 400, color: colors.text,
             letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12,
           }}>
             Academic Discussion
@@ -126,7 +128,7 @@ const AcademicDiscussion = () => {
               onClick={() => navigate('/writing')}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#555', background: 'white',
+                color: colors.textMedium, background: colors.card,
                 border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px',
                 cursor: 'pointer',
               }}
@@ -193,7 +195,7 @@ const AcademicDiscussion = () => {
         padding: '14px 20px',
         borderBottom: '1px solid #ddd',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'white', flexShrink: 0,
+        background: colors.card, flexShrink: 0,
       }}>
         <Timer
           totalTime={timer}
@@ -237,7 +239,7 @@ const AcademicDiscussion = () => {
             </div>
             <span style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 14, fontWeight: 700, color: '#1a1a1a',
+              fontSize: 14, fontWeight: 700, color: colors.text,
             }}>
               {prompt.professor.name}
             </span>
@@ -255,7 +257,7 @@ const AcademicDiscussion = () => {
           {prompt.students.map((student, i) => (
             <div key={student.name} style={{
               flex: 1, minWidth: 250,
-              background: 'white',
+              background: colors.card,
               border: '1px solid #ddd',
               borderRadius: 12,
               padding: '16px 20px',
@@ -269,21 +271,21 @@ const AcademicDiscussion = () => {
                 }}>
                   <span style={{
                     fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 14, fontWeight: 700, color: '#1a1a1a',
+                    fontSize: 14, fontWeight: 700, color: colors.text,
                   }}>
                     {student.name.charAt(0)}
                   </span>
                 </div>
                 <span style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 13, fontWeight: 700, color: '#1a1a1a',
+                  fontSize: 13, fontWeight: 700, color: colors.text,
                 }}>
                   {student.name}
                 </span>
               </div>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13, lineHeight: 1.7, color: '#555', margin: 0,
+                fontSize: 13, lineHeight: 1.7, color: colors.textMedium, margin: 0,
               }}>
                 {student.opinion}
               </p>
@@ -298,7 +300,7 @@ const AcademicDiscussion = () => {
         <div>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, fontWeight: 700, color: '#1a1a1a', marginBottom: 12,
+            fontSize: 14, fontWeight: 700, color: colors.text, marginBottom: 12,
           }}>
             Your Response
           </p>
@@ -311,7 +313,7 @@ const AcademicDiscussion = () => {
               border: '1.5px solid #ccc', borderRadius: 12,
               padding: 16, resize: 'vertical',
               fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.8,
-              color: '#1a1a1a', background: 'white',
+              color: colors.text, background: colors.card,
               outline: 'none', boxSizing: 'border-box',
             }}
           />

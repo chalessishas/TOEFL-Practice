@@ -125,6 +125,39 @@
   margin: 0 2px;
 }
 
+/* ═══ Dark mode overrides ═══ */
+[data-theme="dark"] .confirm-dialog {
+  background: #1e1e1e;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+[data-theme="dark"] .confirm-dialog h3 { color: #e8e8e8; }
+[data-theme="dark"] .confirm-dialog p { color: #777; }
+
+[data-theme="dark"] .btn-cancel {
+  color: #aaa;
+  background: #252525;
+  border-color: #444;
+}
+[data-theme="dark"] .btn-cancel:hover { border-color: #4db6ac; color: #4db6ac; }
+[data-theme="dark"] .btn-confirm { background: #4db6ac; }
+[data-theme="dark"] .btn-confirm:hover { background: #00897b; }
+
+[data-theme="dark"] .pause-badge {
+  color: #4db6ac;
+  background: rgba(77, 182, 172, 0.08);
+  border-color: rgba(77, 182, 172, 0.2);
+}
+
+[data-theme="dark"] .kbd {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #777;
+}
+
+[data-theme="dark"] .test-layout > .passage-panel { background: #1a1a1a; }
+[data-theme="dark"] .test-layout > .question-panel { background: #121212; }
+[data-theme="dark"] .passage-panel { border-color: #2a2a2a !important; }
+
 /* ═══ Mobile responsive ═══ */
 @media (max-width: 768px) {
   .test-layout {

@@ -1,5 +1,6 @@
 import React from 'react'
 import './writing.css'
+import { useTheme } from '../shared/ThemeContext.jsx'
 
 const DIMENSION_LABELS = {
   grammar:      'Grammar',
@@ -24,12 +25,13 @@ const getGrade = (value) => {
 }
 
 const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType, onRetry, onBack }) => {
+  const { colors } = useTheme()
   const pct = Math.round((score.overall / 5) * 100)
   const title = getTitle(score.overall)
 
   return (
     <div style={{
-      minHeight: '100vh', background: '#f5f5f5',
+      minHeight: '100vh', background: colors.bg,
       fontFamily: "'DM Sans', sans-serif",
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px' }}>
@@ -43,12 +45,12 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
             margin: '0 auto 20px',
           }}>
             <div style={{
-              width: 116, height: 116, borderRadius: '50%', background: '#f5f5f5',
+              width: 116, height: 116, borderRadius: '50%', background: colors.bg,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             }}>
               <span style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 44, color: '#1a1a1a', lineHeight: 1,
+                fontSize: 44, color: colors.text, lineHeight: 1,
               }}>
                 {score.overall}
               </span>
@@ -63,7 +65,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
 
           <h2 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 28, color: '#1a1a1a', fontWeight: 400, marginBottom: 0,
+            fontSize: 28, color: colors.text, fontWeight: 400, marginBottom: 0,
           }}>
             {title}
           </h2>
@@ -71,12 +73,12 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
 
         {/* Dimension Bars */}
         <div style={{
-          background: 'white', borderRadius: 14, border: '1px solid #ddd',
+          background: colors.card, borderRadius: 14, border: '1px solid #ddd',
           padding: '24px 28px', marginBottom: 20,
           animation: 'fadeUp 0.5s ease-out 0.1s both',
         }}>
           <p style={{
-            fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 20,
+            fontSize: 16, fontWeight: 700, color: colors.text, marginBottom: 20,
           }}>
             Score Breakdown
           </p>
@@ -89,7 +91,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
               <div key={key} style={{ marginBottom: errors.length > 0 ? 16 : 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{
-                    fontSize: 13, color: '#555', width: 100, flexShrink: 0,
+                    fontSize: 13, color: colors.textMedium, width: 100, flexShrink: 0,
                   }}>
                     {DIMENSION_LABELS[key] || key}
                   </span>
@@ -128,7 +130,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
             marginBottom: 20, animation: 'fadeUp 0.5s ease-out 0.15s both',
           }}>
             <p style={{
-              fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 12,
+              fontSize: 16, fontWeight: 700, color: colors.text, marginBottom: 12,
             }}>
               Suggestions for Improvement
             </p>
@@ -152,13 +154,13 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
         {/* Response Comparison */}
         <div style={{ marginBottom: 32, animation: 'fadeUp 0.5s ease-out 0.2s both' }}>
           <p style={{
-            fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 12,
+            fontSize: 16, fontWeight: 700, color: colors.text, marginBottom: 12,
           }}>
             Response Comparison
           </p>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <div style={{
-              flex: '1 1 280px', background: 'white', borderRadius: 12,
+              flex: '1 1 280px', background: colors.card, borderRadius: 12,
               border: '1px solid #ddd', padding: 20,
             }}>
               <p style={{
@@ -169,13 +171,13 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
               </p>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13,
-                color: '#1a1a1a', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
+                color: colors.text, lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
               }}>
                 {userText}
               </p>
             </div>
             <div style={{
-              flex: '1 1 280px', background: 'white', borderRadius: 12,
+              flex: '1 1 280px', background: colors.card, borderRadius: 12,
               border: '1.5px solid rgba(90,154,110,0.3)', padding: 20,
             }}>
               <p style={{
@@ -186,7 +188,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
               </p>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13,
-                color: '#1a1a1a', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
+                color: colors.text, lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
               }}>
                 {sampleResponse}
               </p>
@@ -211,7 +213,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
             onClick={onBack}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-              color: '#555', background: 'white',
+              color: colors.textMedium, background: colors.card,
               border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer',
             }}
           >

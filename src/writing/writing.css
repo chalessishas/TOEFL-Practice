@@ -59,6 +59,36 @@
 .score-bar-track { height: 8px; border-radius: 4px; background: #e0e0e0; overflow: hidden; }
 .score-bar-fill { height: 100%; border-radius: 4px; background: #00695c; transition: width 0.6s ease-out; }
 
+/* ═══ Dark mode overrides ═══ */
+[data-theme="dark"] .word-chip {
+  background: #252525;
+  border-color: #444;
+  color: #e8e8e8;
+}
+[data-theme="dark"] .word-chip:hover { border-color: #4db6ac; }
+[data-theme="dark"] .word-chip.used { border-color: #333; }
+
+[data-theme="dark"] .answer-slot {
+  background: rgba(77, 182, 172, 0.04);
+  border-color: #444;
+  color: #e8e8e8;
+}
+[data-theme="dark"] .answer-slot.filled {
+  border-color: #4db6ac;
+  background: rgba(77, 182, 172, 0.08);
+}
+[data-theme="dark"] .answer-slot.filled:hover { background: rgba(77, 182, 172, 0.12); }
+[data-theme="dark"] .answer-slot.empty { color: #555; }
+
+[data-theme="dark"] .email-layout { background: #121212; }
+[data-theme="dark"] .email-prompt-panel { background: #1a1a1a; border-color: #2a2a2a; }
+[data-theme="dark"] .email-editor-panel { background: #121212; }
+
+[data-theme="dark"] .discussion-layout { background: #121212; }
+
+[data-theme="dark"] .score-bar-track { background: #333; }
+[data-theme="dark"] .score-bar-fill { background: #4db6ac; }
+
 /* Writing responsive */
 @media (max-width: 768px) {
   .email-layout { flex-direction: column; height: auto; min-height: 100vh; }

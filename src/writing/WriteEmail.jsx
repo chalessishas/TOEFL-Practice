@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './writing.css'
+import { useTheme } from '../shared/ThemeContext.jsx'
 import Timer from '../shared/Timer.jsx'
 import { emailPrompts } from './data/emailData.js'
 import { scoreWriting } from './scorer/index.js'
@@ -30,6 +31,7 @@ const countWords = (text) =>
 
 const WriteEmail = () => {
   const navigate = useNavigate()
+  const { colors } = useTheme()
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
@@ -90,7 +92,7 @@ const WriteEmail = () => {
     const hasResume = !!savedData.current
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
@@ -114,7 +116,7 @@ const WriteEmail = () => {
 
           <h1 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 42, fontWeight: 400, color: '#1a1a1a',
+            fontSize: 42, fontWeight: 400, color: colors.text,
             letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12,
           }}>
             Write an Email
@@ -135,7 +137,7 @@ const WriteEmail = () => {
               onClick={() => navigate('/writing')}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#555', background: 'white',
+                color: colors.textMedium, background: colors.card,
                 border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px',
                 cursor: 'pointer',
               }}
@@ -284,7 +286,7 @@ const WriteEmail = () => {
             placeholder="Enter email subject..."
             style={{
               flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-              color: '#1a1a1a', background: 'transparent',
+              color: colors.text, background: 'transparent',
               border: 'none', borderBottom: '1.5px solid #ccc',
               outline: 'none', padding: '4px 0',
             }}
@@ -298,7 +300,7 @@ const WriteEmail = () => {
         }}>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#1a1a1a', fontStyle: 'italic',
+            fontSize: 14, color: colors.text, fontStyle: 'italic',
             margin: 0,
           }}>
             Dear {prompt.recipient},
@@ -312,7 +314,7 @@ const WriteEmail = () => {
           placeholder="Write your email here..."
           style={{
             flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-            color: '#1a1a1a', lineHeight: 1.8, background: 'transparent',
+            color: colors.text, lineHeight: 1.8, background: 'transparent',
             border: 'none', borderBottom: '1.5px solid #ddd',
             outline: 'none', resize: 'none',
             padding: '12px 24px',
@@ -326,7 +328,7 @@ const WriteEmail = () => {
         }}>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#1a1a1a', fontStyle: 'italic',
+            fontSize: 14, color: colors.text, fontStyle: 'italic',
             margin: 0, marginBottom: 4,
           }}>
             Best regards,

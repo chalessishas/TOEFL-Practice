@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 import './writing.css';
+import { useTheme } from '../shared/ThemeContext.jsx';
 import { buildSentenceItems } from './data/buildSentenceData.js';
 
 const STORAGE_KEY = 'toefl-writing-build-sentence';
@@ -28,6 +29,7 @@ const displayWord = (w) => w.replace(/\(\d+\)$/, '');
 
 const BuildSentence = () => {
   const navigate = useNavigate();
+  const { colors } = useTheme();
   const savedData = useRef(loadSaved());
 
   const [started, setStarted] = useState(!!savedData.current);
@@ -157,7 +159,7 @@ const BuildSentence = () => {
     const hasResume = !!savedData.current;
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
@@ -181,7 +183,7 @@ const BuildSentence = () => {
 
           <h1 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 42, fontWeight: 400, color: '#1a1a1a',
+            fontSize: 42, fontWeight: 400, color: colors.text,
             letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12,
           }}>
             Build a Sentence
@@ -203,7 +205,7 @@ const BuildSentence = () => {
               onClick={() => navigate('/writing')}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#555', background: 'white',
+                color: colors.textMedium, background: colors.card,
                 border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px',
                 cursor: 'pointer',
               }}
@@ -235,7 +237,7 @@ const BuildSentence = () => {
 
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
@@ -256,7 +258,7 @@ const BuildSentence = () => {
             }}>
               <span style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 36, color: '#1a1a1a', lineHeight: 1,
+                fontSize: 36, color: colors.text, lineHeight: 1,
               }}>{score}</span>
               <span style={{ fontSize: 11, color: '#aaa' }}>/ {TOTAL_ITEMS}</span>
             </div>
@@ -264,7 +266,7 @@ const BuildSentence = () => {
 
           <h2 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 28, color: '#1a1a1a', marginBottom: 8, fontWeight: 400,
+            fontSize: 28, color: colors.text, marginBottom: 8, fontWeight: 400,
           }}>
             {title}
           </h2>
@@ -301,7 +303,7 @@ const BuildSentence = () => {
               onClick={() => setShowReview(true)}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#555', background: 'white',
+                color: colors.textMedium, background: colors.card,
                 border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px', cursor: 'pointer',
               }}
             >
@@ -322,7 +324,7 @@ const BuildSentence = () => {
               onClick={() => navigate('/writing')}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#555', background: 'white',
+                color: colors.textMedium, background: colors.card,
                 border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px', cursor: 'pointer',
               }}
             >
@@ -338,7 +340,7 @@ const BuildSentence = () => {
   if (showResult && showReview) {
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         fontFamily: "'DM Sans', sans-serif",
       }}>
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px' }}>
@@ -356,7 +358,7 @@ const BuildSentence = () => {
 
           <h2 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 24, color: '#1a1a1a', marginBottom: 24, fontWeight: 400,
+            fontSize: 24, color: colors.text, marginBottom: 24, fontWeight: 400,
           }}>
             Answer Review
           </h2>
@@ -367,7 +369,7 @@ const BuildSentence = () => {
 
             return (
               <div key={i} style={{
-                background: 'white', borderRadius: 14,
+                background: colors.card, borderRadius: 14,
                 border: `1.5px solid ${correct ? 'rgba(90,154,110,0.3)' : 'rgba(176,96,96,0.3)'}`,
                 padding: 24, marginBottom: 16,
                 animation: `fadeUp 0.4s ease-out ${i * 0.04}s both`,
@@ -382,7 +384,7 @@ const BuildSentence = () => {
                     border: `1.5px solid ${correct ? 'rgba(90,154,110,0.3)' : 'rgba(176,96,96,0.3)'}`,
                     flexShrink: 0,
                   }}>{i + 1}</span>
-                  <span style={{ fontSize: 13, color: '#555', fontStyle: 'italic' }}>
+                  <span style={{ fontSize: 13, color: colors.textMedium, fontStyle: 'italic' }}>
                     {item.prompt}
                   </span>
                 </div>
@@ -472,7 +474,7 @@ const BuildSentence = () => {
       {/* Header */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
-        background: 'white', borderBottom: '1px solid #ddd',
+        background: colors.card, borderBottom: '1px solid #ddd',
         padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         {/* Timer */}
@@ -528,7 +530,7 @@ const BuildSentence = () => {
           <p style={{ fontSize: 13, color: '#888', marginBottom: 4 }}>Context</p>
           <p style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 18, color: '#1a1a1a', fontWeight: 400, lineHeight: 1.5,
+            fontSize: 18, color: colors.text, fontWeight: 400, lineHeight: 1.5,
           }}>
             {item.prompt}
           </p>
@@ -607,7 +609,7 @@ const BuildSentence = () => {
       {/* Bottom nav */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
-        background: 'white', borderTop: '1px solid #ddd',
+        background: colors.card, borderTop: '1px solid #ddd',
         padding: '14px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <button
@@ -644,7 +646,7 @@ const BuildSentence = () => {
             onClick={() => goToItem(currentItem + 1)}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500,
-              color: '#555',
+              color: colors.textMedium,
               background: 'none', border: 'none', cursor: 'pointer',
             }}
           >

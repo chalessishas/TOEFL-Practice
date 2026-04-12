@@ -30,3 +30,38 @@ export const appendScore = (entry) => {
 }
 
 export const getHistory = () => read()
+
+/**
+ * Pick the prompt index the user has historically scored lowest on.
+ * Falls back to random when there's no history for a given type.
+ *
+ * @param {'email'|'discussion'} taskType
+ * @param {number} promptCount - total number of prompts available
+ * @returns {number} index into the prompts array
+ */
+export const pickWeakestPromptIdx = (taskType, promptCount) => {
+  const history = read().filter(h => h.type === taskType)
+  if (history.length === 0) return Math.floor(Math.random() * promptCount)
+
+  // Compute average score per promptIdx
+  const totals = {}
+  const counts = {}
+  for (const h of history) {
+    const idx = h.promptIdx
+    if (idx == null || idx >= promptCount) continue
+    totals[idx] = (totals[idx] ?? 0) + h.score
+    counts[idx] = (counts[idx] ?? 0) + 1
+  }
+
+  // Find the seen index with the lowest average
+  let worstIdx = null
+  let worstAvg = Infinity
+  for (const [idxStr, total] of Object.entries(totals)) {
+    const avg = total / counts[idxStr]
+    if (avg < worstAvg) { worstAvg = avg; worstIdx = Number(idxStr) }
+  }
+
+  // 70% chance to pick the weakest; 30% random (to avoid total staleness)
+  if (worstIdx !== null && Math.random() < 0.7) return worstIdx
+  return Math.floor(Math.random() * promptCount)
+}

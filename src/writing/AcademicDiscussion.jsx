@@ -5,7 +5,7 @@ import { useTheme } from '../shared/ThemeContext.jsx'
 import Timer from '../shared/Timer.jsx'
 import { discussionPrompts } from './data/discussionData.js'
 import { scoreWriting } from './scorer/index.js'
-import { appendScore } from './scoreHistory.js'
+import { appendScore, pickWeakestPromptIdx } from './scoreHistory.js'
 import WritingResult from './WritingResult.jsx'
 
 const STORAGE_KEY = 'toefl-writing-discussion'
@@ -36,7 +36,7 @@ const AcademicDiscussion = () => {
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
-  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? Math.floor(Math.random() * discussionPrompts.length))
+  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? pickWeakestPromptIdx('discussion', discussionPrompts.length))
 
   useEffect(() => { document.title = 'Academic Discussion — TOEFL Practice' }, [])
   const [response, setResponse] = useState(savedData.current?.response ?? '')
@@ -64,7 +64,7 @@ const AcademicDiscussion = () => {
     const promptText = `${prompt.professor.question} ${prompt.students.map(s => s.opinion).join(' ')}`
     const result = scoreWriting(response, 'discussion', promptText)
     const bd = Object.fromEntries(Object.entries(result.breakdown).map(([k, v]) => [k, v.score]))
-    appendScore({ type: 'discussion', score: result.overall, wordCount, breakdown: bd })
+    appendScore({ type: 'discussion', score: result.overall, wordCount, promptIdx, breakdown: bd })
     setScoreResult(result)
     setShowResult(true)
   }
@@ -77,7 +77,7 @@ const AcademicDiscussion = () => {
     setPaused(false)
     setShowResult(false)
     setScoreResult(null)
-    setPromptIdx(Math.floor(Math.random() * discussionPrompts.length))
+    setPromptIdx(pickWeakestPromptIdx('discussion', discussionPrompts.length))
     savedData.current = null
   }
 

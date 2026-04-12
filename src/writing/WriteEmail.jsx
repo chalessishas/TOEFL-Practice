@@ -5,7 +5,7 @@ import { useTheme } from '../shared/ThemeContext.jsx'
 import Timer from '../shared/Timer.jsx'
 import { emailPrompts } from './data/emailData.js'
 import { scoreWriting } from './scorer/index.js'
-import { appendScore } from './scoreHistory.js'
+import { appendScore, pickWeakestPromptIdx } from './scoreHistory.js'
 import WritingResult from './WritingResult.jsx'
 
 const STORAGE_KEY = 'toefl-writing-email'
@@ -36,7 +36,7 @@ const WriteEmail = () => {
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
-  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? Math.floor(Math.random() * emailPrompts.length))
+  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? pickWeakestPromptIdx('email', emailPrompts.length))
 
   useEffect(() => { document.title = 'Write an Email — TOEFL Practice' }, [])
   const [subject, setSubject] = useState(savedData.current?.subject ?? '')
@@ -68,7 +68,7 @@ const WriteEmail = () => {
     const promptText = `${prompt.situation} ${prompt.goals.join(' ')}`
     const result = scoreWriting(fullText, 'email', promptText)
     const bd = Object.fromEntries(Object.entries(result.breakdown).map(([k, v]) => [k, v.score]))
-    appendScore({ type: 'email', score: result.overall, wordCount, breakdown: bd })
+    appendScore({ type: 'email', score: result.overall, wordCount, promptIdx, breakdown: bd })
     setScoreResult(result)
     setShowResult(true)
   }
@@ -82,7 +82,7 @@ const WriteEmail = () => {
     setPaused(false)
     setShowResult(false)
     setScoreResult(null)
-    setPromptIdx(Math.floor(Math.random() * emailPrompts.length))
+    setPromptIdx(pickWeakestPromptIdx('email', emailPrompts.length))
     savedData.current = null
   }
 

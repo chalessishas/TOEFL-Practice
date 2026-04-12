@@ -85,14 +85,14 @@ export default function Writing() {
         <TaskCard
           icon="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
           title="Write an Email"
-          details={['6 prompts, 7 min', '130-140 words']}
+          details={['10 prompts, 7 min', '130-140 words']}
           tagColor="#00897b"
           onStart={() => navigate('/writing/email')}
         />
         <TaskCard
           icon="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"
           title="Academic Discussion"
-          details={['6 prompts, 10 min', '120+ words']}
+          details={['10 prompts, 10 min', '120+ words']}
           tagColor="#004d40"
           onStart={() => navigate('/writing/discussion')}
         />

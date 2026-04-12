@@ -113,4 +113,80 @@ export const discussionPrompts = [
     sampleResponse: "Chloe identifies the most serious flaw in a blunt 2035 ban: it distributes the burden of the energy transition unequally. Noah is correct that firm deadlines drive investment and that delay is costly in climate terms, but the effectiveness of a mandate depends entirely on whether the supporting infrastructure exists. A better policy framework would tie the ban date to measurable benchmarks — a minimum density of public fast-chargers per capita in rural areas and an affordable EV price threshold — rather than a fixed calendar date. This approach preserves the urgency Noah advocates for while addressing the equity concerns Chloe raises. Governments should also pair any phase-out with substantial subsidies targeted at low-income buyers and investment in rural charging networks, ensuring the transition is genuinely accessible rather than theoretically possible.",
     sampleScore: 5,
   },
+  {
+    id: 7,
+    professor: {
+      name: 'Prof. Kim',
+      question: 'Artificial intelligence tools can now produce essays, write code, generate images, and compose music at a level that is often indistinguishable from human-created work. Some educators argue that these tools should be banned from academic settings to preserve the integrity of student learning and assessment. Others contend that AI is simply the next stage in a long history of educational tools, much like calculators and the internet, and that students must learn to use it responsibly. Should AI tools be banned in academic settings, or should students be taught how to use them effectively?',
+    },
+    students: [
+      {
+        name: 'Isabelle',
+        opinion: 'Struggling through a difficult assignment is precisely where learning happens. If students can bypass that productive struggle with an AI tool, they will arrive at graduation without the critical thinking and writing skills their degrees are supposed to certify. Banning AI in assessed work protects the value of education itself.',
+      },
+      {
+        name: 'David',
+        opinion: 'Every professional entering the workforce today will use AI tools daily within a few years. Teaching students to use AI critically — to evaluate its outputs, identify its errors, and direct it effectively — is itself a high-value skill. Banning AI in schools is like banning calculators: it just makes graduates less prepared for the real world.',
+      },
+    ],
+    sampleResponse: "David's point about workforce preparedness is compelling, but Isabelle correctly identifies the risk: if AI removes the productive struggle from learning, students may earn credentials without developing the underlying competencies those credentials represent. I believe the solution is context-dependent rather than a blanket ban or blanket permission. For assessments designed to measure foundational skills — analytical writing, logical reasoning, mathematical proof — AI should be restricted, because these tasks are the learning itself. For applied projects where the skill being measured is judgment, synthesis, or professional output quality, guided AI use is not only acceptable but pedagogically valuable. The key is that educators must redesign assessments to be specific about what they are measuring and explicit about what tools are appropriate. A policy of blanket prohibition is as lazy as blanket permission — both absolve educators of the harder work of defining what mastery actually looks like in an AI-augmented world.",
+    sampleScore: 5,
+  },
+  {
+    id: 8,
+    professor: {
+      name: 'Dr. Okafor',
+      question: 'In recent years, many cities around the world have been debating whether to charge drivers a fee to enter congested central districts, a policy known as congestion pricing. Proponents argue that it reduces traffic, lowers emissions, and generates revenue for public transit. Critics argue that it is an unfair tax that disproportionately burdens lower-income commuters who cannot afford to live near transit or their workplaces. On balance, is urban congestion pricing a good policy?',
+    },
+    students: [
+      {
+        name: 'Hannah',
+        opinion: 'Cities that have implemented congestion pricing, like London and Stockholm, have seen real reductions in traffic and pollution. The revenue can be reinvested in buses and subways that serve everyone, including lower-income residents who are least likely to drive into city centers anyway.',
+      },
+      {
+        name: 'Marcus',
+        opinion: 'Not every essential worker lives near a subway line. A nurse who drives into the city at 5 AM because no bus runs that early should not be penalized for not having a better option. Congestion pricing without massive simultaneous investment in transit alternatives simply shifts the burden onto people with the fewest choices.',
+      },
+    ],
+    sampleResponse: "Marcus identifies the core equity problem: congestion pricing is regressive when public transit alternatives are inadequate. Hannah is correct that the empirical evidence from cities like London and Stockholm demonstrates real environmental benefits, and that low-income residents are statistically less likely to drive into city centers. However, 'statistically less likely' is not the same as 'unaffected,' and essential workers with irregular schedules are a vulnerable group who often have no viable alternative to a car. I believe congestion pricing is sound policy, but only when implemented as part of a comprehensive package: revenues must be legally earmarked for transit expansion, low-income exemptions or discounts should be built into the fee structure, and the pricing zone should not go live until minimum-service transit benchmarks for affected areas are met. Congestion pricing done in isolation is a tax on poverty; done as part of a genuine mobility transition, it is an effective tool.",
+    sampleScore: 5,
+  },
+  {
+    id: 9,
+    professor: {
+      name: 'Prof. Nakamura',
+      question: 'Life expectancy in many developed countries is increasing, and birth rates are falling. Some governments are responding by raising the official retirement age — the age at which workers become eligible for public pension benefits. Supporters argue that this is financially necessary to sustain pension systems. Critics argue that it is unfair, particularly to workers in physically demanding jobs who may not be able to work into their late 60s or early 70s. Should governments raise the retirement age as a response to aging populations?',
+    },
+    students: [
+      {
+        name: 'Fatima',
+        opinion: 'The math is straightforward. If people live longer but the retirement age stays the same, pension systems will eventually run out of money. Raising the retirement age is not ideal, but it is a responsible adjustment to reflect demographic reality.',
+      },
+      {
+        name: 'Carlos',
+        opinion: 'Retirement age policies affect all workers equally on paper, but in reality, a software engineer can comfortably work to 70 while a construction worker or warehouse employee physically cannot. A blanket increase in retirement age is a policy that the professional class designs for itself while ignoring everyone else.',
+      },
+    ],
+    sampleResponse: "Carlos raises a fundamental objection that undermines the apparent fairness of a uniform retirement age increase. Fatima is correct that the fiscal pressure is real — the ratio of working-age contributors to pension recipients is declining in nearly every developed country — but the solution cannot be a policy that is neutral in design and regressive in effect. A more defensible approach would be to decouple eligibility from a single age threshold entirely. Workers in physically demanding occupations, which are easily categorized by existing occupational health frameworks, could retain the current retirement age or even qualify for earlier access. Those in sedentary professional roles could face a higher threshold. Retirement age could also be made flexible, offering reduced pension amounts for earlier retirement and enhanced benefits for delayed retirement, allowing individuals to make choices suited to their health and circumstances. The fiscal problem is real and must be addressed, but a uniform blunt instrument is not the only solution.",
+    sampleScore: 5,
+  },
+  {
+    id: 10,
+    professor: {
+      name: 'Dr. Reyes',
+      question: 'Increasingly, large technology companies collect enormous amounts of personal data — browsing habits, purchase history, location data, and social connections — which they use to deliver targeted advertising and personalized services. Some argue that this data collection is an acceptable exchange for free services and a more convenient online experience. Others argue that the scale and opacity of data collection constitutes a serious violation of personal privacy that requires strict regulation. How should societies respond to large-scale personal data collection by technology companies?',
+    },
+    students: [
+      {
+        name: 'Amara',
+        opinion: 'People freely choose to use these platforms and agree to the terms of service. They receive genuinely useful, free services in return. If people object to data collection, they can choose not to use the platforms. Government regulation risks stifling the innovation that created these services in the first place.',
+      },
+      {
+        name: 'Ben',
+        opinion: 'Terms of service are written by lawyers for lawyers. No ordinary user genuinely understands what they are consenting to. And once you agree, you have no ongoing control over how your data is sold, combined with other data, or used against you in ways you never anticipated when you clicked "I agree."',
+      },
+    ],
+    sampleResponse: "Ben's critique of the consent model is the stronger argument. Amara's position assumes that clicking 'I agree' on a 30-page terms-of-service document constitutes meaningful informed consent, but this is a legal fiction. The asymmetry of information and legal expertise between a technology company and an average user makes genuine voluntary consent almost impossible to achieve in the current framework. However, the solution is not to ban data collection, which would indeed undermine the business models behind genuinely useful free services. Instead, regulation should focus on three things: mandatory plain-language disclosure of what data is collected and how it is used; data minimization requirements so that companies collect only what is necessary for the service; and genuine portability and deletion rights so that users retain ongoing control rather than losing it at the moment of first registration. Meaningful regulation and innovation are not mutually exclusive — the EU's GDPR has demonstrated that a legal framework can coexist with a thriving technology sector.",
+    sampleScore: 5,
+  },
 ]

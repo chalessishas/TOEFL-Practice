@@ -43,6 +43,10 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
       minHeight: '100vh', background: colors.bg,
       fontFamily: "'DM Sans', sans-serif",
     }}>
+      {/* Screen reader score announcement */}
+      <div aria-live="polite" aria-atomic="true" style={{ position: 'absolute', left: -9999, width: 1, height: 1, overflow: 'hidden' }}>
+        {title}. Score: {score.overall.toFixed(1)} out of 5.{isNewBest ? ' New personal best!' : ''}
+      </div>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px' }}>
 
         {/* Score Ring */}

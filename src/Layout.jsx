@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from './shared/ThemeContext.jsx'
 import { getHistory } from './writing/scoreHistory.js'
@@ -61,6 +61,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const [vocab, setVocab] = useState(loadVocab)
   const [newWord, setNewWord] = useState('')
   const [newMeaning, setNewMeaning] = useState('')
+  const [flippedIds, setFlippedIds] = useState(new Set())
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
   const writingEntries = history.filter(h => h.type === 'email' || h.type === 'discussion')
@@ -338,27 +339,43 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
               No words saved yet.
             </p>
           )}
-          {vocab.map((v) => (
-            <div key={v.id} style={{
-              padding: '8px 10px', background: c.cardBg, borderRadius: 6,
-              border: `1px solid ${c.cardBorder}`,
-              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6,
-            }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: 2 }}>{v.word}</div>
-                <div style={{ fontSize: 11, color: c.textMuted }}>{v.meaning}</div>
+          {vocab.map((v) => {
+            const flipped = flippedIds.has(v.id)
+            const toggleFlip = () => setFlippedIds(prev => {
+              const next = new Set(prev)
+              next.has(v.id) ? next.delete(v.id) : next.add(v.id)
+              return next
+            })
+            return (
+              <div key={v.id} style={{
+                padding: '8px 10px', background: flipped ? 'rgba(0,105,92,0.06)' : c.cardBg,
+                borderRadius: 6, border: `1px solid ${flipped ? 'rgba(0,105,92,0.25)' : c.cardBorder}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6,
+                cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s',
+              }} onClick={toggleFlip}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: flipped ? 4 : 0 }}>
+                    {v.word}
+                  </div>
+                  {flipped && (
+                    <div style={{ fontSize: 11, color: colors.primary, fontWeight: 500 }}>{v.meaning}</div>
+                  )}
+                  {!flipped && (
+                    <div style={{ fontSize: 10, color: c.textMuted, fontStyle: 'italic' }}>tap to reveal</div>
+                  )}
+                </div>
+                <button
+                  onClick={e => { e.stopPropagation(); deleteWord(v.id) }}
+                  style={{
+                    fontSize: 14, lineHeight: 1, padding: '2px 4px',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: c.textMuted, flexShrink: 0,
+                  }}
+                  title="Remove"
+                >×</button>
               </div>
-              <button
-                onClick={() => deleteWord(v.id)}
-                style={{
-                  fontSize: 14, lineHeight: 1, padding: '2px 4px',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: c.textMuted, flexShrink: 0,
-                }}
-                title="Remove"
-              >×</button>
-            </div>
-          ))}
+            )
+          })}
         </div>
         {sectionTitle('Areas to Improve')}
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -567,6 +584,12 @@ export default function Layout({ children }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { isDark, toggleDark, isTimerVisible, toggleTimer, isShortcutsVisible, toggleShortcuts } = useTheme()
+  const mainRef = useRef(null)
+
+  // Move focus to main content on route change (keyboard/screen-reader UX)
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.focus()
+  }, [location.pathname])
 
   // Full-screen routes: hide sidebar during active tests
   const fullScreenPaths = ['/writing/build-sentence', '/writing/email', '/writing/discussion']
@@ -582,6 +605,19 @@ export default function Layout({ children }) {
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
+      {/* Skip to main content — visually hidden until focused */}
+      <a
+        href="#main-content"
+        style={{
+          position: 'absolute', left: -9999, top: 8, zIndex: 9999,
+          background: '#00695c', color: 'white', padding: '8px 16px',
+          borderRadius: 6, fontSize: 13, fontWeight: 600, textDecoration: 'none',
+        }}
+        onFocus={e => { e.target.style.left = '8px' }}
+        onBlur={e => { e.target.style.left = '-9999px' }}
+      >
+        Skip to main content
+      </a>
       {/* Icon bar (always visible) */}
       <div style={{
         width: ICON_BAR_W, background: iconBarBg, display: 'flex',
@@ -650,7 +686,12 @@ export default function Layout({ children }) {
       )}
 
       {/* Main content */}
-      <div style={{ flex: 1, overflow: 'auto', background: mainBg }}>
+      <div
+        id="main-content"
+        ref={mainRef}
+        tabIndex={-1}
+        style={{ flex: 1, overflow: 'auto', background: mainBg, outline: 'none' }}
+      >
         {children}
       </div>
     </div>

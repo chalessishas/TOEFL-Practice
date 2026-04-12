@@ -42,9 +42,11 @@ export function score(text) {
   // Fragment detection: flag only if < 3 words AND missing a verb-like word
   // Real e-rater uses NLP parsing; we approximate by checking for common verb patterns
   const verbPattern = /\b(is|are|was|were|be|been|being|have|has|had|do|does|did|will|would|could|should|may|might|can|shall|must|go|get|make|take|give|come|see|know|think|say|use|find|want|tell|ask|work|seem|feel|try|leave|call|need|become|keep|let|begin|show|hear|play|run|move|live|believe|hold|bring|happen|write|provide|sit|stand|lose|pay|meet|include|continue|set|learn|change|lead|understand|watch|follow|stop|create|speak|read|allow|add|spend|grow|open|walk|win|offer|remember|love|consider|appear|buy|wait|serve|die|send|expect|build|stay|fall|cut|reach|kill|remain|suggest|raise|pass|sell|require|report|decide|pull|develop|mean)\b/i
+  // Email salutations and closings are legitimately short and not fragments
+  const salutationPattern = /^(dear|hello|hi|hey|greetings|sincerely|regards|best|yours|cheers|thank you|thanks)\b/i
   sentences.forEach((s, i) => {
     const words = s.split(/\s+/)
-    if (words.length < 3 && !verbPattern.test(s)) {
+    if (words.length < 3 && !verbPattern.test(s) && !salutationPattern.test(s.trim())) {
       errors.push(`Possible fragment (sentence ${i + 1}): "${s.substring(0, 40)}"`)
     }
   })

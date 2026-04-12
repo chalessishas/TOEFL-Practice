@@ -104,7 +104,7 @@ export function suggest(analysis) {
   const wordMatch = analysis.details.match(/(\d+) words/)
   if (wordMatch && parseInt(wordMatch[1]) < 100)
     tips.push('Expand your response — develop your ideas with more detail and explanation.')
-  if (analysis.details.includes('0 detail marker') || analysis.details.includes('1 detail marker'))
+  if (analysis.details.includes('0 detail marker'))
     tips.push('Support your points with specific examples (for example, for instance, such as). Essays without concrete examples are capped at score 3.')
   const sentMatch = analysis.details.match(/(\d+) sentences/)
   if (sentMatch && parseInt(sentMatch[1]) < 5)

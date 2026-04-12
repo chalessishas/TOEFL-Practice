@@ -1,6 +1,6 @@
 # TOEFL Practice App
 
-React 19 TOEFL 备考平台，涵盖 Reading + Writing 模块。Writing 内置 6 维度 e-rater 评分引擎，纯前端离线运行，无后端依赖。
+React 19 TOEFL 备考平台，涵盖 Reading + Writing 模块。Writing 内置 7 维度 e-rater 评分引擎，纯前端离线运行，无后端依赖。
 
 ## Tech Stack
 
@@ -12,7 +12,7 @@ React 19 + React Router 7 + Vite 6, 纯 JSX（无 TypeScript）
 index.html → src/main.jsx (BrowserRouter)
   └─ Layout.jsx (侧边栏 48px icon + 260px panel + 主内容)
        ├─ /               → Home.jsx (仪表盘)
-       ├─ /reading        → Reading.jsx (阅读练习, 1200+ 行)
+       ├─ /reading        → Reading.jsx (orchestrator) → src/reading/ 子组件
        ├─ /writing        → Writing.jsx (任务选择器)
        ├─ /writing/build-sentence → BuildSentence.jsx
        ├─ /writing/email          → WriteEmail.jsx
@@ -40,24 +40,30 @@ src/
 ├── pack6.js              # 6 篇阅读文章 + 题目
 ├── CompleteWords.jsx     # 填空阅读子组件
 ├── pages/
-│   ├── Home.jsx          # 欢迎页 + 模块卡片
-│   ├── Reading.jsx       # 阅读主页面 (1200+ 行, 需重构)
+│   ├── Home.jsx          # 欢迎页 + 模块卡片 (live stats from scoreHistory)
+│   ├── Reading.jsx       # 阅读 orchestrator (228 行, 路由到 src/reading/)
 │   └── Writing.jsx       # 写作任务选择
+├── reading/              # Reading 子组件 (从 1200+ 行拆分)
+│   ├── ReadingHome.jsx       # 模式选择入口
+│   ├── DailyLifeReading.jsx  # Urban Agriculture + data.js
+│   ├── AcademicPassage.jsx   # pack6.js 6 篇学术文章
+│   └── LegacyReadingTest.jsx # 传统阅读测试模式
 ├── writing/
-│   ├── BuildSentence.jsx # 造句: Landing→Test→Result→Review, 10 题 7 分钟
-│   ├── WriteEmail.jsx    # 邮件写作: 左 40% 题目 + 右 60% 编辑, 7 分钟
-│   ├── AcademicDiscussion.jsx # 学术讨论: 10 分钟, 最低 120 词
-│   ├── WritingResult.jsx # 分数展示 (圆环 + 6 维柱状图)
+│   ├── BuildSentence.jsx # 造句: Landing→Test→Result→Review, 10 题 7 分钟, 错题优先复习
+│   ├── WriteEmail.jsx    # 邮件写作: 左 40% 题目 + 右 60% 编辑, 7 分钟, 10 道题
+│   ├── AcademicDiscussion.jsx # 学术讨论: 10 分钟, 最低 120 词, 10 道题
+│   ├── WritingResult.jsx # 分数展示 (圆环 + 7 维柱状图 + personal best badge)
+│   ├── scoreHistory.js   # localStorage 写作历史 (appendScore / getHistory)
 │   ├── writing.css
-│   ├── data/             # buildSentenceData / emailData / discussionData
+│   ├── data/             # buildSentenceData / emailData(10) / discussionData(10)
 │   └── scorer/
 │       ├── index.js      # 加权聚合 → TOEFL [0-5] 标度
 │       ├── grammar.js    # 7% - 片段句/连缀句/双重否定
 │       ├── mechanics.js  # 10% - 275k 词典拼写检查
 │       ├── vocabulary.js # 18% - 词长 + 稀有词比例
-│       ├── organization.js # 30% - 篇章标记词/段落/任务线索/peer engagement
+│       ├── organization.js # 30% - 篇章标记词/段落/任务线索/peer engagement (5-tier)
 │       ├── development.js  # 24% - 字数范围/细节密度
-│       ├── style.js      # 3% - TTR/句长方差/重复惩罚/句型多样性
+│       ├── style.js      # 3% - TTR/句长方差/重复惩罚/句型多样性 (5 syntactic patterns)
 │       ├── wordlist.js   # validWords 15k + commonWords 5k
 │       ├── relevance.js  # 8% - keyword overlap with prompt (stem-normalized)
 │       └── english-words.js # 275k 词典 (2.7MB, Vite manual chunk)
@@ -88,7 +94,7 @@ src/
 ## Known Pitfalls
 
 1. **english-words.js 2.7MB**: Vite manual chunk 懒加载缓解，但首次仍慢。根治方案: WebWorker 或服务端查询
-2. **Reading.jsx 1200+ 行**: 最大技术债，应拆为 DailyLifeReading / PackReading / QuestionNav
+2. **Reading.jsx 已重构**: 拆为 src/reading/ 4 个子组件（ReadingHome / DailyLifeReading / AcademicPassage / LegacyReadingTest），orchestrator 228 行
 3. **localStorage 无迁移机制**: 数据结构变更会导致旧数据失效，缺少版本号 + 迁移逻辑
 4. **Grammar 模块误判**: 动词模式匹配阈值已调过一轮，但仍有边界 case
 5. **Dark Mode 开关存在但未接入**: Layout Settings 面板有 UI，逻辑空置

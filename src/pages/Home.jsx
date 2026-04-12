@@ -112,9 +112,20 @@ export default function Home() {
     return count
   })()
 
+  const readingAccuracy = (() => {
+    try {
+      const rh = JSON.parse(localStorage.getItem('toefl-completion-history')) || {}
+      const all = Object.values(rh).flat()
+      if (!all.length) return null
+      const tot = all.reduce((a, r) => ({ c: a.c + (r.correct || 0), t: a.t + (r.total || 0) }), { c: 0, t: 0 })
+      return tot.t ? Math.round((tot.c / tot.t) * 100) : null
+    } catch { return null }
+  })()
+
   const stats = [
     { label: 'Sessions Done', value: completed > 0 ? String(completed) : '—' },
     { label: 'Avg Writing Score', value: avgWritingScore ? `${avgWritingScore}/5` : '—' },
+    { label: 'Reading Accuracy', value: readingAccuracy !== null ? `${readingAccuracy}%` : '—' },
     { label: 'Last Practice', value: lastEntry ? timeAgo(lastEntry.date) : '—' },
     { label: 'Day Streak', value: streak > 0 ? `${streak}🔥` : '—' },
   ]

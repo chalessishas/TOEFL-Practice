@@ -169,6 +169,9 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {pack6.modules.map((mod, mi) => {
               const done = history[mod.id];
+              const readingScore = done
+                ? done.reduce((acc, r) => ({ correct: acc.correct + (r.correct || 0), total: acc.total + (r.total || 0) }), { correct: 0, total: 0 })
+                : null;
               const sectionTags = mod.sections.map(s => {
                 if (s.type === 'complete_words') return { label: 'Fill Words', color: '#e65100' };
                 if (s.type === 'daily_life') return { label: 'Email', color: '#1565c0' };
@@ -211,10 +214,14 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
                         display: 'flex', alignItems: 'center', gap: 8,
                       }}>
                         {mod.name}
-                        {done && <span style={{
-                          fontSize: 10, fontWeight: 600, color: colors.success,
-                          background: 'rgba(46,125,50,0.08)', padding: '2px 8px', borderRadius: 4,
-                        }}>COMPLETED</span>}
+                        {done && readingScore && (
+                          <span style={{
+                            fontSize: 10, fontWeight: 700,
+                            color: readingScore.correct / readingScore.total >= 0.8 ? colors.success : readingScore.correct / readingScore.total >= 0.6 ? '#f59e0b' : '#f87171',
+                            background: readingScore.correct / readingScore.total >= 0.8 ? 'rgba(46,125,50,0.08)' : readingScore.correct / readingScore.total >= 0.6 ? 'rgba(245,158,11,0.08)' : 'rgba(248,113,113,0.08)',
+                            padding: '2px 8px', borderRadius: 4,
+                          }}>{readingScore.correct}/{readingScore.total}</span>
+                        )}
                         {!done && mi === nextUpIndex && <span style={{
                           fontSize: 10, fontWeight: 700, color: '#fff',
                           background: colors.primary, padding: '2px 8px', borderRadius: 4,

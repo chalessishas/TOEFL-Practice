@@ -31,19 +31,18 @@ const vocabPlaceholder = [
   { word: 'exacerbate', meaning: 'make worse', source: 'Practice Essay' },
 ]
 
-const mistakesPlaceholder = [
-  { type: 'Grammar', desc: 'Run-on sentence in email task', date: '2026-03-18' },
-  { type: 'Vocabulary', desc: 'Used "good" instead of "beneficial"', date: '2026-03-17' },
-  { type: 'Organization', desc: 'Missing conclusion paragraph', date: '2026-03-16' },
-]
 
-const planPlaceholder = [
-  { day: 'Mon', task: 'Reading - Urban Agriculture', done: true },
-  { day: 'Tue', task: 'Writing - Email Practice', done: true },
-  { day: 'Wed', task: 'Reading - Pack 6 Module 1', done: false },
-  { day: 'Thu', task: 'Writing - Academic Discussion', done: false },
-  { day: 'Fri', task: 'Review Mistakes + Vocabulary', done: false },
+// Rotating task suggestions Mon–Sun
+const WEEK_TASKS = [
+  'Writing - Email Practice',
+  'Reading - Urban Agriculture',
+  'Writing - Academic Discussion',
+  'Reading - Pack 6',
+  'Writing - Build a Sentence',
+  'Review Weak Skills',
+  'Writing - Email Practice',
 ]
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, isTimerVisible, toggleTimer, isShortcutsVisible, toggleShortcuts }) {
   const [history, setHistory] = useState([])
@@ -215,55 +214,133 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
             </div>
           ))}
         </div>
-        {sectionTitle('Common Mistakes')}
+        {sectionTitle('Areas to Improve')}
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {mistakesPlaceholder.map((m, i) => (
-            <div key={i} style={{
-              padding: '6px 10px', background: c.cardBg, borderRadius: 6,
-              border: `1px solid ${c.cardBorder}`, fontSize: 12,
-            }}>
-              <span style={{ fontWeight: 600, color: c.red, marginRight: 6 }}>{m.type}</span>
-              <span style={{ color: c.textMid }}>{m.desc}</span>
-              <div style={{ fontSize: 10, color: isDark ? '#555' : '#bbb', marginTop: 2 }}>{m.date}</div>
-            </div>
-          ))}
+          {avgBreakdown ? (() => {
+            const improvements = {
+              organization: 'Use clear intro, body, conclusion structure with transition words.',
+              development: 'Add concrete examples — aim for 2+ specific details per body paragraph.',
+              vocabulary: 'Swap common words (good/big/many) for academic alternatives.',
+              mechanics: 'Proofread for spelling errors and missing punctuation.',
+              grammar: 'Avoid run-on sentences and sentence fragments.',
+              style: 'Vary sentence length to avoid monotony; avoid repeating the same phrase.',
+            }
+            return Object.entries(avgBreakdown)
+              .sort((a, b) => a[1] - b[1])
+              .slice(0, 3)
+              .map(([key, val], i) => (
+                <div key={i} style={{
+                  padding: '6px 10px', background: c.cardBg, borderRadius: 6,
+                  border: `1px solid ${c.cardBorder}`, fontSize: 12,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+                    <span style={{ fontWeight: 600, color: val < 0.5 ? c.red : c.textMid, textTransform: 'capitalize' }}>{key}</span>
+                    <span style={{ fontSize: 10, color: c.textMuted }}>{Math.round(val * 100)}%</span>
+                  </div>
+                  <span style={{ color: c.textMuted, fontSize: 11, lineHeight: 1.4 }}>{improvements[key]}</span>
+                </div>
+              ))
+          })() : (
+            <p style={{ fontSize: 11, color: c.textMuted, lineHeight: 1.6, padding: '0 0 4px' }}>Submit a writing task to see personalized improvement tips.</p>
+          )}
         </div>
       </>
     )
   }
 
   if (activePanel === 'plan') {
+    // Build rolling 7-day plan: today and next 6 days
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const practicedDates = new Set(
+      history.map(h => {
+        const d = new Date(h.date)
+        d.setHours(0, 0, 0, 0)
+        return d.getTime()
+      })
+    )
+    const weekPlan = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today)
+      d.setDate(today.getDate() - (6 - i))
+      const ts = d.getTime()
+      const isToday = ts === today.getTime()
+      const isPast = ts < today.getTime()
+      return {
+        day: DAY_NAMES[d.getDay()],
+        date: d.getDate(),
+        task: WEEK_TASKS[d.getDay()],
+        done: practicedDates.has(ts),
+        isToday,
+        isPast,
+      }
+    })
+
+    // Streak: consecutive days with practice ending today
+    let streak = 0
+    for (let i = 6; i >= 0; i--) {
+      if (weekPlan[i].done) streak++
+      else break
+    }
+
     return (
       <>
+        {streak > 0 && (
+          <div style={{ margin: '12px 16px 0', padding: '8px 12px', borderRadius: 8, background: isDark ? 'rgba(76,175,80,0.08)' : 'rgba(46,125,50,0.05)', border: `1px solid ${isDark ? 'rgba(76,175,80,0.2)' : 'rgba(46,125,50,0.15)'}` }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: c.green }}>🔥 {streak}-day streak</span>
+            <span style={{ fontSize: 11, color: c.textMuted, marginLeft: 6 }}>Keep it up!</span>
+          </div>
+        )}
         {sectionTitle('This Week')}
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {planPlaceholder.map((p, i) => (
+        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+          {weekPlan.map((p, i) => (
             <div key={i} style={{
-              padding: '8px 10px',
-              background: p.done ? (isDark ? 'rgba(76,175,80,0.08)' : 'rgba(46,125,50,0.04)') : c.cardBg,
+              padding: '7px 10px',
+              background: p.done ? (isDark ? 'rgba(76,175,80,0.08)' : 'rgba(46,125,50,0.04)') : (p.isToday ? (isDark ? 'rgba(77,182,172,0.08)' : 'rgba(0,105,92,0.04)') : c.cardBg),
               borderRadius: 6,
-              border: `1px solid ${p.done ? (isDark ? 'rgba(76,175,80,0.2)' : 'rgba(46,125,50,0.15)') : c.cardBorder}`,
+              border: `1px solid ${p.done ? (isDark ? 'rgba(76,175,80,0.2)' : 'rgba(46,125,50,0.15)') : (p.isToday ? (isDark ? 'rgba(77,182,172,0.3)' : 'rgba(0,105,92,0.2)') : c.cardBorder)}`,
               display: 'flex', alignItems: 'center', gap: 8,
+              opacity: p.isPast && !p.done ? 0.5 : 1,
             }}>
               <div style={{
-                width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                width: 15, height: 15, borderRadius: 3, flexShrink: 0,
                 border: p.done ? 'none' : `1.5px solid ${isDark ? '#555' : '#ccc'}`,
                 background: p.done ? c.green : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontSize: 10, fontWeight: 700,
-              }}>{p.done ? 'v' : ''}</div>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: p.done ? c.green : c.textMid }}>{p.day}</div>
+                color: 'white', fontSize: 9, fontWeight: 700,
+              }}>{p.done ? '✓' : ''}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: p.done ? c.green : (p.isToday ? c.teal : c.textMuted) }}>
+                  {p.day} {p.date}{p.isToday ? ' · Today' : ''}
+                </div>
                 <div style={{ fontSize: 11, color: p.done ? c.textMuted : c.textMid, textDecoration: p.done ? 'line-through' : 'none' }}>{p.task}</div>
               </div>
             </div>
           ))}
         </div>
-        {sectionTitle('Goals')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted, lineHeight: 1.8 }}>
-          <div>Target score: <span style={{ fontWeight: 600, color: c.textPrimary }}>24/30 Reading · 5/6 Writing</span></div>
-          <div>Daily practice: <span style={{ fontWeight: 600, color: c.textPrimary }}>30 min</span></div>
-          <div>Test date: <span style={{ fontWeight: 600, color: c.textPrimary }}>Not set</span></div>
+        {sectionTitle('Focus Area')}
+        <div style={{ padding: '0 16px' }}>
+          {avgBreakdown ? (() => {
+            const sorted = Object.entries(avgBreakdown).sort((a, b) => a[1] - b[1])
+            const [weakKey, weakVal] = sorted[0]
+            const tips = {
+              organization: 'Use clear intro/body/conclusion and transition words.',
+              development: 'Add specific examples and expand each point.',
+              vocabulary: 'Replace common words with academic alternatives.',
+              mechanics: 'Proofread for spelling and punctuation.',
+              grammar: 'Avoid run-on sentences and double negatives.',
+              style: 'Vary sentence length and avoid repetition.',
+            }
+            return (
+              <div style={{ padding: '8px 10px', background: c.cardBg, borderRadius: 6, border: `1px solid ${c.cardBorder}` }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: c.red, marginBottom: 4, textTransform: 'capitalize' }}>
+                  Weakest: {weakKey} ({Math.round(weakVal * 100)}%)
+                </div>
+                <div style={{ fontSize: 11, color: c.textMid, lineHeight: 1.5 }}>{tips[weakKey]}</div>
+              </div>
+            )
+          })() : (
+            <p style={{ fontSize: 11, color: c.textMuted, lineHeight: 1.6 }}>Submit a writing task to see your focus area.</p>
+          )}
         </div>
       </>
     )

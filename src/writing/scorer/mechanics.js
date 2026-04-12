@@ -14,21 +14,26 @@ export function score(text) {
     'mr', 'mrs', 'ms', 'dr', 'prof', 'sir', 'madam',
   ])
 
-  // Spelling: check each token against dictionaries
-  tokens.forEach(token => {
-    if (token.length < 3) return
-    if (token === token.toUpperCase()) return
-    if (/\d/.test(token)) return
-    if (token[0] === token[0].toUpperCase() && token.slice(1) === token.slice(1).toLowerCase()) return
+  // Spelling: only run when the 275k dictionary has loaded.
+  // The 15k validWords fallback is too small — common words like "commute",
+  // "eliminates", "mentorship" are absent, causing false positives on correct text.
+  // Skipping spell-check until the dictionary loads is safer than false-flagging.
+  if (_englishWords) {
+    tokens.forEach(token => {
+      if (token.length < 3) return
+      if (token === token.toUpperCase()) return
+      if (/\d/.test(token)) return
+      if (token[0] === token[0].toUpperCase() && token.slice(1) === token.slice(1).toLowerCase()) return
 
-    const lower = token.toLowerCase().replace(/^'+|'+$/g, '')
-    if (lower.length < 3) return
-    if (skipWords.has(lower)) return
-    if (_englishWords && _englishWords.has(lower)) return
-    if (validWords.has(lower)) return
+      const lower = token.toLowerCase().replace(/^'+|'+$/g, '')
+      if (lower.length < 3) return
+      if (skipWords.has(lower)) return
+      if (_englishWords.has(lower)) return
+      if (validWords.has(lower)) return
 
-    errors.push(`Possible misspelling: "${token}"`)
-  })
+      errors.push(`Possible misspelling: "${token}"`)
+    })
+  }
 
   // Capitalization: first word of each sentence should be capitalized
   const sentences = text.split(/(?<=[.!?])\s+/)

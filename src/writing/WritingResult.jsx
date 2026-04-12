@@ -153,6 +153,17 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
           })}
         </div>
 
+        {/* Scoring Disclaimer */}
+        <div style={{
+          background: 'rgba(0,0,0,0.03)', borderRadius: 10,
+          padding: '10px 14px', marginBottom: 20,
+          animation: 'fadeUp 0.5s ease-out 0.12s both',
+        }}>
+          <p style={{ fontSize: 11, color: '#999', margin: 0, lineHeight: 1.6 }}>
+            <strong style={{ color: '#bbb' }}>Note:</strong> This score reflects surface-level writing features (length, vocabulary, mechanics). It cannot assess argument quality, factual accuracy, or originality. A real TOEFL examiner may score differently.
+          </p>
+        </div>
+
         {/* Suggestions */}
         {score.suggestions && score.suggestions.length > 0 && (
           <div style={{

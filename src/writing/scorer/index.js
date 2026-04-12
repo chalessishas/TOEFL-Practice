@@ -7,18 +7,18 @@ import * as style       from './style.js'
 import * as relevance   from './relevance.js'
 
 // Weights calibrated against ETS e-rater macrofeature distribution.
-// Sources: Attali & Burstein 2006, ETS score guide (toeflresources.com).
-// Calibration vs. prior: vocabulary 14%→18% (ETS lexical complexity ~22%),
-// style 5%→3% (ETS ~3%), organization 32%→30% (funds vocabulary increase).
-// Total: 7+10+18+30+24+3+8 = 100%
+// Sources: Attali & Burstein 2006, Attali/Bridgeman/Trapani 2010, ETS RR-04-04.
+// 2026-04-12 recalibration: vocabulary 18%→14% (ETS ~14%), development 24%→28%
+// (ETS ~29%), relevance 8%→5% (naive keyword overlap gameable), org 30%→33% (ETS ~32%).
+// Total: 7+10+14+33+28+3+5 = 100%
 const WEIGHTS = {
   grammar:      0.07,
   mechanics:    0.10,
-  vocabulary:   0.18,
-  organization: 0.30,
-  development:  0.24,
+  vocabulary:   0.14,
+  organization: 0.33,
+  development:  0.28,
   style:        0.03,
-  relevance:    0.08,
+  relevance:    0.05,
 }
 
 /**

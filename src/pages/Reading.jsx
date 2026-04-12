@@ -4,6 +4,7 @@ import '../App.css';
 import { passage as legacyPassage, questions as legacyQuestions, typeLabels, typeColors } from '../data.js';
 import { pack6 } from '../pack6.js';
 import CompleteWords from '../CompleteWords.jsx';
+import { useTheme } from '../shared/ThemeContext.jsx';
 
 const STORAGE_KEY = 'toefl-reading-progress';
 
@@ -31,6 +32,7 @@ const clearProgress = (key) => {
 // Daily Life Reading Component
 // ═══════════════════════════════════════════
 const DailyLifeReading = ({ section, onComplete }) => {
+  const { colors } = useTheme()
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
@@ -68,12 +70,12 @@ const DailyLifeReading = ({ section, onComplete }) => {
   if (showResult) {
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
         <div style={{ textAlign: 'center', maxWidth: 600, padding: '0 24px', animation: 'fadeUp 0.5s ease-out' }}>
-          <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: '#1A1816', marginBottom: 24 }}>
+          <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: colors.text, marginBottom: 24 }}>
             {score === qs.length ? 'Perfect!' : score >= qs.length / 2 ? 'Good Effort' : 'Keep Practicing'}
           </h2>
           <p style={{ fontSize: 14, color: '#888', marginBottom: 32 }}>{score} / {qs.length} correct</p>
@@ -82,7 +84,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
             const ok = isCorrect(qi);
             return (
               <div key={qi} style={{
-                background: 'white', borderRadius: 14, border: '1px solid #ddd',
+                background: colors.card, borderRadius: 14, border: '1px solid #ddd',
                 padding: 24, marginBottom: 12, textAlign: 'left',
                 animation: `fadeUp 0.4s ease-out ${qi * 0.05}s both`,
               }}>
@@ -94,7 +96,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
                     color: ok ? '#5a9a6e' : '#b06060',
                     border: `1.5px solid ${ok ? 'rgba(90,154,110,0.3)' : 'rgba(176,96,96,0.3)'}`,
                   }}>{ok ? '✓' : '✗'}</span>
-                  <span style={{ fontSize: 13, color: '#1A1816' }}>{q.text}</span>
+                  <span style={{ fontSize: 13, color: colors.text }}>{q.text}</span>
                 </div>
                 {q.options.map((opt, oi) => {
                   const isUser = answers[qi] === oi;
@@ -149,7 +151,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
 
   return (
     <div style={{
-      minHeight: '100%', background: 'white',
+      minHeight: '100%', background: colors.card,
       fontFamily: "'DM Sans', sans-serif",
     }}>
       {/* Instruction */}
@@ -159,7 +161,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
       }}>
         <h2 style={{
           fontFamily: "'Georgia', serif", fontSize: 22, fontWeight: 700,
-          color: '#1a1a1a', textAlign: 'center', margin: 0,
+          color: colors.text, textAlign: 'center', margin: 0,
         }}>
           Read an {section.material_type || 'email'}.
         </h2>
@@ -174,7 +176,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
       }}>
         {/* Email card */}
         <div style={{
-          flex: '1 1 380px', background: '#fafafa', borderRadius: 8,
+          flex: '1 1 380px', background: colors.inputBg, borderRadius: 8,
           border: '2px solid #00695c', padding: 24,
         }}>
           {section.material.subject && (
@@ -182,11 +184,11 @@ const DailyLifeReading = ({ section, onComplete }) => {
               display: 'flex', gap: 8, marginBottom: 16, paddingBottom: 12,
               borderBottom: '1px solid #ddd',
             }}>
-              <span style={{ fontWeight: 600, fontSize: 14, color: '#555' }}>Subject:</span>
-              <span style={{ fontSize: 14, color: '#1A1816' }}>{section.material.subject}</span>
+              <span style={{ fontWeight: 600, fontSize: 14, color: colors.textMedium }}>Subject:</span>
+              <span style={{ fontSize: 14, color: colors.text }}>{section.material.subject}</span>
             </div>
           )}
-          <div style={{ fontSize: 15, lineHeight: 1.9, color: '#333', whiteSpace: 'pre-line', fontFamily: "'Georgia', serif" }}>
+          <div style={{ fontSize: 15, lineHeight: 1.9, color: colors.text, whiteSpace: 'pre-line', fontFamily: "'Georgia', serif" }}>
             {section.material.body}
           </div>
         </div>
@@ -195,7 +197,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
         <div style={{ flex: '1 1 380px' }}>
           <h3 style={{
             fontFamily: "'Georgia', serif",
-            fontSize: 19, color: '#1A1816', lineHeight: 1.6,
+            fontSize: 19, color: colors.text, lineHeight: 1.6,
             marginBottom: 24, fontWeight: 400,
           }}>
             {currentQ.text}
@@ -284,6 +286,7 @@ const saveHistory = (moduleId, results) => {
 
 const Reading = () => {
   const navigate = useNavigate();
+  const { colors } = useTheme()
   const [view, setView] = useState('home');
   const [selectedPack, setSelectedPack] = useState(null);
 
@@ -356,7 +359,7 @@ const Reading = () => {
         <div style={{ marginBottom: 28 }}>
           <h1 style={{
             fontFamily: "'Georgia', serif", fontSize: 28, fontWeight: 700,
-            marginBottom: 6, color: '#1a1a1a',
+            marginBottom: 6, color: colors.text,
           }}>
             Reading Practice
           </h1>
@@ -372,7 +375,7 @@ const Reading = () => {
               { label: 'Question Types', value: '5 types' },
             ].map((stat, i) => (
               <div key={i} style={{
-                background: 'white', border: '1px solid #eee',
+                background: colors.card, border: '1px solid #eee',
                 borderRadius: 8, padding: '10px 16px', flex: '1 1 100px',
               }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: '#00695c', marginBottom: 2 }}>{stat.value}</div>
@@ -392,7 +395,7 @@ const Reading = () => {
               <div style={{
                 width: 4, height: 20, borderRadius: 2, background: '#00695c',
               }}/>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>
                 Academic Passages
               </h2>
               <span style={{
@@ -403,7 +406,7 @@ const Reading = () => {
 
             <button onClick={startLegacy} style={{
               width: '100%', textAlign: 'left', padding: 0,
-              background: 'white', borderRadius: 12,
+              background: colors.card, borderRadius: 12,
               border: '1px solid #e0e0e0', cursor: 'pointer',
               transition: 'all 0.2s ease',
               overflow: 'hidden', display: 'flex',
@@ -427,7 +430,7 @@ const Reading = () => {
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: '#1a1a1a', marginBottom: 4 }}>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: colors.text, marginBottom: 4 }}>
                     Urban Agriculture
                   </div>
                   <div style={{ fontSize: 13, color: '#888', lineHeight: 1.5 }}>
@@ -444,7 +447,7 @@ const Reading = () => {
                       textAlign: 'center', padding: '6px 10px',
                       background: '#f8f8f8', borderRadius: 6,
                     }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a' }}>{t.label}</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: colors.text }}>{t.label}</div>
                       <div style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase' }}>{t.sub}</div>
                     </div>
                   ))}
@@ -462,7 +465,7 @@ const Reading = () => {
               <div style={{
                 width: 4, height: 20, borderRadius: 2, background: '#00897b',
               }}/>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>
                 Pack 6 — Mixed Practice
               </h2>
               <span style={{
@@ -516,7 +519,7 @@ const Reading = () => {
 
                       <div style={{ flex: 1 }}>
                         <div style={{
-                          fontSize: 15, fontWeight: 600, color: '#1a1a1a', marginBottom: 6,
+                          fontSize: 15, fontWeight: 600, color: colors.text, marginBottom: 6,
                           display: 'flex', alignItems: 'center', gap: 8,
                         }}>
                           {mod.name}
@@ -560,7 +563,7 @@ const Reading = () => {
             <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
             <div>
               <p style={{ fontSize: 13, fontWeight: 600, color: '#00695c', marginBottom: 4 }}>Study Tip</p>
-              <p style={{ fontSize: 12, color: '#555', lineHeight: 1.6, margin: 0 }}>
+              <p style={{ fontSize: 12, color: colors.textMedium, lineHeight: 1.6, margin: 0 }}>
                 Start with the academic passage to build vocabulary, then move to Pack 6 for mixed practice.
                 Each module includes fill-in-the-blank, email reading, and passage comprehension.
               </p>
@@ -622,7 +625,7 @@ const Reading = () => {
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
         {/* Single light bar */}
         <div style={{
-          background: 'white',
+          background: colors.card,
           padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           fontFamily: "'DM Sans', sans-serif", fontSize: 13,
           borderBottom: '2px solid #00695c',
@@ -708,21 +711,21 @@ const Reading = () => {
     const mod = selectedPack.modules[selectedModule];
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5',
+        minHeight: '100vh', background: colors.bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
         <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px', animation: 'fadeUp 0.6s ease-out' }}>
           <h2 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 28, color: '#1A1816', marginBottom: 24,
+            fontSize: 28, color: colors.text, marginBottom: 24,
           }}>
             {mod.name} Complete
           </h2>
 
           {mod.sections.map((sec, i) => (
             <div key={i} style={{
-              background: 'white', borderRadius: 10, border: '1px solid #ddd',
+              background: colors.card, borderRadius: 10, border: '1px solid #ddd',
               padding: '14px 20px', marginBottom: 8, textAlign: 'left',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
@@ -757,6 +760,7 @@ const Reading = () => {
 // Academic Passage Component (reusable)
 // ═══════════════════════════════════════════
 const AcademicPassage = ({ section, onComplete }) => {
+  const { colors } = useTheme()
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
@@ -811,13 +815,13 @@ const AcademicPassage = ({ section, onComplete }) => {
     const correct = qs.filter((_, i) => isCorrect(i)).length;
     return (
       <div style={{
-        minHeight: '100vh', background: '#f5f5f5', fontFamily: "'DM Sans', sans-serif",
+        minHeight: '100vh', background: colors.bg, fontFamily: "'DM Sans', sans-serif",
       }}>
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px' }}>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <h2 style={{
               fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 28, color: '#1A1816', marginBottom: 8,
+              fontSize: 28, color: colors.text, marginBottom: 8,
             }}>
               {section.title}
             </h2>
@@ -829,7 +833,7 @@ const AcademicPassage = ({ section, onComplete }) => {
             const tc = typeColors[q.question_type] || typeColors.detail;
             return (
               <div key={qi} style={{
-                background: 'white', borderRadius: 14, border: '1px solid #ddd',
+                background: colors.card, borderRadius: 14, border: '1px solid #ddd',
                 padding: 24, marginBottom: 12,
                 animation: `fadeUp 0.4s ease-out ${qi * 0.05}s both`,
               }}>
@@ -852,7 +856,7 @@ const AcademicPassage = ({ section, onComplete }) => {
                     color: ok ? '#5a9a6e' : '#b06060',
                   }}>{ok ? '✓' : '✗'}</span>
                 </div>
-                <p style={{ fontSize: 13, color: '#1A1816', lineHeight: 1.6, marginBottom: 12 }}>{q.text}</p>
+                <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.6, marginBottom: 12 }}>{q.text}</p>
                 {q.options.map((opt, oi) => {
                   const isUser = answers[qi] === oi;
                   const isAnswer = q.correct === oi;
@@ -931,19 +935,19 @@ const AcademicPassage = ({ section, onComplete }) => {
   // Test interface
   return (
     <div className="test-layout" style={{
-      display: 'flex', height: 'calc(100vh - 48px)', background: 'white',
+      display: 'flex', height: 'calc(100vh - 48px)', background: colors.card,
       fontFamily: "'Georgia', serif",
     }}>
       {/* Passage */}
       <div className="passage-panel" style={{
         width: '50%', display: 'flex', flexDirection: 'column',
-        borderRight: '1px solid #ddd', background: 'white',
+        borderRight: '1px solid #ddd', background: colors.card,
       }}>
         <div style={{
           padding: '14px 24px', borderBottom: '1px solid #ddd',
           fontFamily: "'DM Sans', sans-serif",
         }}>
-          <h2 style={{ fontSize: 13, fontWeight: 600, color: '#1A1816' }}>{section.title}</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{section.title}</h2>
         </div>
         <div ref={passageRef} className="passage-content" style={{
           flex: 1, overflowY: 'auto', padding: '24px 28px',
@@ -951,7 +955,7 @@ const AcademicPassage = ({ section, onComplete }) => {
           {paragraphs.map((para, idx) => (
             <p key={idx} ref={el => paragraphRefs.current[idx] = el} style={{
               fontFamily: "'Georgia', serif", fontSize: 16, lineHeight: 2.0,
-              color: '#333', marginBottom: 20, fontWeight: 400,
+              color: colors.text, marginBottom: 20, fontWeight: 400,
               padding: '8px 12px', borderRadius: 4,
               borderLeft: currentQ?.paragraph === idx ? '3px solid #00695c' : '3px solid transparent',
               background: currentQ?.paragraph === idx ? 'rgba(0,105,92,0.03)' : 'transparent',
@@ -965,7 +969,7 @@ const AcademicPassage = ({ section, onComplete }) => {
 
       {/* Questions */}
       <div className="question-panel" style={{
-        width: '50%', display: 'flex', flexDirection: 'column', background: '#f5f5f5',
+        width: '50%', display: 'flex', flexDirection: 'column', background: colors.bg,
       }}>
         {/* Nav dots */}
         <div style={{
@@ -1012,7 +1016,7 @@ const AcademicPassage = ({ section, onComplete }) => {
 
           <h3 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 18, color: '#1A1816', lineHeight: 1.5,
+            fontSize: 18, color: colors.text, lineHeight: 1.5,
             marginBottom: 24, fontWeight: 400,
           }}>{currentQ.text}</h3>
 
@@ -1085,6 +1089,7 @@ const AcademicPassage = ({ section, onComplete }) => {
 // Legacy Reading Test (original component)
 // ═══════════════════════════════════════════
 const LegacyReadingTest = ({ onBack }) => {
+  const { colors } = useTheme()
   const TOTAL_TIME = 20 * 60;
   const saved = useRef(loadProgress(STORAGE_KEY));
   const questions = legacyQuestions;
@@ -1199,19 +1204,19 @@ const LegacyReadingTest = ({ onBack }) => {
     const { correct, total, scaled } = calculateScore();
     const pct = Math.round((correct / total) * 100);
     return (
-      <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Georgia', serif" }}>
+      <div style={{ minHeight: '100vh', background: colors.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Georgia', serif" }}>
         <div style={{ textAlign: 'center', animation: 'fadeUp 0.6s ease-out', maxWidth: 480, padding: '0 24px' }}>
           <div style={{ width: 120, height: 120, borderRadius: '50%', background: `conic-gradient(#D4A574 ${pct * 3.6}deg, #ddd 0deg)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px' }}>
-            <div style={{ width: 100, height: 100, borderRadius: '50%', background: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 36, color: '#1A1816' }}>{scaled}</span>
+            <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 36, color: colors.text }}>{scaled}</span>
               <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa' }}>/ 30</span>
             </div>
           </div>
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', marginBottom: 28 }}>{correct} / {total} correct</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={() => setShowReview(true)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#6B6560', background: 'white', border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Review</button>
+            <button onClick={() => setShowReview(true)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#6B6560', background: colors.card, border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Review</button>
             <button onClick={handleRetry} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: 'white', background: '#00695c', border: 'none', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Retry</button>
-            <button onClick={onBack} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#6B6560', background: 'white', border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Home</button>
+            <button onClick={onBack} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#6B6560', background: colors.card, border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Home</button>
           </div>
         </div>
       </div>
@@ -1220,7 +1225,7 @@ const LegacyReadingTest = ({ onBack }) => {
 
   // Main test (simplified — key parts preserved)
   return (
-    <div className="test-layout" style={{ display: 'flex', height: '100vh', background: '#f5f5f5', fontFamily: "'Georgia', serif" }}>
+    <div className="test-layout" style={{ display: 'flex', height: '100vh', background: colors.bg, fontFamily: "'Georgia', serif" }}>
       {showConfirm && (
         <div className="confirm-overlay" onClick={() => setShowConfirm(false)}>
           <div className="confirm-dialog" onClick={e => e.stopPropagation()}>
@@ -1234,11 +1239,11 @@ const LegacyReadingTest = ({ onBack }) => {
         </div>
       )}
 
-      <div className="passage-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', borderRight: '1px solid #ddd', background: 'white' }}>
+      <div className="passage-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', borderRight: '1px solid #ddd', background: colors.card }}>
         <div style={{ padding: '18px 28px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button onClick={onBack} style={{ fontSize: 12, color: '#888', background: 'none', border: '1px solid #ccc', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>← Home</button>
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: '#1A1816' }}>Urban Agriculture</span>
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: colors.text }}>Urban Agriculture</span>
           </div>
           <button className="timer-btn" onClick={() => setPaused(p => !p)} style={{ color: timer < 120 ? '#b06060' : '#888', background: timer < 120 ? 'rgba(176,96,96,0.08)' : 'rgba(0,0,0,0.03)' }}>
             {paused ? '▶' : '⏸'} {formatTime(timer)}
@@ -1261,7 +1266,7 @@ const LegacyReadingTest = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="question-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', background: '#f5f5f5' }}>
+      <div className="question-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', background: colors.bg }}>
         <div style={{ padding: '16px 28px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', gap: 6 }}>
             {questions.map((_, i) => (
@@ -1281,7 +1286,7 @@ const LegacyReadingTest = ({ onBack }) => {
           <div style={{ display: 'inline-flex', padding: '4px 12px', borderRadius: 6, marginBottom: 20, background: tc.bg, border: `1px solid ${tc.border}` }}>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 500, color: tc.text }}>{typeLabels[currentQ.type]}</span>
           </div>
-          <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: '#1A1816', lineHeight: 1.5, marginBottom: 28, fontWeight: 400 }}>{currentQ.text}</h3>
+          <h3 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 20, color: colors.text, lineHeight: 1.5, marginBottom: 28, fontWeight: 400 }}>{currentQ.text}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {currentQ.options.map((opt, idx) => {
               const isSelected = currentQ.type === 'multiple' ? selectedMultiple.includes(idx) : answers[currentQuestion] === idx;
@@ -1310,7 +1315,7 @@ const LegacyReadingTest = ({ onBack }) => {
           )}
         </div>
 
-        <div style={{ padding: '16px 28px', borderTop: '1px solid #ddd', background: 'white', display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ padding: '16px 28px', borderTop: '1px solid #ddd', background: colors.card, display: 'flex', justifyContent: 'space-between' }}>
           <button onClick={handlePrev} disabled={currentQuestion === 0} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: currentQuestion === 0 ? '#D4CFC5' : '#6B6560', background: 'none', border: 'none', cursor: currentQuestion === 0 ? 'default' : 'pointer' }}>← Previous</button>
           {currentQuestion < questions.length - 1 ? (
             <button onClick={handleNext} disabled={!isCurrentAnswered()} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: !isCurrentAnswered() ? '#D4CFC5' : '#6B6560', background: 'none', border: 'none', cursor: !isCurrentAnswered() ? 'default' : 'pointer' }}>Next →</button>

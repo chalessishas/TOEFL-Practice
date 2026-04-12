@@ -368,7 +368,13 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
     }
 
     const startReview = (words) => {
-      setReviewQueue([...words].sort(() => Math.random() - 0.5))
+      // Tier by mastery so weakest words come first, shuffle within each tier
+      const rank = { new: 0, learning: 1, known: 2 }
+      const shuffle = (arr) => arr.sort(() => Math.random() - 0.5)
+      const tiered = [0, 1, 2].flatMap(t =>
+        shuffle(words.filter(w => rank[w.mastery || 'new'] === t))
+      )
+      setReviewQueue(tiered)
       setReviewIdx(0)
       setReviewFlipped(false)
       setReviewDone(0)

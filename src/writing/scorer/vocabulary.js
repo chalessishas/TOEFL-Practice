@@ -20,6 +20,28 @@ const AWL_CORE = new Set([
   'participate','perceive','positive','potential','previous','primary','promote',
   'propose','range','regulate','relevant','reside','restrict','select','shift',
   'sustain','target','transfer','unique','utilize','valid','volume','welfare',
+  // Sublist 4
+  'access','adequate','annual','apparent','attitude','commitment','communicate',
+  'concentrate','contrast','cycle','debate','dimension','domestic','emerge',
+  'emphasis','ensure','exclude','framework','fund','illustrate','impose',
+  'internal','investigate','label','obvious','occupy','option','output','overall',
+  'parallel','phase','predict','prior','professional','purchase','regional',
+  'release','resource','seek','sufficient','task','technical','traditional',
+  // Sublist 5
+  'adjust','alter','aware','capacity','challenge','conflict','consult','decline',
+  'enable','engage','extract','generate','goal','hypothesis','interval',
+  'manipulate','network','portion','prospect','radical','reinforce','restore',
+  'revise','scheme','sphere','supplement','temporary','terminate','theme',
+  'uniform','visible','voluntary',
+  // Sublist 6+
+  'abstract','accurate','acknowledge','aggregate','allocate','ambiguous',
+  'appreciate','arbitrary','bias','clarify','complement','contradict','crucial',
+  'decade','deduce','detect','dynamic','eliminate','empirical','equate','exhibit',
+  'explicit','exploit','fluctuate','format','guarantee','hierarchy','highlight',
+  'implicit','induce','inevitable','infer','innovate','margin','mutual','notion',
+  'objective','orient','outcome','persist','phenomenon','proportion','pursue',
+  'rational','recover','reveal','specify','substitute','symbol','thesis','topic',
+  'transmit','ultimate',
 ])
 
 // Function words to exclude from content-word analysis

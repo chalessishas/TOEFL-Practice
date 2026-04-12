@@ -64,10 +64,17 @@ export function score(text) {
     /\bwho\b|\bwhich\b|\bthat\b/,              // relative clauses
     /\bif\b|\bunless\b|\bwere to\b/,           // conditionals
     /\bis\s+\w+ed\b|\bare\s+\w+ed\b|\bwas\s+\w+ed\b|\bwere\s+\w+ed\b/, // passives
-    /\bto\s+[a-z]+\s+[a-z]+\b/,               // infinitive phrases
+    /\bto\s+\w+\s+\w+\b/,                      // infinitive phrases (e.g. "to fully understand")
     /\balthough\b|\bdespite\b|\bwhile\b|\bwhereas\b/, // concessive clauses
+    // Higher-discrimination patterns — proficient writers, not just adequate ones
+    /\bwhether\b/,                             // indirect questions / embedded clauses
+    /\bnot only\b/,                            // correlative conjunctions (not only...but also)
+    /\bit is\b.{0,30}\bthat\b|\bit was\b.{0,30}\bthat\b/, // cleft sentences
+    /\bhave\s+\w+ed\b|\bhas\s+\w+ed\b/,       // present perfect aspect
+    /\bin order to\b|\bso as to\b|\bso that\b/, // purposive subordination
   ]
-  const patternHits = COMPLEX_PATTERNS.filter(p => p.test(text)).length
+  const textLower = text.toLowerCase()
+  const patternHits = COMPLEX_PATTERNS.filter(p => p.test(textLower)).length
   const syntacticVariety = patternHits / COMPLEX_PATTERNS.length  // 0–1
 
   // Casual register penalty — ETS penalizes informal language in academic writing
@@ -80,7 +87,7 @@ export function score(text) {
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/5, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}`,
   }
 }
 
@@ -96,8 +103,8 @@ export function suggest(analysis) {
   const repMatch = analysis.details.match(/(\d+) repeated word/)
   if (repMatch && parseInt(repMatch[1]) > 2)
     tips.push('You are overusing certain words — find synonyms or restructure your sentences.')
-  const synMatch = analysis.details.match(/syntactic variety: (\d+)\/5/)
-  if (synMatch && parseInt(synMatch[1]) < 3)
+  const synMatch = analysis.details.match(/syntactic variety: (\d+)\/(\d+)/)
+  if (synMatch && parseInt(synMatch[1]) / parseInt(synMatch[2]) < 0.5)
     tips.push('Use more complex sentence structures: relative clauses (who/which), conditionals (if/unless), or passive constructions to add syntactic variety.')
   if (analysis.details.includes('informal term'))
     tips.push('Avoid informal language (e.g., "kinda", "gonna", "stuff") — TOEFL writing requires formal academic register.')

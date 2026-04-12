@@ -62,6 +62,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const [newWord, setNewWord] = useState('')
   const [newMeaning, setNewMeaning] = useState('')
   const [newContext, setNewContext] = useState('')
+  const [masteryFilter, setMasteryFilter] = useState('all')
   const [flippedIds, setFlippedIds] = useState(new Set())
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
@@ -310,6 +311,34 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
     return (
       <>
         {sectionTitle('Vocabulary Notebook')}
+        {/* Mastery filter tabs */}
+        {vocab.length > 0 && (() => {
+          const counts = { all: vocab.length, new: 0, learning: 0, known: 0 }
+          vocab.forEach(v => { counts[v.mastery || 'new']++ })
+          const tabs = [
+            { key: 'all', label: 'All', color: null },
+            { key: 'new', label: 'New', color: '#bbb' },
+            { key: 'learning', label: 'Learning', color: '#f59e0b' },
+            { key: 'known', label: 'Known', color: '#22c55e' },
+          ]
+          return (
+            <div style={{ display: 'flex', gap: 4, padding: '0 16px 10px' }}>
+              {tabs.map(t => (
+                <button key={t.key} onClick={() => setMasteryFilter(t.key)} style={{
+                  fontSize: 10, padding: '3px 7px', borderRadius: 20, border: 'none',
+                  cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600,
+                  background: masteryFilter === t.key
+                    ? (t.color || colors.primary)
+                    : (isDark ? '#333' : '#f0f0f0'),
+                  color: masteryFilter === t.key ? 'white' : c.textMuted,
+                  transition: 'background 0.15s',
+                }}>
+                  {t.label} {counts[t.key]}
+                </button>
+              ))}
+            </div>
+          )
+        })()}
         {/* Add form */}
         <div style={{ padding: '0 16px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <input
@@ -366,7 +395,12 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
               No words saved yet.
             </p>
           )}
-          {vocab.map((v) => {
+          {vocab.filter(v => masteryFilter === 'all' || (v.mastery || 'new') === masteryFilter).length === 0 && vocab.length > 0 && (
+            <p style={{ fontSize: 12, color: c.textMuted, textAlign: 'center', padding: '12px 0' }}>
+              No {masteryFilter} words.
+            </p>
+          )}
+          {vocab.filter(v => masteryFilter === 'all' || (v.mastery || 'new') === masteryFilter).map((v) => {
             const flipped = flippedIds.has(v.id)
             const toggleFlip = () => setFlippedIds(prev => {
               const next = new Set(prev)

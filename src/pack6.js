@@ -995,3 +995,260 @@ The nutritional and agricultural dimensions of the Columbian Exchange were equal
     },
   ],
 });
+
+// --- Module 5: Psychology of Memory ---
+pack6.modules.push({
+  id: 'pack6-m5',
+  name: 'Module 5',
+  time: 9 * 60,
+  sections: [
+    // --- Complete the Words ---
+    {
+      type: 'complete_words',
+      id: 'pack6-m5-cw',
+      title: 'Memory and the Brain',
+      instructions: 'Fill in the missing letters in the paragraph.',
+      paragraph: [
+        { text: 'Human memory is not a single system but a collection of ' },
+        { blank: 'ter', prefix: 'in', answer: 'interconnected' },
+        { text: ' processes. When we ' },
+        { blank: 'ode', prefix: 'enc', answer: 'encode' },
+        { text: ' information, the brain converts it into a form that can be ' },
+        { blank: 'ored', prefix: 'st', answer: 'stored' },
+        { text: '. The hippocampus plays a crucial role in ' },
+        { blank: 'olidating', prefix: 'cons', answer: 'consolidating' },
+        { text: ' short-term memories into long-term ones. ' },
+        { blank: 'rieval', prefix: 'Ret', answer: 'Retrieval' },
+        { text: ' — the process of accessing stored memories — can be influenced by ' },
+        { blank: 'textual', prefix: 'con', answer: 'contextual' },
+        { text: ' cues such as smell or location. Failure to ' },
+        { blank: 'all', prefix: 'rec', answer: 'recall' },
+        { text: ' information is often due to interference from similar memories rather than permanent ' },
+        { blank: 'ss', prefix: 'lo', answer: 'loss' },
+        { text: '.' },
+      ],
+    },
+    // --- Daily Life Reading 1: Email ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m5-dl1',
+      subtype: 'email',
+      title: 'Study Group Announcement',
+      from: 'Professor Elena Marsh <e.marsh@university.edu>',
+      to: 'PSY 201 Students',
+      subject: 'Exam Prep: Memory Techniques Workshop',
+      body: `Dear Students,
+
+I wanted to let you know about an optional study session I am hosting next Thursday from 3:00 to 5:00 PM in Room 204 of the Psychology Building.
+
+The session will focus on evidence-based memory strategies that are directly relevant to our upcoming midterm. We will cover spaced repetition, the testing effect, and dual-coding techniques. Research consistently shows that students who use these methods outperform those who rely on re-reading alone.
+
+Please bring your lecture notes and any questions about concepts you find difficult. Attendance is voluntary, but I strongly encourage you to come — especially if you struggled with the first quiz.
+
+Light refreshments will be provided.
+
+Best,
+Professor Marsh`,
+      questions: [
+        {
+          id: 1,
+          text: 'What is the main purpose of Professor Marsh\'s email?',
+          options: [
+            'To announce a mandatory exam review session',
+            'To invite students to a voluntary workshop on study strategies',
+            'To distribute practice questions for the midterm',
+            'To inform students that the midterm has been rescheduled',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The email explicitly states the session is "optional" and "voluntary" and describes it as covering memory strategies relevant to the midterm.',
+        },
+        {
+          id: 2,
+          text: 'According to the email, which students does Professor Marsh especially encourage to attend?',
+          options: [
+            'Students who already scored well on the midterm',
+            'Students who have not yet purchased the textbook',
+            'Students who found the first quiz challenging',
+            'Students who are majoring in Psychology',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'Professor Marsh writes "especially if you struggled with the first quiz," targeting students who had difficulty.',
+        },
+      ],
+    },
+    // --- Daily Life Reading 2: Notice ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m5-dl2',
+      subtype: 'notice',
+      title: 'Library Study Room Policy Update',
+      body: `UNIVERSITY LIBRARY — STUDY ROOM RESERVATION POLICY (Effective Monday)
+
+The Library is updating its individual and group study room policies to support focused learning during the final examination period.
+
+INDIVIDUAL ROOMS (Rooms 1–10):
+Maximum booking: 2 hours per day per student. Rooms must be vacated 5 minutes before the reservation ends. No extensions will be granted during peak hours (10:00 AM – 6:00 PM).
+
+GROUP ROOMS (Rooms 11–20):
+Minimum group size: 3 students. Maximum booking: 3 hours per day. Groups must show a reservation confirmation at the front desk before entering.
+
+GENERAL RULES:
+- Noise level must remain below 40 dB (quiet conversation only).
+- Personal belongings left unattended for more than 15 minutes will be removed.
+- Food and drinks are permitted in sealed containers only.
+
+Reservations can be made online at library.university.edu/rooms up to 48 hours in advance.
+
+For questions, contact the front desk or email library@university.edu.`,
+      questions: [
+        {
+          id: 3,
+          text: 'According to the notice, what is required to use a group study room?',
+          options: [
+            'Prior approval from a professor',
+            'A minimum of three students and a reservation confirmation',
+            'A student ID showing library membership',
+            'A deposit held at the front desk',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The notice states groups need "Minimum group size: 3 students" and must "show a reservation confirmation at the front desk before entering."',
+        },
+        {
+          id: 4,
+          text: 'Which of the following is NOT permitted under the new policy?',
+          options: [
+            'Eating a snack from a sealed lunch box',
+            'Booking a room 24 hours in advance',
+            'Extending an individual room reservation at noon',
+            'Quiet conversation between group members',
+          ],
+          correct: 2,
+          question_type: 'negative_fact',
+          explanation: 'The policy explicitly states "No extensions will be granted during peak hours (10:00 AM – 6:00 PM)" — noon falls within peak hours.',
+        },
+        {
+          id: 5,
+          text: 'What can be inferred about the timing of this policy change?',
+          options: [
+            'It was introduced in response to student complaints about noise',
+            'It coincides with a period of high academic pressure',
+            'It replaces an older policy that had no time limits',
+            'It was mandated by the university administration',
+          ],
+          correct: 1,
+          question_type: 'inference',
+          explanation: 'The notice mentions the policy supports "focused learning during the final examination period," implying the change aligns with exam season.',
+        },
+      ],
+    },
+    // --- Academic Passage ---
+    {
+      type: 'academic_passage',
+      id: 'pack6-m5-ap',
+      title: 'The Reconstructive Nature of Human Memory',
+      passage: `Memory has long been conceived as a kind of mental recording device — an internal camera that captures experiences and replays them with fidelity. Modern cognitive science has thoroughly dismantled this notion. Rather than retrieving a stored copy of the past, humans reconstruct memories each time they recall an event, drawing on fragments of genuine experience and filling in gaps with knowledge, expectation, and inference. This reconstructive quality makes memory both flexible and fallible.
+
+The work of psychologist Frederic Bartlett in the 1930s provided early evidence for reconstructive memory. In a series of experiments, Bartlett asked participants to read an unfamiliar Native American folk tale and reproduce it from memory after varying intervals. Over successive recalls, the story underwent systematic distortions: culturally unfamiliar details were omitted or replaced by more familiar concepts, and the narrative was shortened and rationalized to fit participants' existing schemas. Bartlett concluded that memory is not passive storage but active construction shaped by prior knowledge.
+
+Decades later, Elizabeth Loftus extended this insight by demonstrating that memories can be altered by information encountered after an event. In her influential studies on eyewitness testimony, participants who watched a video of a car accident gave different estimates of the vehicle's speed depending on whether they were asked how fast the car was going when it "smashed" or "contacted" another car. More strikingly, a subset of participants later reported seeing broken glass that was never present in the original video. These findings challenged the legal system's reliance on eyewitness accounts and prompted reforms in how police conduct witness interviews.
+
+The neurological basis of memory reconstruction lies partly in the hippocampus and prefrontal cortex. The hippocampus is essential for binding together the elements of an episode — sights, sounds, emotions, and context — into a coherent trace. ■A During retrieval, these elements are reactivated and reassembled, a process that is susceptible to interference from subsequent experiences. ■B The prefrontal cortex contributes by monitoring the plausibility of retrieved information, helping to distinguish genuine memories from false ones, though this monitoring process is imperfect. ■C Neural research has shown that recalling a memory renders it temporarily unstable, a phenomenon known as reconsolidation. ■D During this window, the memory can be updated or corrupted before being restabilized.
+
+The reconstructive nature of memory carries significant implications across multiple domains. In legal contexts, it underlines the unreliability of eyewitness testimony and supports the use of corroborating physical evidence. In education, it argues for teaching strategies that encourage elaborative encoding — connecting new material to existing knowledge — rather than rote repetition. In clinical psychology, it informs therapies that aim to weaken traumatic memories by introducing new, neutral associations during the reconsolidation window.`,
+      questions: [
+        {
+          id: 6,
+          text: 'The word "fallible" in paragraph 1 is closest in meaning to',
+          options: ['unreliable', 'creative', 'unconscious', 'detailed'],
+          correct: 0,
+          question_type: 'vocabulary',
+          explanation: '"Fallible" means capable of making errors or being wrong — i.e., unreliable.',
+        },
+        {
+          id: 7,
+          text: 'According to paragraph 2, what did Bartlett\'s participants tend to do when recalling the folk tale?',
+          options: [
+            'Add culturally unfamiliar details to make the story more interesting',
+            'Reproduce the story with high accuracy regardless of time elapsed',
+            'Replace unfamiliar elements with concepts matching their own schemas',
+            'Refuse to recall details they considered irrelevant',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'Bartlett found that "culturally unfamiliar details were omitted or replaced by more familiar concepts" — fitting participants\' existing schemas.',
+        },
+        {
+          id: 8,
+          text: 'Which of the following is NOT mentioned as a finding of Loftus\'s eyewitness studies?',
+          options: [
+            'Participants\' speed estimates varied with the wording of questions',
+            'Some participants reported seeing objects that were not in the video',
+            'Eyewitness errors were more common in younger participants',
+            'The research influenced reforms in police interview practices',
+          ],
+          correct: 2,
+          question_type: 'negative_fact',
+          explanation: 'Paragraph 3 discusses question wording, false memories (broken glass), and legal reforms — but never mentions age differences between participants.',
+        },
+        {
+          id: 9,
+          text: 'What can be inferred from paragraph 3 about the legal system before Loftus\'s research?',
+          options: [
+            'Judges were aware that eyewitness testimony was often inaccurate',
+            'Eyewitness accounts were treated as highly reliable evidence',
+            'Police routinely used misleading questions to test memory accuracy',
+            'Physical evidence was valued more than witness statements in court',
+          ],
+          correct: 1,
+          question_type: 'inference',
+          explanation: 'The passage says the findings "challenged the legal system\'s reliance on eyewitness accounts," implying such accounts were previously trusted.',
+        },
+        {
+          id: 10,
+          text: 'According to paragraph 4, why is memory reconstruction susceptible to interference?',
+          options: [
+            'The hippocampus deteriorates with each retrieval attempt',
+            'Reactivated memory elements can be affected by subsequent experiences',
+            'The prefrontal cortex prevents accurate binding of episodic elements',
+            'Reconsolidation permanently destroys the original memory trace',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The passage states that during retrieval, "elements are reactivated and reassembled, a process that is susceptible to interference from subsequent experiences."',
+        },
+        {
+          id: 11,
+          text: 'Which sentence best expresses the essential information in this sentence from paragraph 4: "Neural research has shown that recalling a memory renders it temporarily unstable, a phenomenon known as reconsolidation."',
+          options: [
+            'Neural studies prove that memories become permanently unstable once recalled.',
+            'Reconsolidation is a process in which memories are permanently destroyed during recall.',
+            'Research indicates that the act of remembering temporarily destabilizes a memory, a process called reconsolidation.',
+            'Scientists have found that unstable memories can only be restabilized through repeated neural firing.',
+          ],
+          correct: 2,
+          question_type: 'sentence_simplification',
+          explanation: 'Option C accurately captures both key ideas: recall causes temporary instability, and this is called reconsolidation. Option A incorrectly says "permanently." Option B mischaracterizes reconsolidation as destruction. Option D introduces unsupported claims about repeated firing.',
+        },
+        {
+          id: 12,
+          paragraph: 1,
+          text: 'Look at the four squares [■] that indicate where the following sentence could be added to the passage. Where would the sentence best fit?',
+          insert_sentence: 'When any one of these bound elements is weakened or lost, the entire memory becomes difficult to retrieve accurately.',
+          insertion_points: [
+            'The hippocampus is essential for binding together the elements of an episode',
+            'During retrieval, these elements are reactivated and reassembled',
+            'The prefrontal cortex contributes by monitoring the plausibility',
+            'Neural research has shown that recalling a memory renders it temporarily unstable',
+          ],
+          options: ['■A', '■B', '■C', '■D'],
+          correct: 1,
+          question_type: 'text_insertion',
+          explanation: 'The sentence explains a consequence of the binding process — when bound elements weaken, retrieval suffers. This follows naturally after ■A, which describes the hippocampus binding elements together, and before ■B, which discusses reactivation during retrieval. Placing it at ■B introduces it too late (reactivation has already begun). ■C and ■D are mid-topic shifts to prefrontal monitoring and reconsolidation respectively.',
+        },
+      ],
+    },
+  ],
+});

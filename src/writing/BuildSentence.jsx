@@ -7,12 +7,28 @@ import { buildSentenceItems } from './data/buildSentenceData.js';
 import { appendScore } from './scoreHistory.js';
 
 const STORAGE_KEY = 'toefl-writing-build-sentence';
+const WRONG_KEY = 'toefl-bs-wrong';
 const TOTAL_TIME = 7 * 60;
 const SESSION_SIZE = 10;
 
+const loadWrongIds = () => {
+  try {
+    const s = localStorage.getItem(WRONG_KEY);
+    return s ? JSON.parse(s) : [];
+  } catch { return []; }
+};
+
+const saveWrongIds = (ids) => {
+  try { localStorage.setItem(WRONG_KEY, JSON.stringify(ids)); } catch {}
+};
+
+// Pick SESSION_SIZE items: prioritize previously-wrong items (up to 7), fill rest randomly
 const shuffleAndPick = () => {
-  const shuffled = [...buildSentenceItems].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, SESSION_SIZE);
+  const wrongIds = new Set(loadWrongIds());
+  const wrong = buildSentenceItems.filter(it => wrongIds.has(it.id)).sort(() => Math.random() - 0.5);
+  const others = buildSentenceItems.filter(it => !wrongIds.has(it.id)).sort(() => Math.random() - 0.5);
+  const priorityCount = Math.min(wrong.length, 7);
+  return [...wrong.slice(0, priorityCount), ...others].slice(0, SESSION_SIZE).sort(() => Math.random() - 0.5);
 };
 
 const loadSaved = () => {
@@ -134,6 +150,13 @@ const BuildSentence = () => {
   const handleSubmit = () => {
     const finalScore = sessionItems.filter((_, i) => isItemCorrect(i)).length;
     appendScore({ type: 'build-sentence', correct: finalScore, total: SESSION_SIZE });
+
+    // Persist wrong item IDs for adaptive prioritization next session
+    const wrongIds = sessionItems
+      .filter((_, i) => !isItemCorrect(i))
+      .map(it => it.id);
+    saveWrongIds(wrongIds);
+
     setShowResult(true);
     clearProg();
   };
@@ -169,6 +192,7 @@ const BuildSentence = () => {
   // ─── LANDING ───
   if (!started) {
     const hasResume = !!savedData.current;
+    const wrongCount = loadWrongIds().length;
     return (
       <div style={{
         minHeight: '100vh', background: colors.bg,
@@ -206,11 +230,21 @@ const BuildSentence = () => {
             10 items · 7 minutes
           </p>
           <p style={{
-            fontSize: 13, color: '#aaa', lineHeight: 1.7, marginBottom: 40,
+            fontSize: 13, color: '#aaa', lineHeight: 1.7, marginBottom: wrongCount > 0 ? 16 : 40,
           }}>
             Arrange the word chips into a grammatically correct sentence.
             Click a chip in the word bank to place it, click a placed word to remove it.
           </p>
+
+          {wrongCount > 0 && (
+            <p style={{
+              fontSize: 12, color: '#00695c', marginBottom: 40,
+              background: 'rgba(0,105,92,0.06)', borderRadius: 8, padding: '8px 14px',
+              display: 'inline-block',
+            }}>
+              Focused practice: {wrongCount} tricky sentence{wrongCount !== 1 ? 's' : ''} from last session prioritized
+            </p>
+          )}
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <button

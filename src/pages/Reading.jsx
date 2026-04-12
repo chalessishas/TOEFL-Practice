@@ -32,7 +32,7 @@ const clearProgress = (key) => {
 // Daily Life Reading Component
 // ═══════════════════════════════════════════
 const DailyLifeReading = ({ section, onComplete }) => {
-  const { colors } = useTheme()
+  const { colors, isShortcutsVisible } = useTheme()
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
@@ -229,6 +229,12 @@ const DailyLifeReading = ({ section, onComplete }) => {
             })}
           </div>
 
+          {isShortcutsVisible && (
+            <div className="kbd-hint" style={{ paddingLeft: 0, paddingBottom: 8 }}>
+              <span><span className="kbd">←</span><span className="kbd">→</span> navigate</span>
+              <span><span className="kbd">1</span>–<span className="kbd">4</span> select</span>
+            </div>
+          )}
           {/* Nav — teal bar matching TOEFL style */}
           <div style={{
             marginTop: 24, padding: '10px 0',
@@ -762,7 +768,7 @@ const Reading = () => {
 // Academic Passage Component (reusable)
 // ═══════════════════════════════════════════
 const AcademicPassage = ({ section, onComplete }) => {
-  const { colors } = useTheme()
+  const { colors, isShortcutsVisible } = useTheme()
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
   const [showResult, setShowResult] = useState(false);
@@ -1049,6 +1055,12 @@ const AcademicPassage = ({ section, onComplete }) => {
           </div>
         </div>
 
+        {isShortcutsVisible && (
+          <div className="kbd-hint">
+            <span><span className="kbd">←</span><span className="kbd">→</span> navigate</span>
+            <span><span className="kbd">1</span>–<span className="kbd">5</span> select</span>
+          </div>
+        )}
         {/* Nav — TOEFL teal bar */}
         <div style={{
           padding: '10px 20px', background: colors.primary,
@@ -1091,7 +1103,7 @@ const AcademicPassage = ({ section, onComplete }) => {
 // Legacy Reading Test (original component)
 // ═══════════════════════════════════════════
 const LegacyReadingTest = ({ onBack }) => {
-  const { colors, isTimerVisible } = useTheme()
+  const { colors, isTimerVisible, isShortcutsVisible } = useTheme()
   const TOTAL_TIME = 20 * 60;
   const saved = useRef(loadProgress(STORAGE_KEY));
   const questions = legacyQuestions;
@@ -1314,6 +1326,12 @@ const LegacyReadingTest = ({ onBack }) => {
           </div>
           {currentQ.type === 'multiple' && selectedMultiple.length > 0 && (
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: colors.textLight, marginTop: 16 }}>{selectedMultiple.length} of 3 selected</p>
+          )}
+          {isShortcutsVisible && (
+            <div className="kbd-hint" style={{ padding: '12px 0 0' }}>
+              <span><span className="kbd">←</span><span className="kbd">→</span> navigate</span>
+              <span><span className="kbd">1</span>–<span className="kbd">9</span> select</span>
+            </div>
           )}
         </div>
 

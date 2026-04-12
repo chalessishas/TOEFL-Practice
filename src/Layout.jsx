@@ -190,6 +190,64 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
               })
           }
         </div>
+        {sectionTitle('Writing Trend')}
+        <div style={{ padding: '0 16px 4px' }}>
+          {(() => {
+            const pts = [...writingEntries].reverse().slice(-12).map(h => h.score)
+            const W = 228, H = 44
+            if (pts.length < 2) {
+              return <p style={{ fontSize: 11, color: c.textMuted, lineHeight: 1.6, marginBottom: 4 }}>
+                {pts.length === 0 ? 'Submit writing tasks to see trend.' : 'Need 2+ sessions for a trend line.'}
+              </p>
+            }
+            const xStep = W / (pts.length - 1)
+            const points = pts.map((v, i) => `${i * xStep},${H - (v / 5) * H}`).join(' ')
+            const lastScore = pts[pts.length - 1]
+            const trend = pts.length >= 2 ? lastScore - pts[pts.length - 2] : 0
+            const trendColor = trend > 0.1 ? c.green : trend < -0.1 ? c.red : c.textMuted
+            return (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 10, color: c.textMuted }}>Last {pts.length} sessions</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: trendColor }}>
+                    {trend > 0.1 ? '▲' : trend < -0.1 ? '▼' : '—'} {lastScore.toFixed(1)}/5
+                  </span>
+                </div>
+                <svg width={W} height={H} style={{ display: 'block', overflow: 'visible' }}>
+                  <defs>
+                    <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={c.teal} stopOpacity="0.15" />
+                      <stop offset="100%" stopColor={c.teal} stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  {/* Fill area */}
+                  <polygon
+                    points={`0,${H} ${points} ${(pts.length - 1) * xStep},${H}`}
+                    fill="url(#sparkGrad)"
+                  />
+                  {/* Line */}
+                  <polyline
+                    points={points}
+                    fill="none"
+                    stroke={c.teal}
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                  {/* Last point dot */}
+                  <circle
+                    cx={(pts.length - 1) * xStep}
+                    cy={H - (lastScore / 5) * H}
+                    r="3"
+                    fill={c.teal}
+                  />
+                  {/* Baseline */}
+                  <line x1="0" y1={H} x2={W} y2={H} stroke={c.cardBorder} strokeWidth="1" />
+                </svg>
+              </div>
+            )
+          })()}
+        </div>
         {sectionTitle('Score Overview')}
         <div style={{ padding: '0 16px' }}>
           {scoreBar('Writing (avg)', avgWriting != null ? avgWriting / 5 : null, 5)}

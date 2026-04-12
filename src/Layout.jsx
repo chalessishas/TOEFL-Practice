@@ -85,6 +85,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const [reviewIdx, setReviewIdx] = useState(0)
   const [reviewFlipped, setReviewFlipped] = useState(false)
   const [reviewDone, setReviewDone] = useState(0)  // count advanced this session
+  const [shareCopied, setShareCopied] = useState(false)
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
   // Keyboard shortcuts for review mode: Space=flip, ←=still learning, →=got it
@@ -512,13 +513,17 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
                   const data = btoa(unescape(encodeURIComponent(JSON.stringify(vocab))))
                   const url = `${location.origin}${location.pathname}?vocab=${data}`
                   navigator.clipboard.writeText(url)
-                    .then(() => alert('Share link copied to clipboard!\nOpen on any device to import your vocabulary notebook.'))
+                    .then(() => { setShareCopied(true); setTimeout(() => setShareCopied(false), 2000) })
                     .catch(() => prompt('Copy this share link:', url))
-                } catch { alert('Could not generate share link.') }
+                } catch {}
               }} style={{
-                fontSize: 10, color: c.textMuted, background: 'none', border: 'none',
+                fontSize: 10, color: shareCopied ? '#22c55e' : c.textMuted,
+                background: 'none', border: 'none',
                 cursor: 'pointer', padding: '2px 4px', fontFamily: 'inherit',
-              }} title="Copy share link to import notebook on another device">⇗ share</button>
+                transition: 'color 0.2s',
+              }} title="Copy share link to import notebook on another device">
+                {shareCopied ? '✓ copied' : '⇗ share'}
+              </button>
             </>
           )}
         </div>

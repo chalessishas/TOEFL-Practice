@@ -135,6 +135,12 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
               fontSize: 11, color: colors.textMuted, background: colors.borderLight,
               padding: '2px 8px', borderRadius: 4, fontWeight: 500,
             }}>{pack6.modules.length} modules</span>
+            <span style={{
+              fontSize: 10, color: '#b45309', background: 'rgba(180,83,9,0.07)',
+              padding: '2px 8px', borderRadius: 4, fontWeight: 500, border: '1px solid rgba(180,83,9,0.15)',
+            }} title="TOEFL 2026 uses ~200-word passages. These extended passages offer deeper practice beyond the exam format.">
+              Extended Practice
+            </span>
             {completedSets > 0 && (
               <span style={{
                 fontSize: 11, color: colors.success, background: 'rgba(46,125,50,0.08)',

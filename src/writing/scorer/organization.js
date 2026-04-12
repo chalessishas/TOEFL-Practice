@@ -1,13 +1,20 @@
 // Categorised by connector function — reward diversity across categories,
 // not just quantity within one category (e.g. 5 contrast markers ≠ high score).
 const MARKER_CATEGORIES = {
-  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','despite','although','while','on the contrary'],
-  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly'],
-  conclusion:      ['in conclusion','in summary','to summarize','overall','therefore','consequently','as a result','finally'],
-  exemplification: ['for instance','for example','such as','in particular','notably','specifically','that is','in other words'],
-  sequence:        ['firstly','secondly','to begin with','first of all','meanwhile','last but not least'],
-  elaboration:     ['indeed','in fact','after all','at the same time','above all'],
+  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','conversely','despite','although','while','on the contrary','in spite of','even though','yet','notwithstanding'],
+  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly','also','what is more'],
+  conclusion:      ['in conclusion','in summary','to summarize','to sum up','in short','overall','therefore','thus','hence','consequently','as a result','finally'],
+  exemplification: ['for instance','for example','such as','in particular','notably','specifically','namely','to illustrate','that is','in other words'],
+  sequence:        ['firstly','secondly','thirdly','to begin with','first of all','subsequently','previously','then','next','meanwhile','last but not least','last','finally'],
+  elaboration:     ['indeed','in fact','after all','at the same time','above all','in particular','more importantly'],
 }
+
+// Markers classified as "inferential" or "concessive" — proficient writers use these
+// more than additive markers (also/moreover/furthermore). Ratio is a quality signal.
+// Source: corpus-based ESL marker analysis (Research Loop 2, 2026-04-12)
+const INFERENTIAL_MARKERS = new Set(['therefore','thus','hence','consequently','as a result','for this reason','it follows that'])
+const CONCESSIVE_MARKERS  = new Set(['however','nevertheless','nonetheless','although','even though','while','whereas','despite','in spite of','notwithstanding','on the other hand','conversely','yet'])
+const ADDITIVE_MARKERS    = new Set(['also','moreover','furthermore','additionally','in addition','besides','what is more'])
 
 function countMarkersAndDiversity(text) {
   const lower = text.toLowerCase()
@@ -21,10 +28,23 @@ function countMarkersAndDiversity(text) {
       }
     }
   }
+
+  // Inferential+concessive vs additive ratio — proficient writers use more of
+  // the former (therefore/although/nevertheless) than additive (also/moreover).
+  let inferentialCount = 0
+  let additiveCount    = 0
+  for (const m of INFERENTIAL_MARKERS) { if (lower.includes(m)) inferentialCount++ }
+  for (const m of CONCESSIVE_MARKERS)  { if (lower.includes(m)) inferentialCount++ }
+  for (const m of ADDITIVE_MARKERS)    { if (lower.includes(m)) additiveCount++ }
+  // Bonus: 0 if all markers are additive, up to +0.1 if inferential ≥ additive
+  const totalClassified = inferentialCount + additiveCount
+  const ratioBonus = totalClassified === 0 ? 0 : Math.min(0.1, (inferentialCount / totalClassified) * 0.1)
+
   return {
     uniqueCount: found.size,
     categoriesUsed: categoriesUsed.size,
     totalCategories: Object.keys(MARKER_CATEGORIES).length,
+    ratioBonus,
   }
 }
 
@@ -35,7 +55,7 @@ export function score(text, taskType = 'general') {
   // Discourse marker score: 60% density + 40% functional category diversity
   // Diversity rewards essays that use contrast + addition + conclusion + example
   // rather than repeating one category (e.g. "however × 5").
-  const { uniqueCount: uniqueMarkers, categoriesUsed, totalCategories } = countMarkersAndDiversity(text)
+  const { uniqueCount: uniqueMarkers, categoriesUsed, totalCategories, ratioBonus } = countMarkersAndDiversity(text)
   const markerDensity = uniqueMarkers / sentenceCount
   const densityScore    = Math.min(1, markerDensity / 0.15)
   const diversityScore  = categoriesUsed / totalCategories  // 0→0, 3/6→0.5, 6/6→1.0
@@ -113,13 +133,14 @@ export function score(text, taskType = 'general') {
   const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
   const value = Math.min(
     1,
-    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus),
+    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus),
   )
 
-  const zonePart = zoneBonus > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}` : ''
+  const zonePart  = zoneBonus  > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`  : ''
+  const ratioPart = ratioBonus > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}` : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}`,
   }
 }
 

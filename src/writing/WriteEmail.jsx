@@ -5,6 +5,7 @@ import { useTheme } from '../shared/ThemeContext.jsx'
 import Timer from '../shared/Timer.jsx'
 import { emailPrompts } from './data/emailData.js'
 import { scoreWriting } from './scorer/index.js'
+import { appendScore } from './scoreHistory.js'
 import WritingResult from './WritingResult.jsx'
 
 const STORAGE_KEY = 'toefl-writing-email'
@@ -65,6 +66,7 @@ const WriteEmail = () => {
     clearProg()
     const fullText = `Dear ${prompt.recipient},\n\n${body}\n\nBest regards,\n[Your Name]`
     const result = scoreWriting(fullText, 'email')
+    appendScore({ type: 'email', score: result.overall, wordCount })
     setScoreResult(result)
     setShowResult(true)
   }

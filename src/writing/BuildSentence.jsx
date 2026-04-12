@@ -4,6 +4,7 @@ import '../App.css';
 import './writing.css';
 import { useTheme } from '../shared/ThemeContext.jsx';
 import { buildSentenceItems } from './data/buildSentenceData.js';
+import { appendScore } from './scoreHistory.js';
 
 const STORAGE_KEY = 'toefl-writing-build-sentence';
 const TOTAL_TIME = 7 * 60;
@@ -131,6 +132,8 @@ const BuildSentence = () => {
   };
 
   const handleSubmit = () => {
+    const finalScore = sessionItems.filter((_, i) => isItemCorrect(i)).length;
+    appendScore({ type: 'build-sentence', correct: finalScore, total: SESSION_SIZE });
     setShowResult(true);
     clearProg();
   };

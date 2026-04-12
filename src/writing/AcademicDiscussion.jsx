@@ -5,6 +5,7 @@ import { useTheme } from '../shared/ThemeContext.jsx'
 import Timer from '../shared/Timer.jsx'
 import { discussionPrompts } from './data/discussionData.js'
 import { scoreWriting } from './scorer/index.js'
+import { appendScore } from './scoreHistory.js'
 import WritingResult from './WritingResult.jsx'
 
 const STORAGE_KEY = 'toefl-writing-discussion'
@@ -61,6 +62,7 @@ const AcademicDiscussion = () => {
   const handleSubmit = () => {
     clearProg()
     const result = scoreWriting(response, 'discussion')
+    appendScore({ type: 'discussion', score: result.overall, wordCount })
     setScoreResult(result)
     setShowResult(true)
   }

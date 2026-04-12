@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../shared/ThemeContext.jsx'
+import { getHistory } from '../writing/scoreHistory.js'
 
-function ModuleCard({ icon, title, details, onStart, accentColor }) {
+function ModuleCard({ icon, title, details, onStart, accentColor, hasResume }) {
   const [hovered, setHovered] = useState(false)
   const { colors, fonts, shadows } = useTheme()
 
@@ -27,14 +28,24 @@ function ModuleCard({ icon, title, details, onStart, accentColor }) {
         boxShadow: hovered ? shadows.cardHover : shadows.card,
       }}
     >
-      <div style={{
-        width: 40, height: 40, borderRadius: 10,
-        background: accentColor || colors.primary,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="white" opacity="0.9">
-          <path d={icon} />
-        </svg>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 10,
+          background: accentColor || colors.primary,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="white" opacity="0.9">
+            <path d={icon} />
+          </svg>
+        </div>
+        {hasResume && (
+          <span style={{
+            fontSize: 10, fontWeight: 600, color: accentColor || colors.primary,
+            background: `${accentColor || colors.primary}18`,
+            padding: '3px 8px', borderRadius: 20,
+            fontFamily: fonts.body, letterSpacing: '0.03em',
+          }}>IN PROGRESS</span>
+        )}
       </div>
 
       <div>
@@ -53,17 +64,45 @@ function ModuleCard({ icon, title, details, onStart, accentColor }) {
         fontSize: 13, fontWeight: 600, color: accentColor || colors.primary,
         display: 'flex', alignItems: 'center', gap: 4,
       }}>
-        Start practice
+        {hasResume ? 'Resume' : 'Start practice'}
         <span style={{ fontSize: 16 }}>&#8250;</span>
       </div>
     </div>
   )
 }
 
+function timeAgo(isoDate) {
+  const diff = (Date.now() - new Date(isoDate).getTime()) / 1000
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
 export default function Home() {
   const navigate = useNavigate()
   const { colors, fonts, shadows } = useTheme()
+  const [history, setHistory] = useState([])
   useEffect(() => { document.title = 'TOEFL Practice' }, [])
+  useEffect(() => { setHistory(getHistory()) }, [])
+
+  const hasSaved = (key) => {
+    try { return !!localStorage.getItem(key) } catch { return false }
+  }
+
+  const completed = history.length
+  const lastEntry = history[history.length - 1]
+  const avgWritingScore = (() => {
+    const writing = history.filter(h => h.type === 'email' || h.type === 'discussion')
+    if (!writing.length) return null
+    return (writing.reduce((s, h) => s + h.score, 0) / writing.length).toFixed(1)
+  })()
+
+  const stats = [
+    { label: 'Sessions Done', value: completed > 0 ? String(completed) : '—' },
+    { label: 'Avg Writing Score', value: avgWritingScore ? `${avgWritingScore}/5` : '—' },
+    { label: 'Last Practice', value: lastEntry ? timeAgo(lastEntry.date) : '—' },
+  ]
 
   return (
     <div style={{ padding: '32px 40px', maxWidth: 900 }}>
@@ -73,10 +112,12 @@ export default function Home() {
           fontFamily: fonts.heading, fontSize: 28, fontWeight: 700,
           color: colors.text, marginBottom: 6,
         }}>
-          Welcome back
+          {completed > 0 ? 'Welcome back' : 'Get started'}
         </h1>
         <p style={{ fontFamily: fonts.body, fontSize: 14, color: colors.textMuted }}>
-          Pick up where you left off, or start a new practice session.
+          {completed > 0
+            ? `${completed} session${completed > 1 ? 's' : ''} completed. Keep going.`
+            : 'Pick a module below to begin your first practice session.'}
         </p>
       </div>
 
@@ -84,12 +125,7 @@ export default function Home() {
       <div style={{
         display: 'flex', gap: 12, marginBottom: 32, flexWrap: 'wrap',
       }}>
-        {[
-          { label: 'Practice Sets', value: '3' },
-          { label: 'Total Questions', value: '30+' },
-          { label: 'Writing Tasks', value: '3 types' },
-          { label: 'Completed', value: '0' },
-        ].map((s, i) => (
+        {stats.map((s, i) => (
           <div key={i} style={{
             flex: '1 1 120px', padding: '14px 16px',
             background: colors.white, borderRadius: 8,
@@ -141,6 +177,7 @@ export default function Home() {
             details={['Arrange word chips in order', '10 items, 7 min']}
             onStart={() => navigate('/writing/build-sentence')}
             accentColor="#00695c"
+            hasResume={hasSaved('toefl-writing-build-sentence')}
           />
           <ModuleCard
             icon="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"
@@ -148,6 +185,7 @@ export default function Home() {
             details={['Respond to a situation prompt', '130-140 words, 7 min']}
             onStart={() => navigate('/writing/email')}
             accentColor="#00897b"
+            hasResume={hasSaved('toefl-writing-email')}
           />
           <ModuleCard
             icon="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"
@@ -155,6 +193,7 @@ export default function Home() {
             details={['Join a class discussion', '120+ words, 10 min']}
             onStart={() => navigate('/writing/discussion')}
             accentColor="#004d40"
+            hasResume={hasSaved('toefl-writing-discussion')}
           />
         </div>
       </div>

@@ -70,6 +70,60 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const [reviewDone, setReviewDone] = useState(0)  // count advanced this session
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
+  // Keyboard shortcuts for review mode: Space=flip, ←=still learning, →=got it
+  useEffect(() => {
+    if (reviewQueue === null || reviewIdx >= reviewQueue.length) return
+    const handler = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault()
+        setReviewFlipped(f => !f)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [reviewQueue, reviewIdx])
+
+  // Arrow keys for advance (only when flipped) — needs reviewFlipped in deps
+  useEffect(() => {
+    if (reviewQueue === null || reviewIdx >= reviewQueue.length || !reviewFlipped) return
+    const card = reviewQueue[reviewIdx]
+    const handler = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        // Still learning — just advance
+        if (reviewIdx + 1 >= reviewQueue.length) {
+          setReviewQueue(q => [...q])
+          setReviewIdx(reviewQueue.length)
+        } else {
+          setReviewIdx(i => i + 1)
+          setReviewFlipped(false)
+        }
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        // Got it — advance mastery then move on
+        const order = ['new', 'learning', 'known']
+        const next = order[Math.min(order.indexOf(card.mastery || 'new') + 1, 2)]
+        setVocab(prev => {
+          const updated = prev.map(v => v.id !== card.id ? v : { ...v, mastery: next })
+          saveVocab(updated)
+          return updated
+        })
+        setReviewDone(d => d + 1)
+        if (reviewIdx + 1 >= reviewQueue.length) {
+          setReviewQueue(q => [...q])
+          setReviewIdx(reviewQueue.length)
+        } else {
+          setReviewIdx(i => i + 1)
+          setReviewFlipped(false)
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [reviewQueue, reviewIdx, reviewFlipped])
+
   const writingEntries = history.filter(h => h.type === 'email' || h.type === 'discussion')
   const bsEntries = history.filter(h => h.type === 'build-sentence')
 
@@ -387,7 +441,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
             )}
             {reviewFlipped
               ? <div style={{ fontSize: 13, color: colors.primary, fontWeight: 600 }}>{card.meaning}</div>
-              : <div style={{ fontSize: 10, color: c.textMuted, marginTop: 4 }}>tap to reveal meaning</div>
+              : <div style={{ fontSize: 10, color: c.textMuted, marginTop: 4 }}>tap or Space to reveal</div>
             }
           </div>
           {/* Action buttons */}
@@ -397,12 +451,12 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
                 flex: 1, fontSize: 11, fontWeight: 600, padding: '7px 0',
                 borderRadius: 6, border: `1px solid ${c.cardBorder}`,
                 cursor: 'pointer', background: c.cardBg, color: c.textMuted, fontFamily: 'inherit',
-              }}>Still learning</button>
+              }}>← Still learning</button>
               <button onClick={() => advanceReview(true)} style={{
                 flex: 1, fontSize: 11, fontWeight: 600, padding: '7px 0',
                 borderRadius: 6, border: 'none',
                 cursor: 'pointer', background: colors.primary, color: 'white', fontFamily: 'inherit',
-              }}>Got it ✓</button>
+              }}>Got it → </button>
             </div>
           )}
         </div>

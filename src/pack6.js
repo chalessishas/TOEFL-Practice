@@ -293,6 +293,103 @@ Not all fungi are beneficial. Some pathogenic fungi cause diseases in plants and
           ],
         },
 
+        // --- Read in Daily Life: Community Solar Program ---
+        {
+          type: 'daily_life',
+          id: 'pack6-m2-dl1',
+          title: 'Community Solar Enrollment',
+          material_type: 'email',
+          material: {
+            subject: 'Invitation to Join the Maplewood Community Solar Program',
+            from: 'Green Horizons Energy',
+            to: 'Maplewood Residents',
+            body: "Dear Maplewood Resident,\n\nWe are pleased to invite you to enroll in the Maplewood Community Solar Program, launching this spring. By joining, you can access locally generated solar electricity without installing any equipment on your property.\n\nParticipants receive a monthly credit on their utility bill based on their share of the solar array's output. Average savings are estimated at 10–15% per year. Enrollment is free, and there are no cancellation fees if you move or change your mind within the first 60 days.\n\nSpaces are limited. Please return the enclosed enrollment form by April 30 or visit greenhorizons.com/maplewood to sign up online.\n\nWarm regards,\nGreen Horizons Energy",
+          },
+          questions: [
+            {
+              id: 19,
+              text: 'What is one benefit of joining the program mentioned in the email?',
+              options: [
+                'Free solar panels installed on your home',
+                'A reduction in monthly electricity bills',
+                'Guaranteed electricity during power outages',
+                'Priority access to city energy subsidies',
+              ],
+              correct: 1,
+              question_type: 'detail',
+              explanation: 'The email states participants receive "a monthly credit on their utility bill," resulting in estimated savings of 10–15% per year — a reduction in electricity bills. Installing panels on your home, outage protection, and subsidy priority are not mentioned.',
+            },
+            {
+              id: 20,
+              text: 'What can be inferred about residents who enroll but then move within the first two months?',
+              options: [
+                'They will be required to pay a cancellation fee.',
+                'They can leave the program without financial penalty.',
+                'They must transfer their enrollment to the new resident.',
+                'They will lose any bill credits they have already received.',
+              ],
+              correct: 1,
+              question_type: 'inference',
+              explanation: 'The email explicitly states "there are no cancellation fees if you move or change your mind within the first 60 days." 60 days equals approximately two months, so residents who move within that period can exit the program at no cost.',
+            },
+          ],
+        },
+
+        // --- Read in Daily Life: Office Energy Policy ---
+        {
+          type: 'daily_life',
+          id: 'pack6-m2-dl2',
+          title: 'Office Energy Conservation Policy',
+          material_type: 'email',
+          material: {
+            subject: 'New Office Energy Conservation Guidelines – Effective Monday',
+            from: 'Facilities Management',
+            to: 'All Staff',
+            body: "Dear Team,\n\nAs part of our commitment to reducing the building's carbon footprint, Facilities Management is introducing the following energy conservation guidelines, effective this Monday:\n\n1. Computers and monitors must be shut down — not merely put to sleep — at the end of each workday.\n2. Lights in meeting rooms should be turned off when not in use. Motion-sensor lights have been installed in Rooms 3A and 3B.\n3. The air conditioning setpoint has been raised from 21°C to 23°C during summer months. Personal desk fans are permitted.\n4. Staff are encouraged to use the stairs for floors 1–4 to reduce elevator energy use.\n\nThese measures are expected to cut the building's electricity consumption by approximately 12%. Compliance will be tracked quarterly, and departments that meet targets will be recognized in the company newsletter.\n\nThank you for your cooperation.\nFacilities Management",
+          },
+          questions: [
+            {
+              id: 21,
+              text: 'According to the email, what change has been made to Rooms 3A and 3B?',
+              options: [
+                'The air conditioning setpoint has been lowered.',
+                'The rooms have been converted into storage areas.',
+                'Lighting has been automated with motion sensors.',
+                'Computers in those rooms must now be fully shut down.',
+              ],
+              correct: 2,
+              question_type: 'detail',
+              explanation: 'The email states "Motion-sensor lights have been installed in Rooms 3A and 3B." This means the lighting in those rooms is now automated — it turns on or off based on detected movement.',
+            },
+            {
+              id: 22,
+              text: 'What is indicated about the new air conditioning policy?',
+              options: [
+                'Personal cooling devices are prohibited under the new policy.',
+                'The change applies to all seasons equally.',
+                'Staff may use personal fans to compensate for the warmer setting.',
+                'The setpoint was previously set to 23°C.',
+              ],
+              correct: 2,
+              question_type: 'detail',
+              explanation: 'The email raises the A/C setpoint to 23°C during summer and adds "Personal desk fans are permitted," meaning staff can use fans to stay comfortable. Fans are permitted, not prohibited. The change only applies to summer months, not all seasons. The previous setpoint was 21°C, not 23°C.',
+            },
+            {
+              id: 23,
+              text: 'What can be inferred about how compliance will be monitored?',
+              options: [
+                'Individual employees will be penalized for violations.',
+                'The building will undergo daily inspections by Facilities Management.',
+                'Progress will be assessed on a team basis every three months.',
+                'Results will only be shared with department heads.',
+              ],
+              correct: 2,
+              question_type: 'inference',
+              explanation: '"Compliance will be tracked quarterly, and departments that meet targets will be recognized" implies that performance is measured at the department level every quarter (three months). Penalizing individuals, daily inspections, and restricted reporting are not mentioned.',
+            },
+          ],
+        },
+
         // --- Read an Academic Passage: Renewable Energy ---
         {
           type: 'academic_passage',

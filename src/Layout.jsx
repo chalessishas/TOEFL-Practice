@@ -23,13 +23,25 @@ const navItems = [
   { path: '/writing/discussion', label: 'Academic Discussion' },
 ]
 
-const vocabPlaceholder = [
-  { word: 'ubiquitous', meaning: 'present everywhere', source: 'Pack 6 Module 1' },
-  { word: 'mitigate', meaning: 'make less severe', source: 'Urban Agriculture' },
-  { word: 'feasible', meaning: 'possible and practical', source: 'Urban Agriculture' },
-  { word: 'paramount', meaning: 'more important than anything else', source: 'Pack 6 Module 2' },
-  { word: 'exacerbate', meaning: 'make worse', source: 'Practice Essay' },
+const VOCAB_KEY = 'toefl-vocab'
+const DEFAULT_VOCAB = [
+  { word: 'ubiquitous', meaning: 'present everywhere', id: 1 },
+  { word: 'mitigate', meaning: 'make less severe', id: 2 },
+  { word: 'feasible', meaning: 'possible and practical', id: 3 },
+  { word: 'paramount', meaning: 'more important than anything else', id: 4 },
+  { word: 'exacerbate', meaning: 'make worse', id: 5 },
 ]
+
+const loadVocab = () => {
+  try {
+    const s = localStorage.getItem(VOCAB_KEY)
+    return s ? JSON.parse(s) : DEFAULT_VOCAB
+  } catch { return DEFAULT_VOCAB }
+}
+
+const saveVocab = (list) => {
+  try { localStorage.setItem(VOCAB_KEY, JSON.stringify(list)) } catch {}
+}
 
 
 // Rotating task suggestions Mon–Sun
@@ -46,6 +58,9 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, isTimerVisible, toggleTimer, isShortcutsVisible, toggleShortcuts }) {
   const [history, setHistory] = useState([])
+  const [vocab, setVocab] = useState(loadVocab)
+  const [newWord, setNewWord] = useState('')
+  const [newMeaning, setNewMeaning] = useState('')
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
   const writingEntries = history.filter(h => h.type === 'email' || h.type === 'discussion')
@@ -199,18 +214,90 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   }
 
   if (activePanel === 'notebook') {
+    const addWord = () => {
+      const w = newWord.trim()
+      const m = newMeaning.trim()
+      if (!w || !m) return
+      const updated = [{ word: w, meaning: m, id: Date.now() }, ...vocab]
+      setVocab(updated)
+      saveVocab(updated)
+      setNewWord('')
+      setNewMeaning('')
+    }
+
+    const deleteWord = (id) => {
+      const updated = vocab.filter(v => v.id !== id)
+      setVocab(updated)
+      saveVocab(updated)
+    }
+
     return (
       <>
-        {sectionTitle('Saved Vocabulary')}
+        {sectionTitle('Vocabulary Notebook')}
+        {/* Add form */}
+        <div style={{ padding: '0 16px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <input
+            value={newWord}
+            onChange={e => setNewWord(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addWord()}
+            placeholder="Word"
+            style={{
+              fontSize: 12, padding: '6px 9px', borderRadius: 6,
+              border: `1px solid ${c.cardBorder}`, background: c.cardBg,
+              color: c.textPrimary, outline: 'none', fontFamily: 'inherit',
+            }}
+          />
+          <input
+            value={newMeaning}
+            onChange={e => setNewMeaning(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addWord()}
+            placeholder="Meaning"
+            style={{
+              fontSize: 12, padding: '6px 9px', borderRadius: 6,
+              border: `1px solid ${c.cardBorder}`, background: c.cardBg,
+              color: c.textPrimary, outline: 'none', fontFamily: 'inherit',
+            }}
+          />
+          <button
+            onClick={addWord}
+            disabled={!newWord.trim() || !newMeaning.trim()}
+            style={{
+              fontSize: 12, fontWeight: 500, padding: '6px',
+              borderRadius: 6, border: 'none', cursor: 'pointer',
+              background: newWord.trim() && newMeaning.trim() ? '#00695c' : c.cardBorder,
+              color: newWord.trim() && newMeaning.trim() ? 'white' : c.textMuted,
+              fontFamily: 'inherit',
+            }}
+          >
+            + Add Word
+          </button>
+        </div>
+        {/* Word list */}
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {vocabPlaceholder.map((v, i) => (
-            <div key={i} style={{
+          {vocab.length === 0 && (
+            <p style={{ fontSize: 12, color: c.textMuted, textAlign: 'center', padding: '12px 0' }}>
+              No words saved yet.
+            </p>
+          )}
+          {vocab.map((v) => (
+            <div key={v.id} style={{
               padding: '8px 10px', background: c.cardBg, borderRadius: 6,
               border: `1px solid ${c.cardBorder}`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6,
             }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: 2 }}>{v.word}</div>
-              <div style={{ fontSize: 11, color: c.textMuted }}>{v.meaning}</div>
-              <div style={{ fontSize: 10, color: isDark ? '#555' : '#bbb', marginTop: 4 }}>{v.source}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: 2 }}>{v.word}</div>
+                <div style={{ fontSize: 11, color: c.textMuted }}>{v.meaning}</div>
+              </div>
+              <button
+                onClick={() => deleteWord(v.id)}
+                style={{
+                  fontSize: 14, lineHeight: 1, padding: '2px 4px',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: c.textMuted, flexShrink: 0,
+                }}
+                title="Remove"
+              >×</button>
             </div>
           ))}
         </div>

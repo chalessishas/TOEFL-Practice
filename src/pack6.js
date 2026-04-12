@@ -1234,7 +1234,7 @@ The reconstructive nature of memory carries significant implications across mult
         },
         {
           id: 12,
-          paragraph: 1,
+          paragraph: 3,
           text: 'Look at the four squares [■] that indicate where the following sentence could be added to the passage. Where would the sentence best fit?',
           insert_sentence: 'When any one of these bound elements is weakened or lost, the entire memory becomes difficult to retrieve accurately.',
           insertion_points: [

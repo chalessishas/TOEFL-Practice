@@ -173,12 +173,21 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
               const readingScore = doneResults.length
                 ? doneResults.reduce((acc, r) => ({ correct: acc.correct + (r.correct || 0), total: acc.total + (r.total || 0) }), { correct: 0, total: 0 })
                 : null;
-              const sectionTags = mod.sections.map(s => {
-                if (s.type === 'complete_words') return { label: 'Fill Words', color: '#e65100' };
-                if (s.type === 'daily_life') return { label: 'Email', color: '#1565c0' };
-                if (s.type === 'academic_passage') return { label: 'Passage', color: colors.primary };
-                return { label: s.type, color: colors.textMuted };
-              });
+              const sectionTags = (() => {
+                const counts = {};
+                mod.sections.forEach(s => {
+                  const key = s.type === 'complete_words' ? 'Fill Words'
+                    : s.type === 'daily_life' ? 'Email'
+                    : s.type === 'academic_passage' ? 'Passage'
+                    : s.type;
+                  counts[key] = (counts[key] || 0) + 1;
+                });
+                const colorMap = { 'Fill Words': '#e65100', 'Email': '#1565c0', 'Passage': colors.primary };
+                return Object.entries(counts).map(([label, count]) => ({
+                  label: count > 1 ? `${label} ×${count}` : label,
+                  color: colorMap[label] || colors.textMuted,
+                }));
+              })();
               const qCount = mod.sections.reduce((sum, s) => {
                 if (s.type === 'complete_words') return sum + s.paragraph.filter(p => p.blank).length;
                 return sum + (s.questions?.length || 0);

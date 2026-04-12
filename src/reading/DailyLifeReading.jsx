@@ -154,13 +154,22 @@ const DailyLifeReading = ({ section, onComplete }) => {
           flex: '1 1 380px', background: colors.inputBg, borderRadius: 8,
           border: `2px solid ${colors.primary}`, padding: 24,
         }}>
-          {section.material.subject && (
+          {(section.material.subject || section.material.from || section.material.to) && (
             <div style={{
-              display: 'flex', gap: 8, marginBottom: 16, paddingBottom: 12,
+              marginBottom: 16, paddingBottom: 12,
               borderBottom: `1px solid ${colors.border}`,
+              display: 'flex', flexDirection: 'column', gap: 4,
             }}>
-              <span style={{ fontWeight: 600, fontSize: 14, color: colors.textMedium }}>Subject:</span>
-              <span style={{ fontSize: 14, color: colors.text }}>{section.material.subject}</span>
+              {[
+                section.material.from && { label: 'From', value: section.material.from },
+                section.material.to && { label: 'To', value: section.material.to },
+                section.material.subject && { label: 'Subject', value: section.material.subject },
+              ].filter(Boolean).map(({ label, value }) => (
+                <div key={label} style={{ display: 'flex', gap: 8 }}>
+                  <span style={{ fontWeight: 600, fontSize: 13, color: colors.textMedium, minWidth: 52 }}>{label}:</span>
+                  <span style={{ fontSize: 13, color: colors.text }}>{value}</span>
+                </div>
+              ))}
             </div>
           )}
           <div style={{ fontSize: 15, lineHeight: 1.9, color: colors.text, whiteSpace: 'pre-line', fontFamily: "'Georgia', serif" }}>

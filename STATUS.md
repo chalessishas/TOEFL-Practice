@@ -98,6 +98,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] development.js 重复主张惩罚 — 3+ 无支撑的意见句 -0.15（敷衍重复的识别）(f383dd4)
 - [100%] pack6 M5 Q12 text_insertion 段落索引修复 — paragraph 1→3，■A/■B/■C/■D 现在指向正确段落 (edece28)
 - [100%] grammar.js SVA 检测 — 4 个高精度模式（everyone/each/the number of/不可数名词，ESL #1 错误类型）(5beef55)
+- [100%] relevance.js 邮件逐条 goal 评分 — 3 个 goals 独立覆盖检测，suggest() 精确指出未覆盖的 goal (64e31cc)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

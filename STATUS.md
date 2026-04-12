@@ -105,7 +105,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] organization.js 3-zone bonus — discussion 三区结构检测（Burstein 2003，位置模型 org-score Pearson +4）
 - [100%] scorer/index.js build-a-sentence guard — 2026 新题型直接返回 0 不走 prose 评分
 - [100%] grammar.js a/an 冠词错误检测 — 7/7 真错误命中，0 误报（排除 university/European/unique 等 /j/ 音词）(78fa6b1)
-- [100%] mechanics.js 误报修复 — 字典未加载时跳过拼写检查（原行为：15k fallback 将 "commute/eliminates/mentorship" 等正确词误标为拼写错误）(54bab35) — 7/7 真错误命中，0 误报（排除 university/European/unique 等 /j/ 音词）(78fa6b1)
+- [100%] mechanics.js 误报修复 — 字典未加载时跳过拼写检查（原行为：15k fallback 将 "commute/eliminates/mentorship" 等正确词误标为拼写错误）(54bab35)
+- [100%] grammar.js SVA 扩展 — 新增 3 条高精度模式：he/she/it have→has、he/she/it are→is、you/we/they was→were；0 误报（modal 构式通过）(ed87925) — 字典未加载时跳过拼写检查（原行为：15k fallback 将 "commute/eliminates/mentorship" 等正确词误标为拼写错误）(54bab35) — 7/7 真错误命中，0 误报（排除 university/European/unique 等 /j/ 音词）(78fa6b1)
 - [100%] vocabulary.js AWL 扩展 — sublists 4-6+ 补入 ~100 新词（inevitable/empirical/contradict/explicit 等），AWL_CORE 从 ~100 扩至 ~200 词 (020b338)
 - [100%] style.js COMPLEX_PATTERNS — 5→10 模式，修复大写首字母大小写 bug（Despite/Whether 等句首词原本不命中），高级文章 6/10 vs 简单文章 1/10，区分度显著提升 (020b338)
 - [100%] E2E 实测通过 — Discussion 4.3/5、Email 4.9/5，7 维 breakdown 正常，On-Topic 维度展示正确

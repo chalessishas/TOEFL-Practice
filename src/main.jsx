@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import { ErrorBoundary } from './ErrorBoundary.jsx'
+import { ThemeProvider } from './shared/ThemeContext.jsx'
 import Layout from './Layout.jsx'
 import Reading from './pages/Reading.jsx'
 import Home from './pages/Home.jsx'
@@ -14,6 +15,7 @@ import AcademicDiscussion from './writing/AcademicDiscussion.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+      <ThemeProvider>
       <ErrorBoundary>
       <Layout>
         <Routes>
@@ -26,6 +28,7 @@ createRoot(document.getElementById('root')).render(
         </Routes>
       </Layout>
       </ErrorBoundary>
+      </ThemeProvider>
     </BrowserRouter>
   </StrictMode>,
 )

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { colors, fonts } from './shared/theme';
+import { useTheme } from './shared/ThemeContext.jsx';
 
 const CompleteWords = ({ section, onComplete }) => {
+  const { colors, fonts } = useTheme();
   const blanks = section.paragraph.filter(seg => seg.blank !== undefined);
   const [inputs, setInputs] = useState(() => blanks.map(() => ''));
   const [activeBlank, setActiveBlank] = useState(null);

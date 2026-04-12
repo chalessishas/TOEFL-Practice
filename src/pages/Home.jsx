@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { colors, fonts, shadows } from '../shared/theme'
+import { useTheme } from '../shared/ThemeContext.jsx'
 
 function ModuleCard({ icon, title, details, onStart, accentColor }) {
   const [hovered, setHovered] = useState(false)
+  const { colors, fonts, shadows } = useTheme()
 
   return (
     <div
@@ -61,6 +62,7 @@ function ModuleCard({ icon, title, details, onStart, accentColor }) {
 
 export default function Home() {
   const navigate = useNavigate()
+  const { colors, fonts, shadows } = useTheme()
   useEffect(() => { document.title = 'TOEFL Practice' }, [])
 
   return (
@@ -90,8 +92,8 @@ export default function Home() {
         ].map((s, i) => (
           <div key={i} style={{
             flex: '1 1 120px', padding: '14px 16px',
-            background: 'white', borderRadius: 8,
-            border: '1px solid #eee',
+            background: colors.white, borderRadius: 8,
+            border: `1px solid ${colors.borderLight}`,
           }}>
             <div style={{
               fontSize: 22, fontWeight: 700, color: colors.primary,

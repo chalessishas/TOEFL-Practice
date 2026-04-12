@@ -57,3 +57,49 @@ export const shadows = {
   cardHover: '0 8px 24px rgba(0, 105, 92, 0.12)',
   button: '0 4px 16px rgba(0, 105, 92, 0.2)',
 }
+
+export const darkColors = {
+  // Primary (same teal — readable on dark bg)
+  primary: '#4db6ac',
+  primaryDark: '#00897b',
+  primaryLight: '#1a3330',
+  primaryGradient: 'linear-gradient(135deg, #4db6ac 0%, #00897b 100%)',
+  primaryShadow: 'rgba(77, 182, 172, 0.25)',
+
+  // Layout
+  bg: '#121212',
+  white: '#1e1e1e',
+  card: '#1e1e1e',
+  cardHover: '#2a2a2a',
+  inputBg: '#252525',
+
+  // Text
+  text: '#e8e8e8',
+  textMedium: '#aaa',
+  textMuted: '#777',
+  textLight: '#555',
+
+  // Borders
+  border: '#333',
+  borderLight: '#2a2a2a',
+
+  // Feedback (slightly more vivid for contrast on dark)
+  success: '#4caf50',
+  successBg: 'rgba(76, 175, 80, 0.12)',
+  successBorder: 'rgba(76, 175, 80, 0.3)',
+  error: '#ef5350',
+  errorBg: 'rgba(239, 83, 80, 0.12)',
+  errorBorder: 'rgba(239, 83, 80, 0.3)',
+  warning: '#ff7043',
+
+  // Exam accents
+  toeflTeal: '#4db6ac',
+  toeflTealLight: '#80cbc4',
+  toeflRed: '#ef5350',
+}
+
+export const darkShadows = {
+  card: '0 2px 8px rgba(0, 0, 0, 0.4)',
+  cardHover: '0 8px 24px rgba(0, 0, 0, 0.5)',
+  button: '0 4px 16px rgba(77, 182, 172, 0.25)',
+}

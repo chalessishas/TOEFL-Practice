@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTheme } from './shared/ThemeContext.jsx'
 
 const ICON_BAR_W = 48
 const SIDEBAR_W = 260
@@ -43,10 +44,10 @@ const planPlaceholder = [
   { day: 'Fri', task: 'Review Mistakes + Vocabulary', done: false },
 ]
 
-function SidebarContent({ activePanel, navigate, location }) {
+function SidebarContent({ activePanel, navigate, location, isDark, toggleDark }) {
   const sectionTitle = (text) => (
     <div style={{
-      fontSize: 11, fontWeight: 700, color: '#888',
+      fontSize: 11, fontWeight: 700, color: isDark ? '#666' : '#888',
       textTransform: 'uppercase', letterSpacing: '0.08em',
       padding: '16px 16px 8px', userSelect: 'none',
     }}>{text}</div>
@@ -58,17 +59,18 @@ function SidebarContent({ activePanel, navigate, location }) {
         {sectionTitle('Modules')}
         {navItems.map(item => {
           const isActive = location.pathname === item.path
+          const activeTeal = isDark ? '#4db6ac' : '#00695c'
           return (
             <button key={item.path} onClick={() => navigate(item.path)} style={{
               display: 'block', width: '100%', textAlign: 'left',
               padding: '8px 16px', fontSize: 13, fontWeight: isActive ? 600 : 400,
-              color: isActive ? '#00695c' : '#555',
-              background: isActive ? 'rgba(0,105,92,0.06)' : 'transparent',
-              border: 'none', borderLeft: isActive ? '2px solid #00695c' : '2px solid transparent',
+              color: isActive ? activeTeal : (isDark ? '#aaa' : '#555'),
+              background: isActive ? (isDark ? 'rgba(77,182,172,0.1)' : 'rgba(0,105,92,0.06)') : 'transparent',
+              border: 'none', borderLeft: isActive ? `2px solid ${activeTeal}` : '2px solid transparent',
               cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
               transition: 'all 0.15s ease',
             }}
-            onMouseOver={e => { if (!isActive) e.currentTarget.style.background = '#f0f0f0' }}
+            onMouseOver={e => { if (!isActive) e.currentTarget.style.background = isDark ? '#2a2a2a' : '#f0f0f0' }}
             onMouseOut={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
             >
               {item.label}
@@ -76,20 +78,32 @@ function SidebarContent({ activePanel, navigate, location }) {
           )
         })}
         {sectionTitle('Quick Stats')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: '#888', lineHeight: 2 }}>
-          <div>Sessions completed: <span style={{ color: '#1a1a1a', fontWeight: 600 }}>0</span></div>
-          <div>Total practice time: <span style={{ color: '#1a1a1a', fontWeight: 600 }}>0 min</span></div>
-          <div>Current streak: <span style={{ color: '#1a1a1a', fontWeight: 600 }}>0 days</span></div>
+        <div style={{ padding: '0 16px', fontSize: 12, color: isDark ? '#777' : '#888', lineHeight: 2 }}>
+          <div>Sessions completed: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>0</span></div>
+          <div>Total practice time: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>0 min</span></div>
+          <div>Current streak: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>0 days</span></div>
         </div>
       </>
     )
+  }
+
+  const c = {
+    cardBg: isDark ? '#252525' : '#fafafa',
+    cardBorder: isDark ? '#333' : '#eee',
+    textPrimary: isDark ? '#e8e8e8' : '#1a1a1a',
+    textMid: isDark ? '#aaa' : '#555',
+    textMuted: isDark ? '#666' : '#aaa',
+    trackBg: isDark ? '#333' : '#eee',
+    teal: isDark ? '#4db6ac' : '#00695c',
+    red: isDark ? '#ef5350' : '#c62828',
+    green: isDark ? '#4caf50' : '#2e7d32',
   }
 
   if (activePanel === 'progress') {
     return (
       <>
         {sectionTitle('Score History')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: '#888' }}>
+        <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted }}>
           <p style={{ marginBottom: 12, lineHeight: 1.6 }}>
             Complete practice sets to see your score history here.
           </p>
@@ -97,18 +111,18 @@ function SidebarContent({ activePanel, navigate, location }) {
             {['Reading', 'Writing', 'Vocabulary'].map(skill => (
               <div key={skill}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: '#555' }}>{skill}</span>
-                  <span style={{ fontSize: 11, color: '#aaa' }}>--/30</span>
+                  <span style={{ fontSize: 11, color: c.textMid }}>{skill}</span>
+                  <span style={{ fontSize: 11, color: c.textMuted }}>--/30</span>
                 </div>
-                <div style={{ height: 4, background: '#eee', borderRadius: 2 }}>
-                  <div style={{ height: '100%', width: '0%', background: '#00695c', borderRadius: 2 }} />
+                <div style={{ height: 4, background: c.trackBg, borderRadius: 2 }}>
+                  <div style={{ height: '100%', width: '0%', background: c.teal, borderRadius: 2 }} />
                 </div>
               </div>
             ))}
           </div>
         </div>
         {sectionTitle('Skill Breakdown')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: '#aaa', lineHeight: 1.8 }}>
+        <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted, lineHeight: 1.8 }}>
           <div>Grammar: --</div>
           <div>Mechanics: --</div>
           <div>Vocabulary: --</div>
@@ -126,12 +140,12 @@ function SidebarContent({ activePanel, navigate, location }) {
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {vocabPlaceholder.map((v, i) => (
             <div key={i} style={{
-              padding: '8px 10px', background: '#fafafa', borderRadius: 6,
-              border: '1px solid #eee',
+              padding: '8px 10px', background: c.cardBg, borderRadius: 6,
+              border: `1px solid ${c.cardBorder}`,
             }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', marginBottom: 2 }}>{v.word}</div>
-              <div style={{ fontSize: 11, color: '#888' }}>{v.meaning}</div>
-              <div style={{ fontSize: 10, color: '#bbb', marginTop: 4 }}>{v.source}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: 2 }}>{v.word}</div>
+              <div style={{ fontSize: 11, color: c.textMuted }}>{v.meaning}</div>
+              <div style={{ fontSize: 10, color: isDark ? '#555' : '#bbb', marginTop: 4 }}>{v.source}</div>
             </div>
           ))}
         </div>
@@ -139,12 +153,12 @@ function SidebarContent({ activePanel, navigate, location }) {
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {mistakesPlaceholder.map((m, i) => (
             <div key={i} style={{
-              padding: '6px 10px', background: '#fafafa', borderRadius: 6,
-              border: '1px solid #eee', fontSize: 12,
+              padding: '6px 10px', background: c.cardBg, borderRadius: 6,
+              border: `1px solid ${c.cardBorder}`, fontSize: 12,
             }}>
-              <span style={{ fontWeight: 600, color: '#c62828', marginRight: 6 }}>{m.type}</span>
-              <span style={{ color: '#555' }}>{m.desc}</span>
-              <div style={{ fontSize: 10, color: '#bbb', marginTop: 2 }}>{m.date}</div>
+              <span style={{ fontWeight: 600, color: c.red, marginRight: 6 }}>{m.type}</span>
+              <span style={{ color: c.textMid }}>{m.desc}</span>
+              <div style={{ fontSize: 10, color: isDark ? '#555' : '#bbb', marginTop: 2 }}>{m.date}</div>
             </div>
           ))}
         </div>
@@ -159,29 +173,31 @@ function SidebarContent({ activePanel, navigate, location }) {
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {planPlaceholder.map((p, i) => (
             <div key={i} style={{
-              padding: '8px 10px', background: p.done ? 'rgba(46,125,50,0.04)' : '#fafafa',
-              borderRadius: 6, border: `1px solid ${p.done ? 'rgba(46,125,50,0.15)' : '#eee'}`,
+              padding: '8px 10px',
+              background: p.done ? (isDark ? 'rgba(76,175,80,0.08)' : 'rgba(46,125,50,0.04)') : c.cardBg,
+              borderRadius: 6,
+              border: `1px solid ${p.done ? (isDark ? 'rgba(76,175,80,0.2)' : 'rgba(46,125,50,0.15)') : c.cardBorder}`,
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
               <div style={{
                 width: 16, height: 16, borderRadius: 4, flexShrink: 0,
-                border: p.done ? 'none' : '1.5px solid #ccc',
-                background: p.done ? '#2e7d32' : 'transparent',
+                border: p.done ? 'none' : `1.5px solid ${isDark ? '#555' : '#ccc'}`,
+                background: p.done ? c.green : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'white', fontSize: 10, fontWeight: 700,
               }}>{p.done ? 'v' : ''}</div>
               <div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: p.done ? '#2e7d32' : '#555' }}>{p.day}</div>
-                <div style={{ fontSize: 11, color: p.done ? '#888' : '#555', textDecoration: p.done ? 'line-through' : 'none' }}>{p.task}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: p.done ? c.green : c.textMid }}>{p.day}</div>
+                <div style={{ fontSize: 11, color: p.done ? c.textMuted : c.textMid, textDecoration: p.done ? 'line-through' : 'none' }}>{p.task}</div>
               </div>
             </div>
           ))}
         </div>
         {sectionTitle('Goals')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: '#888', lineHeight: 1.8 }}>
-          <div>Target score: <span style={{ fontWeight: 600, color: '#1a1a1a' }}>25/30</span></div>
-          <div>Daily practice: <span style={{ fontWeight: 600, color: '#1a1a1a' }}>30 min</span></div>
-          <div>Test date: <span style={{ fontWeight: 600, color: '#1a1a1a' }}>Not set</span></div>
+        <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted, lineHeight: 1.8 }}>
+          <div>Target score: <span style={{ fontWeight: 600, color: c.textPrimary }}>25/30</span></div>
+          <div>Daily practice: <span style={{ fontWeight: 600, color: c.textPrimary }}>30 min</span></div>
+          <div>Test date: <span style={{ fontWeight: 600, color: c.textPrimary }}>Not set</span></div>
         </div>
       </>
     )
@@ -193,42 +209,49 @@ function SidebarContent({ activePanel, navigate, location }) {
         {sectionTitle('Preferences')}
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
-            { label: 'Timer visible by default', value: true },
-            { label: 'Auto-save progress', value: true },
-            { label: 'Show keyboard hints', value: true },
-            { label: 'Confirm before submit', value: true },
-            { label: 'Dark mode', value: false },
-          ].map((s, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, color: '#555' }}>{s.label}</span>
-              <div style={{
-                width: 32, height: 18, borderRadius: 9,
-                background: s.value ? '#00695c' : '#ccc',
-                position: 'relative', cursor: 'pointer', transition: 'background 0.2s',
-              }}>
-                <div style={{
-                  width: 14, height: 14, borderRadius: '50%', background: 'white',
-                  position: 'absolute', top: 2,
-                  left: s.value ? 16 : 2,
-                  transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                }} />
+            { label: 'Timer visible by default', value: true, onChange: null },
+            { label: 'Auto-save progress', value: true, onChange: null },
+            { label: 'Show keyboard hints', value: true, onChange: null },
+            { label: 'Confirm before submit', value: true, onChange: null },
+            { label: 'Dark mode', value: isDark, onChange: toggleDark },
+          ].map((s, i) => {
+            const teal = isDark ? '#4db6ac' : '#00695c'
+            return (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 12, color: isDark ? '#aaa' : '#555' }}>{s.label}</span>
+                <div
+                  onClick={s.onChange ?? undefined}
+                  style={{
+                    width: 32, height: 18, borderRadius: 9,
+                    background: s.value ? teal : (isDark ? '#444' : '#ccc'),
+                    position: 'relative', cursor: s.onChange ? 'pointer' : 'default',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  <div style={{
+                    width: 14, height: 14, borderRadius: '50%', background: 'white',
+                    position: 'absolute', top: 2,
+                    left: s.value ? 16 : 2,
+                    transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                  }} />
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
         {sectionTitle('Data')}
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button style={{
-            fontSize: 12, color: '#c62828', background: 'rgba(198,40,40,0.04)',
-            border: '1px solid rgba(198,40,40,0.15)', borderRadius: 6,
+            fontSize: 12, color: c.red, background: isDark ? 'rgba(239,83,80,0.08)' : 'rgba(198,40,40,0.04)',
+            border: `1px solid ${isDark ? 'rgba(239,83,80,0.2)' : 'rgba(198,40,40,0.15)'}`, borderRadius: 6,
             padding: '6px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
             textAlign: 'left',
           }}>
             Clear all progress
           </button>
           <button style={{
-            fontSize: 12, color: '#555', background: '#fafafa',
-            border: '1px solid #eee', borderRadius: 6,
+            fontSize: 12, color: c.textMid, background: c.cardBg,
+            border: `1px solid ${c.cardBorder}`, borderRadius: 6,
             padding: '6px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
             textAlign: 'left',
           }}>
@@ -236,7 +259,7 @@ function SidebarContent({ activePanel, navigate, location }) {
           </button>
         </div>
         {sectionTitle('About')}
-        <div style={{ padding: '0 16px', fontSize: 11, color: '#aaa', lineHeight: 1.8 }}>
+        <div style={{ padding: '0 16px', fontSize: 11, color: c.textMuted, lineHeight: 1.8 }}>
           <div>TOEFL Practice v1.0</div>
           <div>Built with React + Vite</div>
           <div>e-rater scoring engine</div>
@@ -253,6 +276,7 @@ export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const navigate = useNavigate()
   const location = useLocation()
+  const { isDark, toggleDark } = useTheme()
 
   // Full-screen routes: hide sidebar during active tests
   const fullScreenPaths = ['/writing/build-sentence', '/writing/email', '/writing/discussion']
@@ -260,11 +284,17 @@ export default function Layout({ children }) {
 
   if (isFullScreen) return <>{children}</>
 
+  const iconBarBg = isDark ? '#0d0d0d' : '#1e1e1e'
+  const sidebarBg = isDark ? '#1a1a1a' : '#f8f8f8'
+  const sidebarBorder = isDark ? '#2a2a2a' : '#e5e5e5'
+  const panelTitleColor = isDark ? '#e0e0e0' : '#1a1a1a'
+  const mainBg = isDark ? '#121212' : '#f5f5f5'
+
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: "'DM Sans', sans-serif" }}>
       {/* Icon bar (always visible) */}
       <div style={{
-        width: ICON_BAR_W, background: '#1e1e1e', display: 'flex',
+        width: ICON_BAR_W, background: iconBarBg, display: 'flex',
         flexDirection: 'column', alignItems: 'center', paddingTop: 8,
         flexShrink: 0,
       }}>
@@ -313,24 +343,24 @@ export default function Layout({ children }) {
       {/* Sidebar panel */}
       {sidebarOpen && (
         <div style={{
-          width: SIDEBAR_W, background: '#f8f8f8', borderRight: '1px solid #e5e5e5',
+          width: SIDEBAR_W, background: sidebarBg, borderRight: `1px solid ${sidebarBorder}`,
           overflowY: 'auto', flexShrink: 0,
         }}>
           {/* Panel title */}
           <div style={{
-            padding: '12px 16px', fontSize: 12, fontWeight: 700, color: '#1a1a1a',
+            padding: '12px 16px', fontSize: 12, fontWeight: 700, color: panelTitleColor,
             textTransform: 'uppercase', letterSpacing: '0.06em',
-            borderBottom: '1px solid #e5e5e5',
+            borderBottom: `1px solid ${sidebarBorder}`,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
             {panels.find(p => p.id === activePanel)?.label}
           </div>
-          <SidebarContent activePanel={activePanel} navigate={navigate} location={location} />
+          <SidebarContent activePanel={activePanel} navigate={navigate} location={location} isDark={isDark} toggleDark={toggleDark} />
         </div>
       )}
 
       {/* Main content */}
-      <div style={{ flex: 1, overflow: 'auto', background: '#f5f5f5' }}>
+      <div style={{ flex: 1, overflow: 'auto', background: mainBg }}>
         {children}
       </div>
     </div>

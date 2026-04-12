@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { colors, fonts, shadows } from '../shared/theme'
+import { useTheme } from '../shared/ThemeContext.jsx'
 
 function TaskCard({ icon, title, details, tagColor, onStart }) {
   const [hovered, setHovered] = useState(false)
+  const { colors, fonts, shadows } = useTheme()
 
   return (
     <div
@@ -59,6 +60,7 @@ function TaskCard({ icon, title, details, tagColor, onStart }) {
 
 export default function Writing() {
   const navigate = useNavigate()
+  const { colors, fonts, shadows } = useTheme()
   useEffect(() => { document.title = 'Writing -- TOEFL Practice' }, [])
 
   return (

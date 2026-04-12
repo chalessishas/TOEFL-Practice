@@ -8,12 +8,17 @@ const DETAIL_MARKERS = [
 const THESIS_MARKERS = [
   'i believe','i think','i agree','i disagree','in my opinion','in my view',
   'i would argue','it is my opinion','i feel that','my view is',
+  'i side with','i support','i favor','i favour','i contend','i stand with',
+  'i find','i consider','my position','my stance','i align with',
+  'i am convinced','i strongly believe','it is clear that','it seems to me',
 ]
 
 // Reason/elaboration markers — signals the essay has developed supporting points
 const REASON_MARKERS = [
   'one reason','another reason','first','second','third','firstly','secondly',
   'thirdly','furthermore','moreover','in addition','additionally',
+  'however','on the other hand','in contrast','by contrast','whereas','although',
+  'nevertheless','nonetheless','despite','while','yet',
 ]
 
 // Word count ranges per task type

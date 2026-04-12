@@ -92,6 +92,12 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] style.js 词边界修复 — 'cause' 不再匹配 'because'，'thing' 不再匹配 'something' (f215a7d)
 - [100%] grammar.js comma splice 误报修复 — "While X, I believe Y" 不再被标记为逗号粘连 (1f2c804)
 - [100%] development.js THESIS_MARKERS 扩展 — "I side with/support/contend" 等 14 个模式加入，ETS sampleResponse argScore 0.35→1.00 (089e766)
+- [100%] development.suggest() 修复 — 有 1 个 example 时不再建议"加例子"，条件改为仅 0 标记触发 (b4ba2dc)
+- [100%] grammar.js 称呼误报修复 — "Dear Mr" 不再被标记为句子片段，salutationPattern 守卫 (b4ba2dc)
+- [100%] organization.js 结尾位置奖惩 — 结语词在末段 +0.1，在首段 -0.1 (f383dd4)
+- [100%] development.js 重复主张惩罚 — 3+ 无支撑的意见句 -0.15（敷衍重复的识别）(f383dd4)
+- [100%] pack6 M5 Q12 text_insertion 段落索引修复 — paragraph 1→3，■A/■B/■C/■D 现在指向正确段落 (edece28)
+- [100%] grammar.js SVA 检测 — 4 个高精度模式（everyone/each/the number of/不可数名词，ESL #1 错误类型）(5beef55)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

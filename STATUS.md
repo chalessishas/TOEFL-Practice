@@ -1,10 +1,10 @@
 # TOEFL Practice — 进度交接书
 
 ## 项目概述
-TOEFL 练习平台，包含阅读和写作两大模块，写作模块内置 e-rater 风格的 6 维评分引擎。面向备考学生。
+TOEFL 2026 格式练习平台，覆盖 Reading + Writing 三大任务，写作模块内置 7 维度 e-rater 评分引擎（2026-04-12 对标 Attali & Burstein 重校正权重），词汇本支持主动回忆复习。面向备考学生。
 
 ## 当前状态
-开发中，未部署。写作评分引擎是近期开发重点，已完成 275k 词典集成和字母评级系统。
+开发中，未部署。功能已相当完整：写作、阅读、词汇本、仪表盘全部打磨完毕。最高优先级阻断：部署（需用户提供 Vercel Secrets）。
 
 ## 技术栈
 React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 TypeScript
@@ -36,13 +36,14 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
   /writing/discussion → 学术讨论 (120+ 词, 10 分钟)
 
 写作评分流程：
-用户提交 → scorer/index.js (加权 6 维)
-  ├→ Organization (32%) — 结构、连贯性
-  ├→ Development (30%) — 内容深度、举例
+用户提交 → scorer/index.js (加权 7 维, 2026-04-12 重校正)
+  ├→ Organization (33%) — 结构、连贯性、peer engagement
+  ├→ Development (28%) — 内容深度、举例
   ├→ Vocabulary (14%) — 词汇丰富度
-  ├→ Mechanics (10%) — 拼写、标点
-  ├→ Grammar (7%) — 语法错误
-  └→ Style (7%) — 语域、风格
+  ├→ Mechanics (10%) — 拼写、标点（275k 词典）
+  ├→ Relevance  (5%)  — keyword overlap with prompt (stem-normalized)
+  ├→ Grammar    (7%)  — 语法错误
+  └→ Style      (3%)  — TTR/句长方差
   → 原始分 [0-1] 映射到 TOEFL 0-5 分 → 字母评级
 
 状态存储：localStorage
@@ -53,7 +54,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] 阅读模块：Urban Agriculture 文章 + 10 题 + Pack 6 (6 模块)
 - [100%] 填空题 (Complete Words)
 - [100%] 写作三大任务：造句（20 题选 10）/ 邮件（10 条 prompt）/ 讨论（10 条 prompt）
-- [100%] e-rater 6 维评分引擎 + 275k 英文词典（拼写误报率接近 0）
+- [100%] e-rater 7 维评分引擎 + 275k 英文词典（拼写误报率接近 0）
 - [100%] 字母评级系统 (Excellent/Good/Fair/Weak)
 - [100%] 定时器 + 全屏任务界面
 - [100%] 进度自动保存 (localStorage)
@@ -66,9 +67,20 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] 学习计划动态化 — 7 日滚动日历 + streak 计数 + 今日高亮 (5a69994)
 - [100%] 个人最佳记录 — WritingResult 显示 ★ New personal best! 或 delta (191a93c)
 - [100%] 笔记本生词本 — localStorage 持久化，支持新增/删除，预置 5 词
+- [100%] 笔记本升级 (2026-04-12) — 掌握度三级（new/learning/known）彩点 + 点击循环 (8607cf7)
+- [100%] 笔记本上下文语境句 — 添加时可录入，卡片正面截断展示 (8607cf7)
+- [100%] 笔记本主动回忆 review mode — 弱词优先（new→learning→known），Space/←/→ 键盘操作 (f08d30d→667b43b→f1445ec)
+- [100%] 笔记本 mastery filter tabs — All/New/Learning/Known 四级过滤 + ▶ Review 入口 (8e89dd4)
+- [100%] 笔记本 TSV 导出 — Anki 兼容格式 (8edfbb8)
+- [100%] Home 仪表盘升级 — 5 项统计（含 Reading Accuracy + Day Streak 🔥）(8607cf7→bc1d694)
+- [100%] Home 写作趋势 sparkline — 固定 0-5 轴，delta 徽章，三条参考线 (8a1ea63→8edfbb8)
+- [100%] 阅读分数展示 — 模块卡片 "8/10" 彩色徽章，历史保留最高分 (bc1d694→110f41c)
+- [100%] 评分权重重校正 — 对标 Attali & Burstein 2006 + ETS RR-04-04 (80e53b6)
+- [100%] pack6 题型扩展 — negative_fact + sentence_simplification，共 6 题型 (a3ca6d7)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
-- [0%] 部署上线
+- [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）
+- [0%] 部署上线（需提供 VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID）
 
 ## 关键决策记录
 | 日期 | 决策 | 原因 |

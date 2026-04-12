@@ -1,16 +1,17 @@
-import { StrictMode } from 'react'
+import { StrictMode, lazy, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import { ErrorBoundary } from './ErrorBoundary.jsx'
 import { ThemeProvider } from './shared/ThemeContext.jsx'
 import Layout from './Layout.jsx'
-import Reading from './pages/Reading.jsx'
-import Home from './pages/Home.jsx'
-import Writing from './pages/Writing.jsx'
-import BuildSentence from './writing/BuildSentence.jsx'
-import WriteEmail from './writing/WriteEmail.jsx'
-import AcademicDiscussion from './writing/AcademicDiscussion.jsx'
+
+const Home = lazy(() => import('./pages/Home.jsx'))
+const Reading = lazy(() => import('./pages/Reading.jsx'))
+const Writing = lazy(() => import('./pages/Writing.jsx'))
+const BuildSentence = lazy(() => import('./writing/BuildSentence.jsx'))
+const WriteEmail = lazy(() => import('./writing/WriteEmail.jsx'))
+const AcademicDiscussion = lazy(() => import('./writing/AcademicDiscussion.jsx'))
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -18,14 +19,16 @@ createRoot(document.getElementById('root')).render(
       <ThemeProvider>
       <ErrorBoundary>
       <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/reading" element={<Reading />} />
-          <Route path="/writing" element={<Writing />} />
-          <Route path="/writing/build-sentence" element={<BuildSentence />} />
-          <Route path="/writing/email" element={<WriteEmail />} />
-          <Route path="/writing/discussion" element={<AcademicDiscussion />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/reading" element={<Reading />} />
+            <Route path="/writing" element={<Writing />} />
+            <Route path="/writing/build-sentence" element={<BuildSentence />} />
+            <Route path="/writing/email" element={<WriteEmail />} />
+            <Route path="/writing/discussion" element={<AcademicDiscussion />} />
+          </Routes>
+        </Suspense>
       </Layout>
       </ErrorBoundary>
       </ThemeProvider>

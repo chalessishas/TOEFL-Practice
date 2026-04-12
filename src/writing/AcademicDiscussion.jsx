@@ -31,7 +31,7 @@ const countWords = (text) =>
 
 const AcademicDiscussion = () => {
   const navigate = useNavigate()
-  const { colors } = useTheme()
+  const { colors, isTimerVisible } = useTheme()
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
@@ -197,13 +197,13 @@ const AcademicDiscussion = () => {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         background: colors.card, flexShrink: 0,
       }}>
-        <Timer
+        {isTimerVisible && <Timer
           totalTime={timer}
           paused={paused}
           onTogglePause={() => setPaused(p => !p)}
           onTick={(t) => setTimer(t)}
           onTimeUp={handleSubmit}
-        />
+        />}
         <span style={{
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 13, fontWeight: 500, color: '#888',

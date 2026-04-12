@@ -44,7 +44,7 @@ const planPlaceholder = [
   { day: 'Fri', task: 'Review Mistakes + Vocabulary', done: false },
 ]
 
-function SidebarContent({ activePanel, navigate, location, isDark, toggleDark }) {
+function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, isTimerVisible, toggleTimer, isShortcutsVisible, toggleShortcuts }) {
   const sectionTitle = (text) => (
     <div style={{
       fontSize: 11, fontWeight: 700, color: isDark ? '#666' : '#888',
@@ -213,9 +213,9 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark })
         {sectionTitle('Preferences')}
         <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {[
-            { label: 'Timer visible by default', value: true, onChange: null },
+            { label: 'Timer visible by default', value: isTimerVisible, onChange: toggleTimer },
             { label: 'Auto-save progress', value: true, onChange: null },
-            { label: 'Show keyboard hints', value: true, onChange: null },
+            { label: 'Show keyboard hints', value: isShortcutsVisible, onChange: toggleShortcuts },
             { label: 'Confirm before submit', value: true, onChange: null },
             { label: 'Dark mode', value: isDark, onChange: toggleDark },
           ].map((s, i) => {
@@ -280,7 +280,7 @@ export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const navigate = useNavigate()
   const location = useLocation()
-  const { isDark, toggleDark } = useTheme()
+  const { isDark, toggleDark, isTimerVisible, toggleTimer, isShortcutsVisible, toggleShortcuts } = useTheme()
 
   // Full-screen routes: hide sidebar during active tests
   const fullScreenPaths = ['/writing/build-sentence', '/writing/email', '/writing/discussion']
@@ -359,7 +359,7 @@ export default function Layout({ children }) {
           }}>
             {panels.find(p => p.id === activePanel)?.label}
           </div>
-          <SidebarContent activePanel={activePanel} navigate={navigate} location={location} isDark={isDark} toggleDark={toggleDark} />
+          <SidebarContent activePanel={activePanel} navigate={navigate} location={location} isDark={isDark} toggleDark={toggleDark} isTimerVisible={isTimerVisible} toggleTimer={toggleTimer} isShortcutsVisible={isShortcutsVisible} toggleShortcuts={toggleShortcuts} />
         </div>
       )}
 

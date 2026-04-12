@@ -286,7 +286,7 @@ const saveHistory = (moduleId, results) => {
 
 const Reading = () => {
   const navigate = useNavigate();
-  const { colors } = useTheme()
+  const { colors, isTimerVisible } = useTheme()
   const [view, setView] = useState('home');
   const [selectedPack, setSelectedPack] = useState(null);
 
@@ -651,17 +651,19 @@ const Reading = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{
-              fontSize: 14, fontWeight: 600, fontVariantNumeric: 'tabular-nums',
-              color: moduleTimer < 60 ? colors.toeflRed : colors.text,
-            }}>
-              {formatTime(moduleTimer)}
-            </span>
-            <span style={{
-              fontSize: 12, color: colors.textLight, cursor: 'pointer',
-            }} onClick={() => setTimerPaused(p => !p)}>
-              {timerPaused ? '▶ Resume' : '⏸ Hide Time'}
-            </span>
+            {isTimerVisible && <>
+              <span style={{
+                fontSize: 14, fontWeight: 600, fontVariantNumeric: 'tabular-nums',
+                color: moduleTimer < 60 ? colors.toeflRed : colors.text,
+              }}>
+                {formatTime(moduleTimer)}
+              </span>
+              <span style={{
+                fontSize: 12, color: colors.textLight, cursor: 'pointer',
+              }} onClick={() => setTimerPaused(p => !p)}>
+                {timerPaused ? '▶ Resume' : '⏸ Hide Time'}
+              </span>
+            </>}
             <button onClick={() => {
               if (isLast) return;
               handleSectionComplete({ correct: 0, total: 0 });

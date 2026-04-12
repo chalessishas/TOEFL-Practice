@@ -29,7 +29,7 @@ const displayWord = (w) => w.replace(/\(\d+\)$/, '');
 
 const BuildSentence = () => {
   const navigate = useNavigate();
-  const { colors } = useTheme();
+  const { colors, isTimerVisible, isShortcutsVisible } = useTheme();
   const savedData = useRef(loadSaved());
 
   const [started, setStarted] = useState(!!savedData.current);
@@ -478,7 +478,7 @@ const BuildSentence = () => {
         padding: '12px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         {/* Timer */}
-        <button
+        {isTimerVisible && <button
           className="timer-btn"
           onClick={() => setPaused(p => !p)}
           style={{
@@ -488,7 +488,7 @@ const BuildSentence = () => {
         >
           {paused ? '▶' : '⏸'} {formatTime(timer)}
           {paused && <span className="pause-badge">PAUSED</span>}
-        </button>
+        </button>}
 
         {/* Question nav dots */}
         <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
@@ -624,10 +624,10 @@ const BuildSentence = () => {
           ← Previous
         </button>
 
-        <div className="kbd-hint">
+        {isShortcutsVisible && <div className="kbd-hint">
           <span><span className="kbd">Space</span> pause</span>
           <span><span className="kbd">←</span><span className="kbd">→</span> navigate</span>
-        </div>
+        </div>}
 
         {isLast ? (
           <button

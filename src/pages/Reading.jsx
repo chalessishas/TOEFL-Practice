@@ -213,15 +213,15 @@ const DailyLifeReading = ({ section, onComplete }) => {
                   background: isSelected ? 'rgba(0,105,92,0.04)' : 'white',
                   cursor: 'pointer', transition: 'all 0.2s ease',
                   display: 'flex', alignItems: 'center', gap: 12,
-                  fontSize: 15, color: isSelected ? '#1A1816' : '#555',
+                  fontSize: 15, color: isSelected ? colors.text : colors.textMedium,
                   fontFamily: "'Georgia', serif",
                 }}>
                   <span style={{
                     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                     border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.textLight}`,
-                    background: isSelected ? '#00695c' : 'transparent',
+                    background: isSelected ? colors.primary : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 600, color: isSelected ? 'white' : '#bbb',
+                    fontSize: 10, fontWeight: 600, color: isSelected ? 'white' : colors.textLight,
                   }}>{isSelected ? '●' : '○'}</span>
                   {opt}
                 </button>
@@ -255,7 +255,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
               <button onClick={handleSubmit} disabled={!isCurrentAnswered} style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
                 color: colors.primary,
-                background: !isCurrentAnswered ? '#ddd' : '#e0f2f1',
+                background: !isCurrentAnswered ? colors.border : colors.primaryLight,
                 border: 'none', borderRadius: 6, padding: '8px 24px',
                 cursor: !isCurrentAnswered ? 'default' : 'pointer',
               }}>Submit</button>
@@ -497,16 +497,16 @@ const Reading = () => {
                 return (
                   <button key={mod.id} onClick={() => startPack(pack6, mi)} style={{
                     width: '100%', textAlign: 'left', padding: 0,
-                    background: done ? '#f9fffe' : 'white', borderRadius: 12,
-                    border: `1px solid ${done ? 'rgba(46,125,50,0.2)' : '#e0e0e0'}`,
+                    background: done ? colors.card : 'white', borderRadius: 12,
+                    border: `1px solid ${done ? 'rgba(46,125,50,0.2)' : colors.borderLight}`,
                     cursor: 'pointer', transition: 'all 0.2s ease',
                     overflow: 'hidden', display: 'flex',
                     fontFamily: "'DM Sans', sans-serif",
                   }}
                   onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
-                  onMouseOut={e => { e.currentTarget.style.borderColor = done ? 'rgba(46,125,50,0.2)' : '#e0e0e0'; e.currentTarget.style.boxShadow = 'none'; }}
+                  onMouseOut={e => { e.currentTarget.style.borderColor = done ? 'rgba(46,125,50,0.2)' : colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
                   >
-                    <div style={{ width: 6, background: done ? '#2e7d32' : '#00897b', flexShrink: 0 }}/>
+                    <div style={{ width: 6, background: done ? colors.success : colors.toeflTealLight, flexShrink: 0 }}/>
                     <div style={{ padding: '16px 20px', flex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
                       {/* Module number */}
                       <div style={{
@@ -514,7 +514,7 @@ const Reading = () => {
                         background: done ? 'rgba(46,125,50,0.08)' : 'rgba(0,105,92,0.06)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 15, fontWeight: 800,
-                        color: done ? '#2e7d32' : '#00695c',
+                        color: done ? colors.success : colors.primary,
                       }}>{done ? '✓' : mi + 1}</div>
 
                       <div style={{ flex: 1 }}>
@@ -643,8 +643,8 @@ const Reading = () => {
               {mod.sections.map((_, i) => (
                 <div key={i} style={{
                   width: 20, height: 3, borderRadius: 2,
-                  background: i < currentSectionIdx ? '#2e7d32'
-                    : i === currentSectionIdx ? '#00695c' : '#ddd',
+                  background: i < currentSectionIdx ? colors.success
+                    : i === currentSectionIdx ? colors.primary : colors.border,
                 }} />
               ))}
             </div>
@@ -653,7 +653,7 @@ const Reading = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{
               fontSize: 14, fontWeight: 600, fontVariantNumeric: 'tabular-nums',
-              color: moduleTimer < 60 ? '#c62828' : '#1a1a1a',
+              color: moduleTimer < 60 ? colors.toeflRed : colors.text,
             }}>
               {formatTime(moduleTimer)}
             </span>
@@ -986,7 +986,7 @@ const AcademicPassage = ({ section, onComplete }) => {
                 background: i === currentQuestion ? 'rgba(212,165,116,0.08)'
                   : answers[i] !== undefined ? 'rgba(90,154,110,0.05)' : 'white',
                 fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500,
-                color: i === currentQuestion ? '#C4956A' : answers[i] !== undefined ? '#5a9a6e' : '#aaa',
+                color: i === currentQuestion ? '#C4956A' : answers[i] !== undefined ? '#5a9a6e' : colors.textLight,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>{i + 1}</button>
             ))}
@@ -1031,14 +1031,14 @@ const AcademicPassage = ({ section, onComplete }) => {
                   cursor: 'pointer', transition: 'all 0.2s ease',
                   display: 'flex', alignItems: 'center', gap: 10,
                   fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-                  color: isSelected ? '#1A1816' : '#555',
+                  color: isSelected ? colors.text : colors.textMedium,
                 }}>
                   <span style={{
                     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                     border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.textLight}`,
-                    background: isSelected ? '#00695c' : 'transparent',
+                    background: isSelected ? colors.primary : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 600, color: isSelected ? 'white' : '#bbb',
+                    fontSize: 10, fontWeight: 600, color: isSelected ? 'white' : colors.textLight,
                   }}>{String.fromCharCode(65 + idx)}</span>
                   {opt}
                 </button>
@@ -1245,7 +1245,7 @@ const LegacyReadingTest = ({ onBack }) => {
             <button onClick={onBack} style={{ fontSize: 12, color: colors.textMuted, background: 'none', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>← Home</button>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: colors.text }}>Urban Agriculture</span>
           </div>
-          <button className="timer-btn" onClick={() => setPaused(p => !p)} style={{ color: timer < 120 ? '#b06060' : '#888', background: timer < 120 ? 'rgba(176,96,96,0.08)' : 'rgba(0,0,0,0.03)' }}>
+          <button className="timer-btn" onClick={() => setPaused(p => !p)} style={{ color: timer < 120 ? '#b06060' : colors.textMuted, background: timer < 120 ? 'rgba(176,96,96,0.08)' : 'rgba(0,0,0,0.03)' }}>
             {paused ? '▶' : '⏸'} {formatTime(timer)}
             {paused && <span className="pause-badge">PAUSED</span>}
           </button>
@@ -1275,7 +1275,7 @@ const LegacyReadingTest = ({ onBack }) => {
                 border: i === currentQuestion ? '2px solid #D4A574' : answers[i] !== undefined ? '1.5px solid rgba(90,154,110,0.3)' : `1.5px solid ${colors.border}`,
                 background: i === currentQuestion ? 'rgba(212,165,116,0.08)' : answers[i] !== undefined ? 'rgba(90,154,110,0.05)' : 'white',
                 fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500,
-                color: i === currentQuestion ? '#C4956A' : answers[i] !== undefined ? '#5a9a6e' : '#aaa',
+                color: i === currentQuestion ? '#C4956A' : answers[i] !== undefined ? '#5a9a6e' : colors.textLight,
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>{i + 1}</button>
             ))}
@@ -1303,9 +1303,9 @@ const LegacyReadingTest = ({ onBack }) => {
                     background: isSelected ? '#D4A574' : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontFamily: "'DM Sans', sans-serif", fontSize: 11, fontWeight: 600,
-                    color: isSelected ? 'white' : '#aaa',
+                    color: isSelected ? 'white' : colors.textLight,
                   }}>{String.fromCharCode(65 + idx)}</span>
-                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: isSelected ? '#1A1816' : '#6B6560' }}>{opt}</span>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: isSelected ? colors.text : colors.textMedium }}>{opt}</span>
                 </button>
               );
             })}
@@ -1316,9 +1316,9 @@ const LegacyReadingTest = ({ onBack }) => {
         </div>
 
         <div style={{ padding: '16px 28px', borderTop: `1px solid ${colors.border}`, background: colors.card, display: 'flex', justifyContent: 'space-between' }}>
-          <button onClick={handlePrev} disabled={currentQuestion === 0} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: currentQuestion === 0 ? '#D4CFC5' : '#6B6560', background: 'none', border: 'none', cursor: currentQuestion === 0 ? 'default' : 'pointer' }}>← Previous</button>
+          <button onClick={handlePrev} disabled={currentQuestion === 0} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: currentQuestion === 0 ? '#D4CFC5' : colors.textMedium, background: 'none', border: 'none', cursor: currentQuestion === 0 ? 'default' : 'pointer' }}>← Previous</button>
           {currentQuestion < questions.length - 1 ? (
-            <button onClick={handleNext} disabled={!isCurrentAnswered()} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: !isCurrentAnswered() ? '#D4CFC5' : '#6B6560', background: 'none', border: 'none', cursor: !isCurrentAnswered() ? 'default' : 'pointer' }}>Next →</button>
+            <button onClick={handleNext} disabled={!isCurrentAnswered()} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: !isCurrentAnswered() ? '#D4CFC5' : colors.textMedium, background: 'none', border: 'none', cursor: !isCurrentAnswered() ? 'default' : 'pointer' }}>Next →</button>
           ) : (
             <button onClick={() => setShowConfirm(true)} disabled={!isCurrentAnswered()} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: 'white', background: !isCurrentAnswered() ? '#D4CFC5' : 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)', border: 'none', borderRadius: 8, padding: '10px 24px', cursor: !isCurrentAnswered() ? 'default' : 'pointer' }}>Submit</button>
           )}

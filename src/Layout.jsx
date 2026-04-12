@@ -61,6 +61,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const [vocab, setVocab] = useState(loadVocab)
   const [newWord, setNewWord] = useState('')
   const [newMeaning, setNewMeaning] = useState('')
+  const [newContext, setNewContext] = useState('')
   const [flippedIds, setFlippedIds] = useState(new Set())
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
@@ -278,11 +279,26 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
       const w = newWord.trim()
       const m = newMeaning.trim()
       if (!w || !m) return
-      const updated = [{ word: w, meaning: m, id: Date.now() }, ...vocab]
+      const updated = [{ word: w, meaning: m, context: newContext.trim(), mastery: 'new', id: Date.now() }, ...vocab]
       setVocab(updated)
       saveVocab(updated)
       setNewWord('')
       setNewMeaning('')
+      setNewContext('')
+    }
+
+    const cycleMastery = (id) => {
+      const order = ['new', 'learning', 'known']
+      const updated = vocab.map(v => v.id !== id ? v : {
+        ...v, mastery: order[(order.indexOf(v.mastery || 'new') + 1) % order.length]
+      })
+      setVocab(updated)
+      saveVocab(updated)
+    }
+
+    const masteryDot = (mastery) => {
+      const cfg = { new: '#bbb', learning: '#f59e0b', known: '#22c55e' }
+      return cfg[mastery || 'new']
     }
 
     const deleteWord = (id) => {
@@ -312,6 +328,17 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
             onChange={e => setNewMeaning(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && addWord()}
             placeholder="Meaning"
+            style={{
+              fontSize: 12, padding: '6px 9px', borderRadius: 6,
+              border: `1px solid ${c.cardBorder}`, background: c.cardBg,
+              color: c.textPrimary, outline: 'none', fontFamily: 'inherit',
+            }}
+          />
+          <input
+            value={newContext}
+            onChange={e => setNewContext(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addWord()}
+            placeholder="Context sentence (optional)"
             style={{
               fontSize: 12, padding: '6px 9px', borderRadius: 6,
               border: `1px solid ${c.cardBorder}`, background: c.cardBg,
@@ -354,13 +381,26 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
                 cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s',
               }} onClick={toggleFlip}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary, marginBottom: flipped ? 4 : 0 }}>
-                    {v.word}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: flipped ? 4 : 2 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: c.textPrimary }}>{v.word}</div>
+                    <button
+                      onClick={e => { e.stopPropagation(); cycleMastery(v.id) }}
+                      title={`Mastery: ${v.mastery || 'new'} — click to advance`}
+                      style={{
+                        width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                        background: masteryDot(v.mastery), border: 'none', cursor: 'pointer', padding: 0,
+                      }}
+                    />
                   </div>
                   {flipped && (
                     <div style={{ fontSize: 11, color: colors.primary, fontWeight: 500 }}>{v.meaning}</div>
                   )}
-                  {!flipped && (
+                  {!flipped && v.context && (
+                    <div style={{ fontSize: 10, color: c.textMuted, fontStyle: 'italic', lineHeight: 1.4 }}>
+                      {v.context.length > 60 ? v.context.slice(0, 60) + '…' : v.context}
+                    </div>
+                  )}
+                  {!flipped && !v.context && (
                     <div style={{ fontSize: 10, color: c.textMuted, fontStyle: 'italic' }}>tap to reveal</div>
                   )}
                 </div>

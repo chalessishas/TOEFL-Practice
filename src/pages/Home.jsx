@@ -98,10 +98,25 @@ export default function Home() {
     return (writing.reduce((s, h) => s + h.score, 0) / writing.length).toFixed(1)
   })()
 
+  const streak = (() => {
+    if (!history.length) return 0
+    const days = new Set(history.map(h => h.date.slice(0, 10)))
+    let count = 0
+    const d = new Date()
+    // If today has no entry yet, start checking from yesterday
+    if (!days.has(d.toISOString().slice(0, 10))) d.setDate(d.getDate() - 1)
+    while (days.has(d.toISOString().slice(0, 10))) {
+      count++
+      d.setDate(d.getDate() - 1)
+    }
+    return count
+  })()
+
   const stats = [
     { label: 'Sessions Done', value: completed > 0 ? String(completed) : '—' },
     { label: 'Avg Writing Score', value: avgWritingScore ? `${avgWritingScore}/5` : '—' },
     { label: 'Last Practice', value: lastEntry ? timeAgo(lastEntry.date) : '—' },
+    { label: 'Day Streak', value: streak > 0 ? `${streak}🔥` : '—' },
   ]
 
   return (

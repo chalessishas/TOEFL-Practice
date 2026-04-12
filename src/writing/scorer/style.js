@@ -71,7 +71,7 @@ export function suggest(analysis) {
   const ttrMatch = analysis.details.match(/TTR: ([\d.]+)/)
   if (ttrMatch && parseFloat(ttrMatch[1]) < 0.6)
     tips.push('Avoid repeating the same words — use synonyms to add variety.')
-  const varMatch = analysis.details.match(/sentence length variance: ([\d.]+)/)
+  const varMatch = analysis.details.match(/sentence(?: length)? variance: ([\d.]+)/)
   if (varMatch && parseFloat(varMatch[1]) < 0.3)
     tips.push('Vary your sentence lengths — mix short punchy sentences with longer detailed ones.')
   const repMatch = analysis.details.match(/(\d+) repeated word/)

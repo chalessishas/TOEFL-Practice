@@ -4,28 +4,29 @@ import * as vocabulary  from './vocabulary.js'
 import * as organization from './organization.js'
 import * as development from './development.js'
 import * as style       from './style.js'
+import * as relevance   from './relevance.js'
 
-// Weights aligned with real ETS e-rater macrofeature distribution:
-// Organization ~32%, Development ~29%, Vocabulary (lexical) ~14%,
-// Mechanics ~10%, Grammar ~7% (+usage), Style ~3%
-// We combine grammar+usage into one and lexical word-length + rare-words into vocabulary.
+// Weights aligned with real ETS e-rater macrofeature distribution.
+// Relevance added at 8%, redistributed from development (was 30% → 24%) and style (7% → 5%).
 const WEIGHTS = {
   grammar:      0.07,
   mechanics:    0.10,
   vocabulary:   0.14,
   organization: 0.32,
-  development:  0.30,
-  style:        0.07,
+  development:  0.24,
+  style:        0.05,
+  relevance:    0.08,
 }
 
 /**
  * Score a writing sample.
  *
- * @param {string} text     - The essay/email/discussion text
- * @param {string} taskType - 'email' | 'discussion' | 'general'
+ * @param {string} text       - The essay/email/discussion text
+ * @param {string} taskType   - 'email' | 'discussion' | 'general'
+ * @param {string} promptText - Optional: the prompt/question text for relevance scoring
  * @returns {{ overall: number, breakdown: object, suggestions: string[] }}
  */
-export function scoreWriting(text, taskType = 'general') {
+export function scoreWriting(text, taskType = 'general', promptText = '') {
   const analyses = {
     grammar:      grammar.score(text),
     mechanics:    mechanics.score(text),
@@ -33,6 +34,7 @@ export function scoreWriting(text, taskType = 'general') {
     organization: organization.score(text, taskType),
     development:  development.score(text, taskType),
     style:        style.score(text),
+    relevance:    relevance.score(text, promptText),
   }
 
   // Weighted sum → raw score in [0, 1]
@@ -65,6 +67,7 @@ export function scoreWriting(text, taskType = 'general') {
     organization: organization.suggest,
     development:  development.suggest,
     style:        style.suggest,
+    relevance:    relevance.suggest,
   }
 
   const allSuggestions = []

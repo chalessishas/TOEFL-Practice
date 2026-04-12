@@ -44,18 +44,17 @@ export function score(text, taskType = 'general') {
     const hasClosing = /\b(regards|sincerely|thank|best|yours|cheers|warm|respectfully|cordially)\b/i.test(text)
     taskSpecific = (hasGreeting ? 0.5 : 0) + (hasClosing ? 0.5 : 0)
   } else if (taskType === 'discussion') {
-    // ETS: peer engagement is a hard requirement — must reference classmate ideas, not just state own opinion
-    // Signal 1: name + engagement verb pattern (e.g. "Kelly makes a point", "Andrew mentioned")
-    const nameEngagement = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up)/i.test(text)
-    // Signal 2: contrast/build-on phrases with capitalized name or pronoun reference
-    const buildOn = /\b(building on|adding to|unlike|while [A-Z]|although [A-Z]|I (also )?(agree|disagree) with [A-Z])/i.test(text)
-    // Signal 3: baseline opinion (can exist without peer ref — weak signal)
+    // ETS: genuine peer engagement = name-reference + build-on/contrast, not just bare opinion
+    const PEER_NAMES = /\b(Sarah|Mark|Liam|Maya|Alex|Priya|Emma|James|Sophie|Ethan|Noah|Chloe|Hannah|Marcus|Fatima|Carlos|Amara|Ben|Isabelle|David)\b/
+    const hasPeerName = PEER_NAMES.test(text)
+    const engagementVerb = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up)/i.test(text)
+    const buildOn = /\b(building on|adding to|unlike|while [A-Z]|although [A-Z]|I (also )?(agree|disagree) with)\b/i.test(text)
     const hasOpinion = /\b(i agree|i disagree|i think|in my opinion|i believe)\b/i.test(text)
 
-    if (nameEngagement && (buildOn || hasOpinion)) taskSpecific = 1.0       // genuine engagement
-    else if (nameEngagement) taskSpecific = 0.7                              // referenced but not built upon
-    else if (buildOn) taskSpecific = 0.5                                     // structural engagement, no name
-    else if (hasOpinion) taskSpecific = 0.3                                  // opinion only, no peer ref
+    if (hasPeerName && (engagementVerb || buildOn)) taskSpecific = 1.0  // named peer + engagement
+    else if (hasPeerName || (engagementVerb && buildOn)) taskSpecific = 0.7
+    else if (engagementVerb || buildOn) taskSpecific = 0.5
+    else if (hasOpinion) taskSpecific = 0.3
     else taskSpecific = 0.1
   } else {
     // General: reward having a clear opening and closing cue

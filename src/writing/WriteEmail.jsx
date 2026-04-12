@@ -65,7 +65,8 @@ const WriteEmail = () => {
   const handleSubmit = () => {
     clearProg()
     const fullText = `Dear ${prompt.recipient},\n\n${body}\n\nBest regards,\n[Your Name]`
-    const result = scoreWriting(fullText, 'email')
+    const promptText = `${prompt.situation} ${prompt.goals.join(' ')}`
+    const result = scoreWriting(fullText, 'email', promptText)
     const bd = Object.fromEntries(Object.entries(result.breakdown).map(([k, v]) => [k, v.score]))
     appendScore({ type: 'email', score: result.overall, wordCount, breakdown: bd })
     setScoreResult(result)

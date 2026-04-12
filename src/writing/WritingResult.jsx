@@ -10,6 +10,7 @@ const DIMENSION_LABELS = {
   organization: 'Organization',
   development:  'Development',
   style:        'Style',
+  relevance:    'On-Topic',
 }
 
 const getTitle = (overall) => {

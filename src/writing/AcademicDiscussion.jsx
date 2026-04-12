@@ -61,7 +61,8 @@ const AcademicDiscussion = () => {
 
   const handleSubmit = () => {
     clearProg()
-    const result = scoreWriting(response, 'discussion')
+    const promptText = `${prompt.professor.question} ${prompt.students.map(s => s.opinion).join(' ')}`
+    const result = scoreWriting(response, 'discussion', promptText)
     const bd = Object.fromEntries(Object.entries(result.breakdown).map(([k, v]) => [k, v.score]))
     appendScore({ type: 'discussion', score: result.overall, wordCount, breakdown: bd })
     setScoreResult(result)

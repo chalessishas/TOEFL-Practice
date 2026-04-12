@@ -8,16 +8,19 @@ import * as relevance   from './relevance.js'
 
 // Weights calibrated against ETS e-rater macrofeature distribution.
 // Sources: Attali & Burstein 2006, Attali/Bridgeman/Trapani 2010, ETS RR-04-04.
-// 2026-04-12 recalibration: vocabulary 18%→14% (ETS ~14%), development 24%→28%
-// (ETS ~29%), relevance 8%→5% (naive keyword overlap gameable), org 30%→33% (ETS ~32%).
-// Total: 7+10+14+33+28+3+5 = 100%
+// 2026-04-12 recalibration: vocabulary 18%→14%, development 24%→28%,
+//   relevance 8%→5%, org 30%→33%.
+// 2026-04-12 v2: style 3%→7% (syntactic range is more diagnostic than spelling
+//   for intermediate writers), mechanics 10%→6% (spelling is a floor condition,
+//   not a differentiator above score 2).
+// Total: 7+6+14+33+28+7+5 = 100%
 const WEIGHTS = {
   grammar:      0.07,
-  mechanics:    0.10,
+  mechanics:    0.06,
   vocabulary:   0.14,
   organization: 0.33,
   development:  0.28,
-  style:        0.03,
+  style:        0.07,
   relevance:    0.05,
 }
 

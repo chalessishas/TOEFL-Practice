@@ -1,3 +1,10 @@
+// Casual/informal register terms that ETS penalizes in academic writing
+const CASUAL_TERMS = [
+  'kinda','gonna','wanna','gotta','dunno','cuz','cause','cmon',
+  'lol','btw','omg','stuff','thing','things','like,','you know',
+  'pretty much','sort of','kind of',
+]
+
 // Function words excluded from repetition analysis
 const FUNCTION_WORDS = new Set([
   'the','a','an','is','are','was','were','be','been','being','have','has','had',
@@ -56,12 +63,17 @@ export function score(text) {
   const patternHits = COMPLEX_PATTERNS.filter(p => p.test(text)).length
   const syntacticVariety = patternHits / COMPLEX_PATTERNS.length  // 0–1
 
+  // Casual register penalty — ETS penalizes informal language in academic writing
+  const lowerText = text.toLowerCase()
+  const casualHits = CASUAL_TERMS.filter(t => lowerText.includes(t)).length
+  const casualPenalty = Math.min(0.3, casualHits * 0.07)
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/5, ${repeatedWords} repeated word(s)`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/5, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}`,
   }
 }
 
@@ -80,5 +92,7 @@ export function suggest(analysis) {
   const synMatch = analysis.details.match(/syntactic variety: (\d+)\/5/)
   if (synMatch && parseInt(synMatch[1]) < 3)
     tips.push('Use more complex sentence structures: relative clauses (who/which), conditionals (if/unless), or passive constructions to add syntactic variety.')
+  if (analysis.details.includes('informal term'))
+    tips.push('Avoid informal language (e.g., "kinda", "gonna", "stuff") — TOEFL writing requires formal academic register.')
   return tips.length > 0 ? tips : ['Improve your writing style by using varied vocabulary and sentence structures.']
 }

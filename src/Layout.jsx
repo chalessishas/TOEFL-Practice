@@ -34,6 +34,23 @@ const DEFAULT_VOCAB = [
 
 const loadVocab = () => {
   try {
+    // Check for share link import (?vocab=base64data)
+    const params = new URLSearchParams(location.search)
+    const shared = params.get('vocab')
+    if (shared) {
+      const imported = JSON.parse(decodeURIComponent(escape(atob(shared))))
+      if (Array.isArray(imported) && imported.length > 0) {
+        // Merge: imported words take precedence by word key, existing mastery preserved
+        const existing = (() => { try { return JSON.parse(localStorage.getItem(VOCAB_KEY)) || [] } catch { return [] } })()
+        const merged = [...imported]
+        existing.forEach(e => { if (!merged.find(m => m.word === e.word)) merged.push(e) })
+        saveVocab(merged)
+        // Clean URL without reload
+        const clean = location.href.replace(/[?&]vocab=[^&]*/, '').replace(/[?&]$/, '')
+        window.history.replaceState({}, '', clean)
+        return merged
+      }
+    }
     const s = localStorage.getItem(VOCAB_KEY)
     return s ? JSON.parse(s) : DEFAULT_VOCAB
   } catch { return DEFAULT_VOCAB }
@@ -475,20 +492,34 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 }}>
           {sectionTitle('Vocabulary Notebook')}
           {vocab.length > 0 && (
-            <button onClick={() => {
-              const lines = vocab.map(v =>
-                [v.word, v.meaning, v.context || '', v.mastery || 'new'].join('\t')
-              )
-              const blob = new Blob(['word\tmeaning\tcontext\tmastery\n' + lines.join('\n')], { type: 'text/plain' })
-              const a = document.createElement('a')
-              a.href = URL.createObjectURL(blob)
-              a.download = 'toefl-vocabulary.txt'
-              a.click()
-              setTimeout(() => URL.revokeObjectURL(a.href), 100)
-            }} style={{
-              fontSize: 10, color: c.textMuted, background: 'none', border: 'none',
-              cursor: 'pointer', padding: '2px 4px', fontFamily: 'inherit',
-            }} title="Export as tab-separated text">↓ export</button>
+            <>
+              <button onClick={() => {
+                const lines = vocab.map(v =>
+                  [v.word, v.meaning, v.context || '', v.mastery || 'new'].join('\t')
+                )
+                const blob = new Blob(['word\tmeaning\tcontext\tmastery\n' + lines.join('\n')], { type: 'text/plain' })
+                const a = document.createElement('a')
+                a.href = URL.createObjectURL(blob)
+                a.download = 'toefl-vocabulary.txt'
+                a.click()
+                setTimeout(() => URL.revokeObjectURL(a.href), 100)
+              }} style={{
+                fontSize: 10, color: c.textMuted, background: 'none', border: 'none',
+                cursor: 'pointer', padding: '2px 4px', fontFamily: 'inherit',
+              }} title="Export as tab-separated text">↓ export</button>
+              <button onClick={() => {
+                try {
+                  const data = btoa(unescape(encodeURIComponent(JSON.stringify(vocab))))
+                  const url = `${location.origin}${location.pathname}?vocab=${data}`
+                  navigator.clipboard.writeText(url)
+                    .then(() => alert('Share link copied to clipboard!\nOpen on any device to import your vocabulary notebook.'))
+                    .catch(() => prompt('Copy this share link:', url))
+                } catch { alert('Could not generate share link.') }
+              }} style={{
+                fontSize: 10, color: c.textMuted, background: 'none', border: 'none',
+                cursor: 'pointer', padding: '2px 4px', fontFamily: 'inherit',
+              }} title="Copy share link to import notebook on another device">⇗ share</button>
+            </>
           )}
         </div>
         {/* Mastery filter tabs */}

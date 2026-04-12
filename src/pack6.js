@@ -522,5 +522,241 @@ Recent innovations are addressing these issues. For instance, researchers are de
         },
       ],
     },
+
+    // ═══════════════════════════════════════════════════════
+    // MODULE 3 — Climate Systems & Ocean Acidification
+    // ═══════════════════════════════════════════════════════
+    {
+      id: 'pack6-m3',
+      name: 'Module 3',
+      time: 9 * 60,
+      sections: [
+        // --- Complete the Words ---
+        {
+          type: 'complete_words',
+          id: 'pack6-m3-cw',
+          title: 'Climate Systems',
+          instructions: 'Fill in the missing letters in the paragraph.',
+          paragraph: [
+            { text: 'Earth\'s climate is shaped by complex interactions between the atmosphere, oceans, land, and living organisms. Solar ' },
+            { blank: 'tion', prefix: 'radia', answer: 'radiation' },
+            { text: ' warms the planet\'s surface, while greenhouse gases such as carbon dioxide ' },
+            { blank: 'ain', prefix: 'ret', answer: 'retain' },
+            { text: ' heat in the atmosphere. Human ' },
+            { blank: 'ivities', prefix: 'act', answer: 'activities' },
+            { text: ', especially the burning of fossil fuels, have ' },
+            { blank: 'sed', prefix: 'increa', answer: 'increased' },
+            { text: ' the concentration of these gases, leading to ' },
+            { blank: 'al', prefix: 'glob', answer: 'global' },
+            { text: ' warming. Rising temperatures are causing glaciers to ' },
+            { blank: 't', prefix: 'mel', answer: 'melt' },
+            { text: ', sea levels to ' },
+            { blank: 'e', prefix: 'ris', answer: 'rise' },
+            { text: ', and weather ' },
+            { blank: 'terns', prefix: 'pat', answer: 'patterns' },
+            { text: ' to become more extreme. Understanding these processes is essential for developing effective strategies to ' },
+            { blank: 'igate', prefix: 'mit', answer: 'mitigate' },
+            { text: ' climate change and protect ecosystems worldwide.' },
+          ],
+        },
+
+        // --- Read in Daily Life: Campus Recycling Program ---
+        {
+          type: 'daily_life',
+          id: 'pack6-m3-dl1',
+          title: 'Campus Recycling Initiative',
+          material_type: 'email',
+          material: {
+            subject: 'Launch of the Green Campus Recycling Initiative – Your Participation Needed',
+            from: 'Office of Campus Sustainability',
+            to: 'All Students and Staff',
+            body: "Dear Campus Community,\n\nWe are excited to announce the launch of the Green Campus Recycling Initiative, beginning on the first of next month. New color-coded recycling bins have been installed in all dormitories, classrooms, and common areas.\n\nHere is a quick guide:\n• Blue bins — paper and cardboard\n• Yellow bins — plastic bottles and aluminum cans\n• Green bins — food waste and compostable items\n• Gray bins — general non-recyclable waste\n\nPlease note that contaminated materials (e.g., greasy pizza boxes or items with food residue) should go in the gray bins even if the material itself is recyclable. Contamination reduces the value of recyclable materials and can cause entire batches to be rejected.\n\nWorkshops on proper sorting will be held every Thursday at 12:00 PM in the Student Union, Room 204, throughout the month. Attendance is optional but encouraged.\n\nThank you for helping us build a more sustainable campus.\n\nOffice of Campus Sustainability",
+          },
+          questions: [
+            {
+              id: 11,
+              text: 'According to the email, where should a greasy pizza box be placed?',
+              options: [
+                'In the blue bin, since it is made of cardboard',
+                'In the green bin, because it contains food residue',
+                'In the gray bin, regardless of the material',
+                'In the yellow bin, after removing the grease',
+              ],
+              correct: 2,
+              question_type: 'detail',
+              explanation: 'The email explicitly states that "contaminated materials (e.g., greasy pizza boxes or items with food residue) should go in the gray bins even if the material itself is recyclable." A pizza box is cardboard (recyclable) but contamination overrides the material rule.',
+            },
+            {
+              id: 12,
+              text: 'What can be inferred about why contamination is a problem for recycling?',
+              options: [
+                'It makes the bins harder to clean after collection.',
+                'It can cause recyclable materials to become non-recyclable in bulk.',
+                'It releases harmful gases during the sorting process.',
+                'It increases the cost of operating the gray waste bins.',
+              ],
+              correct: 1,
+              question_type: 'inference',
+              explanation: 'The email warns that contamination "can cause entire batches to be rejected." This implies that a single contaminated item can ruin an entire collection of otherwise recyclable materials, making the bulk non-recyclable. The other options introduce ideas not mentioned in the email.',
+            },
+          ],
+        },
+
+        // --- Read in Daily Life: Water Conservation Notice ---
+        {
+          type: 'daily_life',
+          id: 'pack6-m3-dl2',
+          title: 'Building Water Conservation Notice',
+          material_type: 'email',
+          material: {
+            subject: 'Mandatory Water Conservation Measures – Building 7 & 8',
+            from: 'Property Management Office',
+            to: 'Residents of Buildings 7 and 8',
+            body: "Dear Residents,\n\nDue to ongoing drought conditions in the region, the city has requested that all commercial and residential properties reduce water consumption by at least 20% over the next 60 days. To comply with this request, the following measures will be implemented in Buildings 7 and 8 starting this Friday:\n\n1. Laundry facilities will operate on reduced hours: Monday, Wednesday, and Friday from 9:00 AM to 6:00 PM only.\n2. Outdoor landscaping irrigation will be suspended until further notice.\n3. Pool and jacuzzi areas will be temporarily closed.\n4. Residents are asked to limit showers to five minutes and report any visible leaks to the office immediately.\n\nWe understand these restrictions may be inconvenient, and we appreciate your cooperation. Residents who exceed average water usage by more than 30% may be contacted individually.\n\nProperty Management Office",
+          },
+          questions: [
+            {
+              id: 13,
+              text: 'What is the primary reason for the water conservation measures?',
+              options: [
+                'A burst pipe has reduced water pressure in the buildings.',
+                'The property management wants to lower utility expenses.',
+                'City authorities have requested reduced water use due to drought.',
+                'New environmental regulations require all buildings to cut water use.',
+              ],
+              correct: 2,
+              question_type: 'detail',
+              explanation: 'The notice states "the city has requested that all commercial and residential properties reduce water consumption" due to "ongoing drought conditions." The measures are a response to a city request prompted by drought, not a pipe issue, cost-cutting, or new regulations.',
+            },
+            {
+              id: 14,
+              text: 'On which days can residents use the laundry facilities?',
+              options: [
+                'Every day from 9:00 AM to 6:00 PM',
+                'Tuesday, Thursday, and Saturday',
+                'Monday, Wednesday, and Friday',
+                'Weekdays only, with no hour restrictions',
+              ],
+              correct: 2,
+              question_type: 'detail',
+              explanation: 'The notice specifies laundry will operate "Monday, Wednesday, and Friday from 9:00 AM to 6:00 PM only." Tuesday, Thursday, and Saturday are excluded. Hours are restricted to 9 AM–6 PM, not the full day.',
+            },
+            {
+              id: 15,
+              text: 'What can be inferred about residents who use significantly more water than usual?',
+              options: [
+                'They will be fined immediately by the property management.',
+                'They may receive personal follow-up from building management.',
+                'Their water supply will be automatically restricted.',
+                'They will be required to attend a conservation workshop.',
+              ],
+              correct: 1,
+              question_type: 'inference',
+              explanation: 'The notice states residents who exceed average usage by more than 30% "may be contacted individually." This means management will follow up personally — an inference, since the notice says "may be contacted," not "will be fined," "restricted," or "required to attend workshops."',
+            },
+          ],
+        },
+
+        // --- Read an Academic Passage: Ocean Acidification ---
+        {
+          type: 'academic_passage',
+          id: 'pack6-m3-ap',
+          title: 'Ocean Acidification',
+          passage: `The world's oceans play a critical role in regulating Earth's climate by absorbing approximately one-quarter of the carbon dioxide released into the atmosphere each year. While this absorption helps moderate global warming, it triggers a chemical reaction that is fundamentally altering the ocean's chemistry. When carbon dioxide dissolves in seawater, it forms carbonic acid, which then releases hydrogen ions, lowering the ocean's pH. This process, known as ocean acidification, has caused a measurable decline in the pH of surface ocean waters — from an average of 8.2 in the pre-industrial era to approximately 8.1 today. Though this shift may appear small, the pH scale is logarithmic, meaning the ocean has actually become about 26% more acidic.
+
+The consequences of ocean acidification are particularly severe for marine organisms that build shells or skeletons from calcium carbonate, a compound that becomes less available as acidity increases. Oysters, mussels, sea urchins, and corals are among the most vulnerable species. Laboratory experiments have demonstrated that elevated acidity inhibits shell formation in mollusks and causes coral skeletons to dissolve at rates faster than they can be rebuilt. Coral reefs, which support roughly 25% of all marine biodiversity despite covering less than 1% of the ocean floor, face the prospect of widespread bleaching and structural collapse under projected acidification scenarios.
+
+Beyond individual species, ocean acidification threatens entire food webs. Pteropods — small free-swimming snails sometimes called "sea butterflies" — are a foundational food source for salmon, herring, and baleen whales in many ocean regions. Studies have already documented shell dissolution in pteropods collected from parts of the Southern Ocean and the Pacific Northwest. If pteropod populations collapse, the cascading effects on commercial fisheries and marine ecosystems could be profound. Scientists emphasize that unlike many other environmental stressors, ocean acidification is directly tied to atmospheric CO₂ concentrations, meaning meaningful reduction in carbon emissions represents the most effective long-term solution.`,
+          questions: [
+            {
+              id: 16,
+              paragraph: 0,
+              text: 'The word "logarithmic" in paragraph 1 is closest in meaning to:',
+              options: [
+                'based on exponential multiplication rather than linear addition',
+                'related to the temperature of a chemical solution',
+                'measured in units that double with each step',
+                'describing a process that occurs gradually over centuries',
+              ],
+              correct: 0,
+              question_type: 'vocab',
+              explanation: '"Logarithmic" describes a scale where each unit represents a multiplicative (exponential) change rather than an additive one. The passage uses this to explain that a 0.1 pH drop means the ocean is 26% more acidic — a much larger real change than the number implies.',
+            },
+            {
+              id: 17,
+              paragraph: 1,
+              text: 'According to the passage, which of the following is NOT listed as a direct effect of ocean acidification on marine organisms?',
+              options: [
+                'Inhibited shell formation in mollusks',
+                'Coral skeleton dissolution',
+                'Increased migration of fish to warmer waters',
+                'Bleaching and structural collapse of coral reefs',
+              ],
+              correct: 2,
+              question_type: 'negative_fact',
+              explanation: 'The passage mentions inhibited shell formation (mollusks), coral skeleton dissolution, and bleaching/structural collapse of reefs. Fish migration to warmer waters is never mentioned — it is not listed as an effect of acidification in the passage.',
+            },
+            {
+              id: 18,
+              paragraph: 0,
+              text: 'Based on the passage, what can be inferred about the relationship between carbon emissions and ocean health?',
+              options: [
+                'Reducing emissions would halt all ocean acidification immediately.',
+                'Ocean health is primarily determined by temperature, not CO₂ levels.',
+                'Lowering atmospheric CO₂ is the most direct path to slowing acidification.',
+                'Ocean acidification is irreversible regardless of changes in carbon emissions.',
+              ],
+              correct: 2,
+              question_type: 'inference',
+              explanation: 'The passage states ocean acidification is "directly tied to atmospheric CO₂ concentrations" and calls emission reduction "the most effective long-term solution." This supports inference C. Option A overstates ("halt all... immediately"). Option B contradicts the passage\'s focus on CO₂. Option D contradicts the passage\'s implication that solutions exist.',
+            },
+            {
+              id: 19,
+              paragraph: 1,
+              text: 'Which of the following best expresses the essential information in the highlighted sentence? Incorrect choices change the meaning or leave out essential information.',
+              highlighted_word: 'Coral reefs, which support roughly 25% of all marine biodiversity despite covering less than 1% of the ocean floor, face the prospect of widespread bleaching and structural collapse under projected acidification scenarios.',
+              options: [
+                'Coral reefs cover 25% of the ocean floor but support less than 1% of marine species.',
+                'Although coral reefs occupy a small portion of the ocean, their ecological importance makes acidification-driven collapse particularly significant.',
+                'Bleaching events have already destroyed most coral reefs, which once covered 25% of the ocean floor.',
+                'Coral reefs will survive acidification because their biodiversity makes them resilient to environmental change.',
+              ],
+              correct: 1,
+              question_type: 'sentence_simplification',
+              explanation: 'The original sentence conveys two ideas: coral reefs are ecologically disproportionate (support 25% of biodiversity on <1% of ocean floor) and they face acidification threats (bleaching, collapse). Option B captures both correctly. Option A reverses the statistics. Option C misrepresents tense and current status. Option D contradicts the passage\'s warning.',
+            },
+            {
+              id: 20,
+              paragraph: 2,
+              text: 'According to the passage, why are pteropods significant in marine ecosystems?',
+              options: [
+                'They directly absorb carbon dioxide from seawater.',
+                'They are the primary producers of calcium carbonate in the ocean.',
+                'They serve as a key food source for several larger marine animals.',
+                'They are the only species currently affected by ocean acidification.',
+              ],
+              correct: 2,
+              question_type: 'detail',
+              explanation: 'The passage describes pteropods as "a foundational food source for salmon, herring, and baleen whales." Their significance is as a prey species in food webs, not CO₂ absorption, calcium carbonate production, or exclusive vulnerability to acidification.',
+            },
+            {
+              id: 21,
+              paragraph: 1,
+              text: 'Look at the four squares [■] that indicate where the following sentence could be added to the passage. Where would the sentence best fit?',
+              insert_sentence: 'The rate of this dissolution can exceed the rate of skeletal growth, leaving reefs structurally weakened within decades.',
+              insertion_points: [
+                'Laboratory experiments have demonstrated',
+                'Coral reefs, which support',
+                'face the prospect of widespread bleaching',
+              ],
+              options: ['■A', '■B', '■C'],
+              correct: 0,
+              question_type: 'text_insertion',
+              explanation: 'The insert sentence talks about dissolution rate exceeding growth rate — a direct elaboration on the preceding idea that acid causes coral skeletons to "dissolve at rates faster than they can be rebuilt." Inserting after that clause (■A) creates a logical continuation: dissolution can happen, AND the rate can exceed rebuilding capacity. ■B and ■C appear later in the paragraph and discuss reef-scale collapse, which is a higher-level consequence rather than the mechanism detail described here.',
+            },
+          ],
+        },
+      ],
+    },
   ],
 };

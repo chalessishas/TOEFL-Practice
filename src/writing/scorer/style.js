@@ -45,12 +45,23 @@ export function score(text) {
   const repeatedWords = Object.values(freq).filter(count => count >= 3).length
   const repetitionPenalty = Math.min(0.3, repeatedWords * 0.05)
 
+  // Syntactic variety — ETS rewards "variety of syntactic structures" (relative clauses, conditionals, passives, etc.)
+  const COMPLEX_PATTERNS = [
+    /\bwho\b|\bwhich\b|\bthat\b/,              // relative clauses
+    /\bif\b|\bunless\b|\bwere to\b/,           // conditionals
+    /\bis\s+\w+ed\b|\bare\s+\w+ed\b|\bwas\s+\w+ed\b|\bwere\s+\w+ed\b/, // passives
+    /\bto\s+[a-z]+\s+[a-z]+\b/,               // infinitive phrases
+    /\balthough\b|\bdespite\b|\bwhile\b|\bwhereas\b/, // concessive clauses
+  ]
+  const patternHits = COMPLEX_PATTERNS.filter(p => p.test(text)).length
+  const syntacticVariety = patternHits / COMPLEX_PATTERNS.length  // 0–1
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.4 + varianceScore * 0.4 + 0.2 - repetitionPenalty))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence length variance: ${varianceScore.toFixed(2)}, ${repeatedWords} repeated word(s)`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/5, ${repeatedWords} repeated word(s)`,
   }
 }
 
@@ -66,5 +77,8 @@ export function suggest(analysis) {
   const repMatch = analysis.details.match(/(\d+) repeated word/)
   if (repMatch && parseInt(repMatch[1]) > 2)
     tips.push('You are overusing certain words — find synonyms or restructure your sentences.')
+  const synMatch = analysis.details.match(/syntactic variety: (\d+)\/5/)
+  if (synMatch && parseInt(synMatch[1]) < 3)
+    tips.push('Use more complex sentence structures: relative clauses (who/which), conditionals (if/unless), or passive constructions to add syntactic variety.')
   return tips.length > 0 ? tips : ['Improve your writing style by using varied vocabulary and sentence structures.']
 }

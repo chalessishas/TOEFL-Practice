@@ -44,15 +44,19 @@ export function score(text, taskType = 'general') {
     const hasClosing = /\b(regards|sincerely|thank|best|yours|cheers|warm|respectfully|cordially)\b/i.test(text)
     taskSpecific = (hasGreeting ? 0.5 : 0) + (hasClosing ? 0.5 : 0)
   } else if (taskType === 'discussion') {
-    const hasEngagement =
-      /\bi agree\b/i.test(text) ||
-      /\bi disagree\b/i.test(text) ||
-      /makes a good point/i.test(text) ||
-      /\bwhile [A-Z]/i.test(text) ||
-      /\bI think\b/i.test(text) ||
-      /\bIn my opinion\b/i.test(text) ||
-      /\bI believe\b/i.test(text)
-    taskSpecific = hasEngagement ? 1.0 : 0.3
+    // ETS: peer engagement is a hard requirement — must reference classmate ideas, not just state own opinion
+    // Signal 1: name + engagement verb pattern (e.g. "Kelly makes a point", "Andrew mentioned")
+    const nameEngagement = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up)/i.test(text)
+    // Signal 2: contrast/build-on phrases with capitalized name or pronoun reference
+    const buildOn = /\b(building on|adding to|unlike|while [A-Z]|although [A-Z]|I (also )?(agree|disagree) with [A-Z])/i.test(text)
+    // Signal 3: baseline opinion (can exist without peer ref — weak signal)
+    const hasOpinion = /\b(i agree|i disagree|i think|in my opinion|i believe)\b/i.test(text)
+
+    if (nameEngagement && (buildOn || hasOpinion)) taskSpecific = 1.0       // genuine engagement
+    else if (nameEngagement) taskSpecific = 0.7                              // referenced but not built upon
+    else if (buildOn) taskSpecific = 0.5                                     // structural engagement, no name
+    else if (hasOpinion) taskSpecific = 0.3                                  // opinion only, no peer ref
+    else taskSpecific = 0.1
   } else {
     // General: reward having a clear opening and closing cue
     const hasOpener = /\b(first|to begin|in this|the purpose|this essay|one reason)\b/i.test(text)
@@ -78,7 +82,7 @@ export function suggest(analysis) {
     tips.push('Use discourse markers (however, moreover, in conclusion) to connect your ideas.')
   if (analysis.details.includes('1 paragraph'))
     tips.push('Divide your response into multiple paragraphs for clarity.')
-  if (analysis.details.includes('taskScore=0.00'))
-    tips.push('Include task-specific conventions (greetings for emails, engagement phrases for discussions).')
+  if (analysis.details.includes('taskScore=0.00') || analysis.details.includes('taskScore=0.10') || analysis.details.includes('taskScore=0.30'))
+    tips.push('For Academic Discussion: explicitly reference a classmate\'s idea — mention what they said and build on or contrast it.')
   return tips.length > 0 ? tips : ['Improve cohesion by using transition phrases between ideas.']
 }

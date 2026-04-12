@@ -38,12 +38,12 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 写作评分流程：
 用户提交 → scorer/index.js (加权 7 维, 2026-04-12 重校正)
   ├→ Organization (33%) — 结构、连贯性、peer engagement
-  ├→ Development (28%) — 内容深度、举例
+  ├→ Development (28%) — 内容深度、举例（argument structure ceiling for essays）
   ├→ Vocabulary (14%) — 词汇丰富度
-  ├→ Mechanics (10%) — 拼写、标点（275k 词典）
+  ├→ Mechanics  (6%)  — 拼写、标点（275k 词典）
   ├→ Relevance  (5%)  — keyword overlap with prompt (stem-normalized)
   ├→ Grammar    (7%)  — 语法错误
-  └→ Style      (3%)  — TTR/句长方差
+  └→ Style      (7%)  — TTR/句长方差/句型多样性/casual penalty
   → 原始分 [0-1] 映射到 TOEFL 0-5 分 → 字母评级
 
 状态存储：localStorage
@@ -83,6 +83,11 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] pack6 M4 新增 — 古代贸易路线填词 + 哥伦布大交换学术段落，11 道新题 (acd8269)
 - [100%] pack6 M5 新增 — 记忆与大脑填词 + 记忆重构学术段落，12 道新题 (f2dc7eb)
 - [100%] pack6 M6 新增 — 人类交流填词 + 语言习得关键期学术段落，12 道新题 (84568ee) ← Pack 6 完整 6 模块达成
+- [100%] 评分引擎 v2 (2026-04-12) — style casual penalty + development argStructure ceiling + mechanics 6%/style 7% reweight
+- [100%] 笔记本 share-via-URL — ?vocab= Base64 param，导入时与本地 merge，URL 加载后自动清除
+- [100%] ReadingHome "Shorter Than Exam" 徽章 — 修正方向（平台文章 200-500w，真实考试 ~700w）
+- [100%] DailyLifeReading 邮件头优化 — From/To/Subject 三行展示
+- [100%] argumentStructureScore email 修复 — email 任务跳过 thesis/reason ceiling，避免虚假惩罚
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

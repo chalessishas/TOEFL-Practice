@@ -54,7 +54,9 @@ function sentenceCountScore(count, taskType) {
   return 1.0
 }
 
-function argumentStructureScore(text, wordCount) {
+function argumentStructureScore(text, wordCount, taskType) {
+  // Email tasks use transactional structure (request/reply/apology), not opinion/thesis
+  if (taskType === 'email') return 1.0
   // Only penalise essays long enough that thin ideas are a choice, not a length issue
   if (wordCount < 120) return 1.0
   const lower = text.toLowerCase()
@@ -78,7 +80,7 @@ export function score(text, taskType = 'general') {
   const wcScore  = wordCountScore(wordCount, taskType)
   const dmScore  = detailMarkersScore(text)
   const scScore  = sentenceCountScore(sentenceCount, taskType)
-  const argScore = argumentStructureScore(text, wordCount)
+  const argScore = argumentStructureScore(text, wordCount, taskType)
 
   // argScore gates the ceiling: thin ideas cap development at ~0.65 regardless of word count
   const value = Math.min(argScore, Math.min(1, wcScore * 0.5 + dmScore * 0.3 + scScore * 0.2))

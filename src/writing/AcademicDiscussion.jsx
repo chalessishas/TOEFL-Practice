@@ -62,7 +62,8 @@ const AcademicDiscussion = () => {
   const handleSubmit = () => {
     clearProg()
     const result = scoreWriting(response, 'discussion')
-    appendScore({ type: 'discussion', score: result.overall, wordCount })
+    const bd = Object.fromEntries(Object.entries(result.breakdown).map(([k, v]) => [k, v.score]))
+    appendScore({ type: 'discussion', score: result.overall, wordCount, breakdown: bd })
     setScoreResult(result)
     setShowResult(true)
   }

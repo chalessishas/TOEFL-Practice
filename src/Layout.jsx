@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTheme } from './shared/ThemeContext.jsx'
+import { getHistory } from './writing/scoreHistory.js'
 
 const ICON_BAR_W = 48
 const SIDEBAR_W = 260
@@ -45,6 +46,29 @@ const planPlaceholder = [
 ]
 
 function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, isTimerVisible, toggleTimer, isShortcutsVisible, toggleShortcuts }) {
+  const [history, setHistory] = useState([])
+  useEffect(() => { setHistory(getHistory()) }, [activePanel])
+
+  const writingEntries = history.filter(h => h.type === 'email' || h.type === 'discussion')
+  const bsEntries = history.filter(h => h.type === 'build-sentence')
+
+  const avgWriting = writingEntries.length
+    ? (writingEntries.reduce((s, h) => s + h.score, 0) / writingEntries.length)
+    : null
+  const avgBS = bsEntries.length
+    ? (bsEntries.reduce((s, h) => s + h.correct / h.total, 0) / bsEntries.length)
+    : null
+
+  const avgBreakdown = (() => {
+    const withBd = writingEntries.filter(h => h.breakdown)
+    if (!withBd.length) return null
+    const keys = ['grammar', 'mechanics', 'vocabulary', 'organization', 'development', 'style']
+    return Object.fromEntries(keys.map(k => [
+      k,
+      withBd.reduce((s, h) => s + (h.breakdown[k] || 0), 0) / withBd.length
+    ]))
+  })()
+
   const sectionTitle = (text) => (
     <div style={{
       fontSize: 11, fontWeight: 700, color: isDark ? '#666' : '#888',
@@ -79,9 +103,9 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
         })}
         {sectionTitle('Quick Stats')}
         <div style={{ padding: '0 16px', fontSize: 12, color: isDark ? '#777' : '#888', lineHeight: 2 }}>
-          <div>Sessions completed: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>0</span></div>
-          <div>Total practice time: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>0 min</span></div>
-          <div>Current streak: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>0 days</span></div>
+          <div>Sessions completed: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>{history.length || 0}</span></div>
+          <div>Writing sessions: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>{writingEntries.length || 0}</span></div>
+          <div>Avg writing score: <span style={{ color: isDark ? '#e8e8e8' : '#1a1a1a', fontWeight: 600 }}>{avgWriting != null ? `${avgWriting.toFixed(1)}/5` : '—'}</span></div>
         </div>
       </>
     )
@@ -100,38 +124,74 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   }
 
   if (activePanel === 'progress') {
+    const recent = [...history].reverse().slice(0, 6)
+    const typeLabel = { email: 'Email', discussion: 'Discussion', 'build-sentence': 'Build Sentence' }
+    const scoreBar = (label, value, max) => (
+      <div key={label} style={{ marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
+          <span style={{ fontSize: 11, color: c.textMid }}>{label}</span>
+          <span style={{ fontSize: 11, color: c.textMuted }}>
+            {value != null ? `${(value * max).toFixed(1)}/${max}` : `—/${max}`}
+          </span>
+        </div>
+        <div style={{ height: 4, background: c.trackBg, borderRadius: 2 }}>
+          <div style={{ height: '100%', width: `${value != null ? value * 100 : 0}%`, background: c.teal, borderRadius: 2, transition: 'width 0.4s ease' }} />
+        </div>
+      </div>
+    )
     return (
       <>
-        {sectionTitle('Score History')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted }}>
-          <p style={{ marginBottom: 12, lineHeight: 1.6 }}>
-            Complete practice sets to see your score history here.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {[
-              { label: 'Reading', max: 30 },
-              { label: 'Writing', max: 6 },
-              { label: 'Vocabulary', max: 30 },
-            ].map(skill => (
-              <div key={skill.label}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: c.textMid }}>{skill.label}</span>
-                  <span style={{ fontSize: 11, color: c.textMuted }}>--/{skill.max}</span>
-                </div>
-                <div style={{ height: 4, background: c.trackBg, borderRadius: 2 }}>
-                  <div style={{ height: '100%', width: '0%', background: c.teal, borderRadius: 2 }} />
-                </div>
-              </div>
-            ))}
-          </div>
+        {sectionTitle('Recent Sessions')}
+        <div style={{ padding: '0 16px' }}>
+          {recent.length === 0
+            ? <p style={{ fontSize: 12, color: c.textMuted, lineHeight: 1.6 }}>Complete a practice set to see history here.</p>
+            : recent.map((h, i) => {
+                const scoreText = h.type === 'build-sentence'
+                  ? `${h.correct}/${h.total}`
+                  : `${h.score?.toFixed(1)}/5`
+                const scoreColor = h.type === 'build-sentence'
+                  ? (h.correct / h.total >= 0.7 ? c.green : c.textMid)
+                  : (h.score >= 3.5 ? c.green : h.score >= 2.5 ? c.textMid : c.red)
+                const ago = (() => {
+                  const diff = (Date.now() - new Date(h.date).getTime()) / 1000
+                  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+                  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+                  return `${Math.floor(diff / 86400)}d ago`
+                })()
+                return (
+                  <div key={i} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '6px 0', borderBottom: `1px solid ${c.cardBorder}`,
+                    fontSize: 11,
+                  }}>
+                    <div>
+                      <div style={{ color: c.textMid, fontWeight: 500 }}>{typeLabel[h.type]}</div>
+                      <div style={{ color: c.textMuted, marginTop: 1 }}>{ago}</div>
+                    </div>
+                    <span style={{ fontWeight: 700, color: scoreColor }}>{scoreText}</span>
+                  </div>
+                )
+              })
+          }
+        </div>
+        {sectionTitle('Score Overview')}
+        <div style={{ padding: '0 16px' }}>
+          {scoreBar('Writing (avg)', avgWriting != null ? avgWriting / 5 : null, 5)}
+          {scoreBar('Build Sentence (avg)', avgBS, 10)}
         </div>
         {sectionTitle('Skill Breakdown')}
-        <div style={{ padding: '0 16px', fontSize: 12, color: c.textMuted, lineHeight: 1.8 }}>
-          <div>Grammar: --</div>
-          <div>Mechanics: --</div>
-          <div>Vocabulary: --</div>
-          <div>Organization: --</div>
-          <div>Development: --</div>
+        <div style={{ padding: '0 16px' }}>
+          {avgBreakdown
+            ? [
+                ['Organization', avgBreakdown.organization],
+                ['Development', avgBreakdown.development],
+                ['Vocabulary', avgBreakdown.vocabulary],
+                ['Mechanics', avgBreakdown.mechanics],
+                ['Grammar', avgBreakdown.grammar],
+                ['Style', avgBreakdown.style],
+              ].map(([label, val]) => scoreBar(label, val, 100))
+            : <p style={{ fontSize: 11, color: c.textMuted, lineHeight: 1.6 }}>Submit a writing task to see skill breakdown.</p>
+          }
         </div>
       </>
     )

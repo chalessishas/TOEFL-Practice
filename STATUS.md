@@ -87,7 +87,11 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] 笔记本 share-via-URL — ?vocab= Base64 param，导入时与本地 merge，URL 加载后自动清除
 - [100%] ReadingHome "Shorter Than Exam" 徽章 — 修正方向（平台文章 200-500w，真实考试 ~700w）
 - [100%] DailyLifeReading 邮件头优化 — From/To/Subject 三行展示
-- [100%] argumentStructureScore email 修复 — email 任务跳过 thesis/reason ceiling，避免虚假惩罚
+- [100%] argumentStructureScore email 修复 — email 任务跳过 thesis/reason ceiling，避免虚假惩罚 (7897849)
+- [100%] organization suggest() 任务类型感知 — email/general 不再显示 discussion 专属提示 (5468609)
+- [100%] style.js 词边界修复 — 'cause' 不再匹配 'because'，'thing' 不再匹配 'something' (f215a7d)
+- [100%] grammar.js comma splice 误报修复 — "While X, I believe Y" 不再被标记为逗号粘连 (1f2c804)
+- [100%] development.js THESIS_MARKERS 扩展 — "I side with/support/contend" 等 14 个模式加入，ETS sampleResponse argScore 0.35→1.00 (089e766)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

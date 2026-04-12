@@ -8,6 +8,8 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
 
   const totalSets = 1 + pack6.modules.length;
   const completedSets = Object.keys(history).length;
+  // Find the first incomplete Pack 6 module index for "Next Up" recommendation
+  const nextUpIndex = pack6.modules.findIndex(m => !history[m.id]);
   const totalQuestions = 10 + pack6.modules.reduce((sum, m) => sum + m.sections.reduce((s2, sec) => {
     if (sec.type === 'complete_words') return s2 + sec.paragraph.filter(p => p.blank).length;
     return s2 + (sec.questions?.length || 0);
@@ -155,17 +157,20 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
                 return sum + (s.questions?.length || 0);
               }, 0);
 
+              const isNextUp = !done && mi === nextUpIndex
+              const borderColor = done ? 'rgba(46,125,50,0.2)' : isNextUp ? `rgba(0,105,92,0.35)` : colors.borderLight
               return (
                 <button key={mod.id} onClick={() => onStartPack(pack6, mi)} style={{
                   width: '100%', textAlign: 'left', padding: 0,
                   background: done ? colors.card : 'white', borderRadius: 12,
-                  border: `1px solid ${done ? 'rgba(46,125,50,0.2)' : colors.borderLight}`,
+                  border: `1px solid ${borderColor}`,
+                  boxShadow: isNextUp ? '0 2px 12px rgba(0,105,92,0.08)' : 'none',
                   cursor: 'pointer', transition: 'all 0.2s ease',
                   overflow: 'hidden', display: 'flex',
                   fontFamily: "'DM Sans', sans-serif",
                 }}
                 onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
-                onMouseOut={e => { e.currentTarget.style.borderColor = done ? 'rgba(46,125,50,0.2)' : colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = borderColor; e.currentTarget.style.boxShadow = isNextUp ? '0 2px 12px rgba(0,105,92,0.08)' : 'none'; }}
                 >
                   <div style={{ width: 6, background: done ? colors.success : colors.toeflTealLight, flexShrink: 0 }}/>
                   <div style={{ padding: '16px 20px', flex: 1, display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -187,6 +192,11 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
                           fontSize: 10, fontWeight: 600, color: colors.success,
                           background: 'rgba(46,125,50,0.08)', padding: '2px 8px', borderRadius: 4,
                         }}>COMPLETED</span>}
+                        {!done && mi === nextUpIndex && <span style={{
+                          fontSize: 10, fontWeight: 700, color: '#fff',
+                          background: colors.primary, padding: '2px 8px', borderRadius: 4,
+                          letterSpacing: '0.03em',
+                        }}>NEXT UP</span>}
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {sectionTags.map((tag, ti) => (

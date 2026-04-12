@@ -78,13 +78,13 @@ const DailyLifeReading = ({ section, onComplete }) => {
           <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 28, color: colors.text, marginBottom: 24 }}>
             {score === qs.length ? 'Perfect!' : score >= qs.length / 2 ? 'Good Effort' : 'Keep Practicing'}
           </h2>
-          <p style={{ fontSize: 14, color: '#888', marginBottom: 32 }}>{score} / {qs.length} correct</p>
+          <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: 32 }}>{score} / {qs.length} correct</p>
 
           {qs.map((q, qi) => {
             const ok = isCorrect(qi);
             return (
               <div key={qi} style={{
-                background: colors.card, borderRadius: 14, border: '1px solid #ddd',
+                background: colors.card, borderRadius: 14, border: `1px solid ${colors.border}`,
                 padding: 24, marginBottom: 12, textAlign: 'left',
                 animation: `fadeUp 0.4s ease-out ${qi * 0.05}s both`,
               }}>
@@ -101,7 +101,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
                 {q.options.map((opt, oi) => {
                   const isUser = answers[qi] === oi;
                   const isAnswer = q.correct === oi;
-                  let bg = 'transparent', border = '#ddd', color = '#6B6560';
+                  let bg = 'transparent', border = colors.border, color = colors.textMedium;
                   if (isAnswer) { bg = 'rgba(90,154,110,0.06)'; border = 'rgba(90,154,110,0.3)'; color = '#5a9a6e'; }
                   if (isUser && !isAnswer) { bg = 'rgba(176,96,96,0.06)'; border = 'rgba(176,96,96,0.3)'; color = '#b06060'; }
                   return (
@@ -124,8 +124,8 @@ const DailyLifeReading = ({ section, onComplete }) => {
                     background: 'rgba(0,105,92,0.04)',
                     border: '1px solid rgba(0,105,92,0.12)',
                   }}>
-                    <p style={{ fontSize: 12, color: '#00695c', lineHeight: 1.7 }}>
-                      <strong style={{ fontWeight: 500, color: '#004d40' }}>Explanation: </strong>
+                    <p style={{ fontSize: 12, color: colors.primary, lineHeight: 1.7 }}>
+                      <strong style={{ fontWeight: 500, color: colors.primaryDark }}>Explanation: </strong>
                       {q.explanation}
                     </p>
                   </div>
@@ -137,7 +137,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
           {onComplete && (
             <button onClick={() => onComplete({ correct: score, total: qs.length })} style={{
               marginTop: 20, fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-              color: 'white', background: '#00695c',
+              color: 'white', background: colors.primary,
               border: 'none', borderRadius: 10, padding: '12px 32px', cursor: 'pointer',
               boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
             }}>
@@ -156,7 +156,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
     }}>
       {/* Instruction */}
       <div style={{
-        borderBottom: '3px solid #c62828',
+        borderBottom: `3px solid ${colors.toeflRed}`,
         padding: '24px 40px 14px',
       }}>
         <h2 style={{
@@ -166,7 +166,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
           Read an {section.material_type || 'email'}.
         </h2>
         <p style={{
-          fontSize: 13, color: '#888', textAlign: 'center', marginTop: 6,
+          fontSize: 13, color: colors.textMuted, textAlign: 'center', marginTop: 6,
         }}>{section.title} — Question {currentQuestion + 1} of {qs.length}</p>
       </div>
 
@@ -177,12 +177,12 @@ const DailyLifeReading = ({ section, onComplete }) => {
         {/* Email card */}
         <div style={{
           flex: '1 1 380px', background: colors.inputBg, borderRadius: 8,
-          border: '2px solid #00695c', padding: 24,
+          border: `2px solid ${colors.primary}`, padding: 24,
         }}>
           {section.material.subject && (
             <div style={{
               display: 'flex', gap: 8, marginBottom: 16, paddingBottom: 12,
-              borderBottom: '1px solid #ddd',
+              borderBottom: `1px solid ${colors.border}`,
             }}>
               <span style={{ fontWeight: 600, fontSize: 14, color: colors.textMedium }}>Subject:</span>
               <span style={{ fontSize: 14, color: colors.text }}>{section.material.subject}</span>
@@ -209,7 +209,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
               return (
                 <button key={idx} onClick={() => handleSelect(idx)} style={{
                   width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 8,
-                  border: isSelected ? '2px solid #00695c' : '1.5px solid #ccc',
+                  border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.border}`,
                   background: isSelected ? 'rgba(0,105,92,0.04)' : 'white',
                   cursor: 'pointer', transition: 'all 0.2s ease',
                   display: 'flex', alignItems: 'center', gap: 12,
@@ -218,7 +218,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
                 }}>
                   <span style={{
                     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                    border: isSelected ? '2px solid #00695c' : '1.5px solid #bbb',
+                    border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.textLight}`,
                     background: isSelected ? '#00695c' : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 10, fontWeight: 600, color: isSelected ? 'white' : '#bbb',
@@ -238,7 +238,7 @@ const DailyLifeReading = ({ section, onComplete }) => {
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
                 color: 'white', opacity: currentQuestion === 0 ? 0.4 : 1,
-                background: '#00695c', border: 'none',
+                background: colors.primary, border: 'none',
                 borderRadius: 6, padding: '8px 20px',
                 cursor: currentQuestion === 0 ? 'default' : 'pointer',
               }}>‹ Back</button>
@@ -246,15 +246,15 @@ const DailyLifeReading = ({ section, onComplete }) => {
               <button onClick={() => setCurrentQuestion(q => q + 1)} disabled={!isCurrentAnswered}
                 style={{
                   fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-                  color: '#00695c', opacity: !isCurrentAnswered ? 0.5 : 1,
-                  background: '#e0f2f1', border: 'none',
+                  color: colors.primary, opacity: !isCurrentAnswered ? 0.5 : 1,
+                  background: colors.primaryLight, border: 'none',
                   borderRadius: 6, padding: '8px 24px',
                   cursor: !isCurrentAnswered ? 'default' : 'pointer',
                 }}>Next ›</button>
             ) : (
               <button onClick={handleSubmit} disabled={!isCurrentAnswered} style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-                color: '#00695c',
+                color: colors.primary,
                 background: !isCurrentAnswered ? '#ddd' : '#e0f2f1',
                 border: 'none', borderRadius: 6, padding: '8px 24px',
                 cursor: !isCurrentAnswered ? 'default' : 'pointer',
@@ -363,7 +363,7 @@ const Reading = () => {
           }}>
             Reading Practice
           </h1>
-          <p style={{ fontSize: 14, color: '#999', marginBottom: 20 }}>
+          <p style={{ fontSize: 14, color: colors.textMuted, marginBottom: 20 }}>
             Academic passages and daily life materials
           </p>
 
@@ -375,11 +375,11 @@ const Reading = () => {
               { label: 'Question Types', value: '5 types' },
             ].map((stat, i) => (
               <div key={i} style={{
-                background: colors.card, border: '1px solid #eee',
+                background: colors.card, border: `1px solid ${colors.borderLight}`,
                 borderRadius: 8, padding: '10px 16px', flex: '1 1 100px',
               }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#00695c', marginBottom: 2 }}>{stat.value}</div>
-                <div style={{ fontSize: 10, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: colors.primary, marginBottom: 2 }}>{stat.value}</div>
+                <div style={{ fontSize: 10, color: colors.textLight, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -393,13 +393,13 @@ const Reading = () => {
               display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16,
             }}>
               <div style={{
-                width: 4, height: 20, borderRadius: 2, background: '#00695c',
+                width: 4, height: 20, borderRadius: 2, background: colors.primary,
               }}/>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>
                 Academic Passages
               </h2>
               <span style={{
-                fontSize: 11, color: '#888', background: '#eee',
+                fontSize: 11, color: colors.textMuted, background: colors.borderLight,
                 padding: '2px 8px', borderRadius: 4, fontWeight: 500,
               }}>1 available</span>
             </div>
@@ -407,16 +407,16 @@ const Reading = () => {
             <button onClick={startLegacy} style={{
               width: '100%', textAlign: 'left', padding: 0,
               background: colors.card, borderRadius: 12,
-              border: '1px solid #e0e0e0', cursor: 'pointer',
+              border: `1px solid ${colors.borderLight}`, cursor: 'pointer',
               transition: 'all 0.2s ease',
               overflow: 'hidden', display: 'flex',
               fontFamily: "'DM Sans', sans-serif",
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = '#00695c'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = '#e0e0e0'; e.currentTarget.style.boxShadow = 'none'; }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
             >
               {/* Color accent strip */}
-              <div style={{ width: 6, background: '#00695c', flexShrink: 0 }}/>
+              <div style={{ width: 6, background: colors.primary, flexShrink: 0 }}/>
               <div style={{ padding: '20px 24px', flex: 1, display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{
                   width: 48, height: 48, borderRadius: 10,
@@ -424,7 +424,7 @@ const Reading = () => {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00695c" strokeWidth="1.8" strokeLinecap="round">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="1.8" strokeLinecap="round">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                   </svg>
@@ -433,7 +433,7 @@ const Reading = () => {
                   <div style={{ fontSize: 16, fontWeight: 600, color: colors.text, marginBottom: 4 }}>
                     Urban Agriculture
                   </div>
-                  <div style={{ fontSize: 13, color: '#888', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5 }}>
                     The practice of cultivating crops within city boundaries and its impact on food security.
                   </div>
                 </div>
@@ -445,14 +445,14 @@ const Reading = () => {
                   ].map((t, i) => (
                     <div key={i} style={{
                       textAlign: 'center', padding: '6px 10px',
-                      background: '#f8f8f8', borderRadius: 6,
+                      background: colors.inputBg, borderRadius: 6,
                     }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: colors.text }}>{t.label}</div>
-                      <div style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase' }}>{t.sub}</div>
+                      <div style={{ fontSize: 9, color: colors.textLight, textTransform: 'uppercase' }}>{t.sub}</div>
                     </div>
                   ))}
                 </div>
-                <span style={{ fontSize: 20, color: '#00695c', fontWeight: 700, marginLeft: 8 }}>›</span>
+                <span style={{ fontSize: 20, color: colors.primary, fontWeight: 700, marginLeft: 8 }}>›</span>
               </div>
             </button>
           </div>
@@ -463,18 +463,18 @@ const Reading = () => {
               display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16,
             }}>
               <div style={{
-                width: 4, height: 20, borderRadius: 2, background: '#00897b',
+                width: 4, height: 20, borderRadius: 2, background: colors.toeflTealLight,
               }}/>
               <h2 style={{ fontSize: 16, fontWeight: 700, color: colors.text, margin: 0 }}>
                 Pack 6 — Mixed Practice
               </h2>
               <span style={{
-                fontSize: 11, color: '#888', background: '#eee',
+                fontSize: 11, color: colors.textMuted, background: colors.borderLight,
                 padding: '2px 8px', borderRadius: 4, fontWeight: 500,
               }}>{pack6.modules.length} modules</span>
               {completedSets > 0 && (
                 <span style={{
-                  fontSize: 11, color: '#2e7d32', background: 'rgba(46,125,50,0.08)',
+                  fontSize: 11, color: colors.success, background: 'rgba(46,125,50,0.08)',
                   padding: '2px 8px', borderRadius: 4, fontWeight: 600,
                 }}>{completedSets} done</span>
               )}
@@ -486,8 +486,8 @@ const Reading = () => {
                 const sectionTags = mod.sections.map(s => {
                   if (s.type === 'complete_words') return { label: 'Fill Words', color: '#e65100' };
                   if (s.type === 'daily_life') return { label: 'Email', color: '#1565c0' };
-                  if (s.type === 'academic_passage') return { label: 'Passage', color: '#00695c' };
-                  return { label: s.type, color: '#888' };
+                  if (s.type === 'academic_passage') return { label: 'Passage', color: colors.primary };
+                  return { label: s.type, color: colors.textMuted };
                 });
                 const qCount = mod.sections.reduce((sum, s) => {
                   if (s.type === 'complete_words') return sum + s.paragraph.filter(p => p.blank).length;
@@ -503,7 +503,7 @@ const Reading = () => {
                     overflow: 'hidden', display: 'flex',
                     fontFamily: "'DM Sans', sans-serif",
                   }}
-                  onMouseOver={e => { e.currentTarget.style.borderColor = '#00695c'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
+                  onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
                   onMouseOut={e => { e.currentTarget.style.borderColor = done ? 'rgba(46,125,50,0.2)' : '#e0e0e0'; e.currentTarget.style.boxShadow = 'none'; }}
                   >
                     <div style={{ width: 6, background: done ? '#2e7d32' : '#00897b', flexShrink: 0 }}/>
@@ -524,7 +524,7 @@ const Reading = () => {
                         }}>
                           {mod.name}
                           {done && <span style={{
-                            fontSize: 10, fontWeight: 600, color: '#2e7d32',
+                            fontSize: 10, fontWeight: 600, color: colors.success,
                             background: 'rgba(46,125,50,0.08)', padding: '2px 8px', borderRadius: 4,
                           }}>COMPLETED</span>}
                         </div>
@@ -538,7 +538,7 @@ const Reading = () => {
                             }}>{tag.label}</span>
                           ))}
                           <span style={{
-                            fontSize: 10, fontWeight: 500, color: '#888',
+                            fontSize: 10, fontWeight: 500, color: colors.textMuted,
                             padding: '2px 8px',
                           }}>
                             {qCount}Q · {Math.floor(mod.time / 60)}:{(mod.time % 60).toString().padStart(2, '0')}
@@ -546,7 +546,7 @@ const Reading = () => {
                         </div>
                       </div>
 
-                      <span style={{ fontSize: 20, color: '#00695c', fontWeight: 700 }}>›</span>
+                      <span style={{ fontSize: 20, color: colors.primary, fontWeight: 700 }}>›</span>
                     </div>
                   </button>
                 );
@@ -562,7 +562,7 @@ const Reading = () => {
           }}>
             <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#00695c', marginBottom: 4 }}>Study Tip</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: colors.primary, marginBottom: 4 }}>Study Tip</p>
               <p style={{ fontSize: 12, color: colors.textMedium, lineHeight: 1.6, margin: 0 }}>
                 Start with the academic passage to build vocabulary, then move to Pack 6 for mixed practice.
                 Each module includes fill-in-the-blank, email reading, and passage comprehension.
@@ -628,17 +628,17 @@ const Reading = () => {
           background: colors.card,
           padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           fontFamily: "'DM Sans', sans-serif", fontSize: 13,
-          borderBottom: '2px solid #00695c',
+          borderBottom: `2px solid ${colors.primary}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button onClick={goHome} style={{
-              fontSize: 12, color: '#888', background: 'transparent',
-              border: '1px solid #ddd', borderRadius: 5, padding: '4px 12px', cursor: 'pointer',
+              fontSize: 12, color: colors.textMuted, background: 'transparent',
+              border: `1px solid ${colors.border}`, borderRadius: 5, padding: '4px 12px', cursor: 'pointer',
               fontFamily: 'inherit', fontWeight: 500,
             }}>← Home</button>
-            <span style={{ fontWeight: 700, color: '#00695c' }}>Reading</span>
-            <span style={{ color: '#ccc' }}>|</span>
-            <span style={{ color: '#888' }}>{getQuestionRange()}</span>
+            <span style={{ fontWeight: 700, color: colors.primary }}>Reading</span>
+            <span style={{ color: colors.border }}>|</span>
+            <span style={{ color: colors.textMuted }}>{getQuestionRange()}</span>
             <div style={{ display: 'flex', gap: 3, marginLeft: 8 }}>
               {mod.sections.map((_, i) => (
                 <div key={i} style={{
@@ -658,7 +658,7 @@ const Reading = () => {
               {formatTime(moduleTimer)}
             </span>
             <span style={{
-              fontSize: 12, color: '#aaa', cursor: 'pointer',
+              fontSize: 12, color: colors.textLight, cursor: 'pointer',
             }} onClick={() => setTimerPaused(p => !p)}>
               {timerPaused ? '▶ Resume' : '⏸ Hide Time'}
             </span>
@@ -667,7 +667,7 @@ const Reading = () => {
               handleSectionComplete({ correct: 0, total: 0 });
             }} style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-              color: 'white', background: '#00695c',
+              color: 'white', background: colors.primary,
               border: 'none', borderRadius: 6,
               padding: '6px 18px', cursor: 'pointer',
             }}>
@@ -725,11 +725,11 @@ const Reading = () => {
 
           {mod.sections.map((sec, i) => (
             <div key={i} style={{
-              background: colors.card, borderRadius: 10, border: '1px solid #ddd',
+              background: colors.card, borderRadius: 10, border: `1px solid ${colors.border}`,
               padding: '14px 20px', marginBottom: 8, textAlign: 'left',
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span style={{ fontSize: 13, color: '#4A4640' }}>
+              <span style={{ fontSize: 13, color: colors.textMedium }}>
                 {sec.title || sec.type}
               </span>
               <span style={{ fontSize: 13, fontWeight: 500, color: '#5a9a6e' }}>
@@ -740,7 +740,7 @@ const Reading = () => {
 
           <button onClick={goHome} style={{
             marginTop: 24, fontSize: 14, fontWeight: 500, color: 'white',
-            background: '#00695c',
+            background: colors.primary,
             border: 'none', borderRadius: 10, padding: '12px 32px', cursor: 'pointer',
             boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
             fontFamily: "'DM Sans', sans-serif",
@@ -825,7 +825,7 @@ const AcademicPassage = ({ section, onComplete }) => {
             }}>
               {section.title}
             </h2>
-            <p style={{ fontSize: 14, color: '#888' }}>{correct} / {qs.length} correct</p>
+            <p style={{ fontSize: 14, color: colors.textMuted }}>{correct} / {qs.length} correct</p>
           </div>
 
           {qs.map((q, qi) => {
@@ -833,7 +833,7 @@ const AcademicPassage = ({ section, onComplete }) => {
             const tc = typeColors[q.question_type] || typeColors.detail;
             return (
               <div key={qi} style={{
-                background: colors.card, borderRadius: 14, border: '1px solid #ddd',
+                background: colors.card, borderRadius: 14, border: `1px solid ${colors.border}`,
                 padding: 24, marginBottom: 12,
                 animation: `fadeUp 0.4s ease-out ${qi * 0.05}s both`,
               }}>
@@ -860,7 +860,7 @@ const AcademicPassage = ({ section, onComplete }) => {
                 {q.options.map((opt, oi) => {
                   const isUser = answers[qi] === oi;
                   const isAnswer = q.correct === oi;
-                  let bg = 'transparent', border = '#ddd', color = '#6B6560';
+                  let bg = 'transparent', border = colors.border, color = colors.textMedium;
                   if (isAnswer) { bg = 'rgba(90,154,110,0.06)'; border = 'rgba(90,154,110,0.3)'; color = '#5a9a6e'; }
                   if (isUser && !isAnswer) { bg = 'rgba(176,96,96,0.06)'; border = 'rgba(176,96,96,0.3)'; color = '#b06060'; }
                   return (
@@ -883,8 +883,8 @@ const AcademicPassage = ({ section, onComplete }) => {
                     background: 'rgba(0,105,92,0.04)',
                     border: '1px solid rgba(0,105,92,0.12)',
                   }}>
-                    <p style={{ fontSize: 12, color: '#00695c', lineHeight: 1.7 }}>
-                      <strong style={{ fontWeight: 500, color: '#004d40' }}>Explanation: </strong>
+                    <p style={{ fontSize: 12, color: colors.primary, lineHeight: 1.7 }}>
+                      <strong style={{ fontWeight: 500, color: colors.primaryDark }}>Explanation: </strong>
                       {q.explanation}
                     </p>
                   </div>
@@ -941,10 +941,10 @@ const AcademicPassage = ({ section, onComplete }) => {
       {/* Passage */}
       <div className="passage-panel" style={{
         width: '50%', display: 'flex', flexDirection: 'column',
-        borderRight: '1px solid #ddd', background: colors.card,
+        borderRight: `1px solid ${colors.border}`, background: colors.card,
       }}>
         <div style={{
-          padding: '14px 24px', borderBottom: '1px solid #ddd',
+          padding: '14px 24px', borderBottom: `1px solid ${colors.border}`,
           fontFamily: "'DM Sans', sans-serif",
         }}>
           <h2 style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>{section.title}</h2>
@@ -957,7 +957,7 @@ const AcademicPassage = ({ section, onComplete }) => {
               fontFamily: "'Georgia', serif", fontSize: 16, lineHeight: 2.0,
               color: colors.text, marginBottom: 20, fontWeight: 400,
               padding: '8px 12px', borderRadius: 4,
-              borderLeft: currentQ?.paragraph === idx ? '3px solid #00695c' : '3px solid transparent',
+              borderLeft: currentQ?.paragraph === idx ? `3px solid ${colors.primary}` : '3px solid transparent',
               background: currentQ?.paragraph === idx ? 'rgba(0,105,92,0.03)' : 'transparent',
               transition: 'all 0.4s ease',
             }}>
@@ -973,7 +973,7 @@ const AcademicPassage = ({ section, onComplete }) => {
       }}>
         {/* Nav dots */}
         <div style={{
-          padding: '12px 24px', borderBottom: '1px solid #ddd',
+          padding: '12px 24px', borderBottom: `1px solid ${colors.border}`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -982,7 +982,7 @@ const AcademicPassage = ({ section, onComplete }) => {
                 width: 26, height: 26, borderRadius: 6,
                 border: i === currentQuestion ? '2px solid #D4A574'
                   : answers[i] !== undefined ? '1.5px solid rgba(90,154,110,0.3)'
-                  : '1.5px solid #ccc',
+                  : `1.5px solid ${colors.border}`,
                 background: i === currentQuestion ? 'rgba(212,165,116,0.08)'
                   : answers[i] !== undefined ? 'rgba(90,154,110,0.05)' : 'white',
                 fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500,
@@ -991,7 +991,7 @@ const AcademicPassage = ({ section, onComplete }) => {
               }}>{i + 1}</button>
             ))}
           </div>
-          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa' }}>
+          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: colors.textLight }}>
             {Object.keys(answers).length} / {qs.length}
           </span>
         </div>
@@ -1026,7 +1026,7 @@ const AcademicPassage = ({ section, onComplete }) => {
               return (
                 <button key={idx} onClick={() => handleSelect(idx)} style={{
                   width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 8,
-                  border: isSelected ? '2px solid #00695c' : '1.5px solid #ccc',
+                  border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.border}`,
                   background: isSelected ? 'rgba(0,105,92,0.04)' : 'white',
                   cursor: 'pointer', transition: 'all 0.2s ease',
                   display: 'flex', alignItems: 'center', gap: 10,
@@ -1035,7 +1035,7 @@ const AcademicPassage = ({ section, onComplete }) => {
                 }}>
                   <span style={{
                     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
-                    border: isSelected ? '2px solid #00695c' : '1.5px solid #bbb',
+                    border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.textLight}`,
                     background: isSelected ? '#00695c' : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 10, fontWeight: 600, color: isSelected ? 'white' : '#bbb',
@@ -1049,7 +1049,7 @@ const AcademicPassage = ({ section, onComplete }) => {
 
         {/* Nav — TOEFL teal bar */}
         <div style={{
-          padding: '10px 20px', background: '#00695c',
+          padding: '10px 20px', background: colors.primary,
           display: 'flex', justifyContent: 'flex-end', gap: 8,
         }}>
           <button onClick={() => setCurrentQuestion(q => q - 1)} disabled={currentQuestion === 0}
@@ -1064,7 +1064,7 @@ const AcademicPassage = ({ section, onComplete }) => {
             <button onClick={() => setCurrentQuestion(q => q + 1)} disabled={!isCurrentAnswered}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-                color: '#00695c', opacity: !isCurrentAnswered ? 0.5 : 1,
+                color: colors.primary, opacity: !isCurrentAnswered ? 0.5 : 1,
                 background: 'white', border: 'none',
                 borderRadius: 6, padding: '8px 24px',
                 cursor: !isCurrentAnswered ? 'default' : 'pointer',
@@ -1072,7 +1072,7 @@ const AcademicPassage = ({ section, onComplete }) => {
           ) : (
             <button onClick={handleSubmit} disabled={!isCurrentAnswered} style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600,
-              color: '#00695c',
+              color: colors.primary,
               background: !isCurrentAnswered ? 'rgba(255,255,255,0.4)' : 'white',
               border: 'none', borderRadius: 6, padding: '8px 24px',
               cursor: !isCurrentAnswered ? 'default' : 'pointer',
@@ -1209,14 +1209,14 @@ const LegacyReadingTest = ({ onBack }) => {
           <div style={{ width: 120, height: 120, borderRadius: '50%', background: `conic-gradient(#D4A574 ${pct * 3.6}deg, #ddd 0deg)`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px' }}>
             <div style={{ width: 100, height: 100, borderRadius: '50%', background: colors.bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 36, color: colors.text }}>{scaled}</span>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: '#aaa' }}>/ 30</span>
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: colors.textLight }}>/ 30</span>
             </div>
           </div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#888', marginBottom: 28 }}>{correct} / {total} correct</p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: colors.textMuted, marginBottom: 28 }}>{correct} / {total} correct</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={() => setShowReview(true)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#6B6560', background: colors.card, border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Review</button>
-            <button onClick={handleRetry} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: 'white', background: '#00695c', border: 'none', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Retry</button>
-            <button onClick={onBack} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: '#6B6560', background: colors.card, border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Home</button>
+            <button onClick={() => setShowReview(true)} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: colors.textMedium, background: colors.card, border: `1.5px solid ${colors.border}`, borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Review</button>
+            <button onClick={handleRetry} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: 'white', background: colors.primary, border: 'none', borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Retry</button>
+            <button onClick={onBack} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: colors.textMedium, background: colors.card, border: `1.5px solid ${colors.border}`, borderRadius: 10, padding: '12px 28px', cursor: 'pointer' }}>Home</button>
           </div>
         </div>
       </div>
@@ -1239,10 +1239,10 @@ const LegacyReadingTest = ({ onBack }) => {
         </div>
       )}
 
-      <div className="passage-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', borderRight: '1px solid #ddd', background: colors.card }}>
-        <div style={{ padding: '18px 28px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="passage-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', borderRight: `1px solid ${colors.border}`, background: colors.card }}>
+        <div style={{ padding: '18px 28px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={onBack} style={{ fontSize: 12, color: '#888', background: 'none', border: '1px solid #ccc', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>← Home</button>
+            <button onClick={onBack} style={{ fontSize: 12, color: colors.textMuted, background: 'none', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>← Home</button>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: colors.text }}>Urban Agriculture</span>
           </div>
           <button className="timer-btn" onClick={() => setPaused(p => !p)} style={{ color: timer < 120 ? '#b06060' : '#888', background: timer < 120 ? 'rgba(176,96,96,0.08)' : 'rgba(0,0,0,0.03)' }}>
@@ -1253,7 +1253,7 @@ const LegacyReadingTest = ({ onBack }) => {
         <div ref={passageRef} className="passage-content" style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
           {paragraphs.map((para, idx) => (
             <p key={idx} ref={el => paragraphRefs.current[idx] = el} style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.85, color: '#4A4640',
+              fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.85, color: colors.textMedium,
               marginBottom: 20, fontWeight: 300, padding: '8px 12px', borderRadius: 8,
               borderLeft: currentQ.paragraph === idx ? '2.5px solid #D4A574' : '2.5px solid transparent',
               background: currentQ.paragraph === idx ? 'rgba(212,165,116,0.04)' : 'transparent',
@@ -1267,12 +1267,12 @@ const LegacyReadingTest = ({ onBack }) => {
       </div>
 
       <div className="question-panel" style={{ width: '50%', display: 'flex', flexDirection: 'column', background: colors.bg }}>
-        <div style={{ padding: '16px 28px', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '16px 28px', borderBottom: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', gap: 6 }}>
             {questions.map((_, i) => (
               <button key={i} onClick={() => { setCurrentQuestion(i); setSelectedMultiple(questions[i].type === 'multiple' && Array.isArray(answers[i]) ? answers[i] : []); }} style={{
                 width: 26, height: 26, borderRadius: 6,
-                border: i === currentQuestion ? '2px solid #D4A574' : answers[i] !== undefined ? '1.5px solid rgba(90,154,110,0.3)' : '1.5px solid #ccc',
+                border: i === currentQuestion ? '2px solid #D4A574' : answers[i] !== undefined ? '1.5px solid rgba(90,154,110,0.3)' : `1.5px solid ${colors.border}`,
                 background: i === currentQuestion ? 'rgba(212,165,116,0.08)' : answers[i] !== undefined ? 'rgba(90,154,110,0.05)' : 'white',
                 fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500,
                 color: i === currentQuestion ? '#C4956A' : answers[i] !== undefined ? '#5a9a6e' : '#aaa',
@@ -1293,7 +1293,7 @@ const LegacyReadingTest = ({ onBack }) => {
               return (
                 <button key={idx} onClick={() => handleSelectAnswer(idx)} style={{
                   width: '100%', textAlign: 'left', padding: '14px 16px', borderRadius: 10,
-                  border: isSelected ? '1.5px solid #D4A574' : '1.5px solid #ccc',
+                  border: isSelected ? '1.5px solid #D4A574' : `1.5px solid ${colors.border}`,
                   background: isSelected ? 'rgba(0,105,92,0.04)' : 'white',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
                 }}>
@@ -1311,11 +1311,11 @@ const LegacyReadingTest = ({ onBack }) => {
             })}
           </div>
           {currentQ.type === 'multiple' && selectedMultiple.length > 0 && (
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: '#aaa', marginTop: 16 }}>{selectedMultiple.length} of 3 selected</p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: colors.textLight, marginTop: 16 }}>{selectedMultiple.length} of 3 selected</p>
           )}
         </div>
 
-        <div style={{ padding: '16px 28px', borderTop: '1px solid #ddd', background: colors.card, display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ padding: '16px 28px', borderTop: `1px solid ${colors.border}`, background: colors.card, display: 'flex', justifyContent: 'space-between' }}>
           <button onClick={handlePrev} disabled={currentQuestion === 0} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: currentQuestion === 0 ? '#D4CFC5' : '#6B6560', background: 'none', border: 'none', cursor: currentQuestion === 0 ? 'default' : 'pointer' }}>← Previous</button>
           {currentQuestion < questions.length - 1 ? (
             <button onClick={handleNext} disabled={!isCurrentAnswered()} style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: !isCurrentAnswered() ? '#D4CFC5' : '#6B6560', background: 'none', border: 'none', cursor: !isCurrentAnswered() ? 'default' : 'pointer' }}>Next →</button>

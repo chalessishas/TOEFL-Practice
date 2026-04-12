@@ -78,7 +78,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] 评分权重重校正 — 对标 Attali & Burstein 2006 + ETS RR-04-04 (80e53b6)
 - [100%] pack6 题型扩展 — negative_fact + sentence_simplification，共 6 题型 (a3ca6d7)
 - [100%] pack6 text_insertion 题型 — ■A/■B/■C/■D 段落内嵌标记 + insert_sentence 展示框 (fba8874)
-- [100%] pack6 M2 内容补全 — dl1（社区太阳能邮件）+ dl2（办公室节能通知），5 道新题 (当前)
+- [100%] pack6 M2 内容补全 — dl1（社区太阳能邮件）+ dl2（办公室节能通知），5 道新题 (507df20)
+- [100%] pack6 M3 新增 — 气候系统填词 + 海洋酸化学术段落 + dl1/dl2 日常场景，11 道新题 (29d0692)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

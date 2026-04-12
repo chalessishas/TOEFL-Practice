@@ -58,12 +58,12 @@ src/
 │   ├── data/             # buildSentenceData / emailData(10) / discussionData(10)
 │   └── scorer/
 │       ├── index.js      # 加权聚合 → TOEFL [0-5] 标度
-│       ├── grammar.js    # 7% - 片段句/连缀句/双重否定
-│       ├── mechanics.js  # 10% - 275k 词典拼写检查
-│       ├── vocabulary.js # 14% - 词长 + 稀有词比例 (2026-04-12 recalibrated from 18%)
+│       ├── grammar.js    # 7% - 片段句/连缀句/双重否定 (从属连词开头行跳过 comma splice 检测)
+│       ├── mechanics.js  # 6% - 275k 词典拼写检查 (2026-04-12 from 10%; 拼写是底线，不是区分器)
+│       ├── vocabulary.js # 14% - 词长 + 稀有词比例 (2026-04-12 from 18%)
 │       ├── organization.js # 33% - 篇章标记词/段落/任务线索/peer engagement (2026-04-12 from 30%)
-│       ├── development.js  # 28% - 字数范围/细节密度 (2026-04-12 recalibrated from 24%)
-│       ├── style.js      # 3% - TTR/句长方差/重复惩罚/句型多样性 (5 syntactic patterns)
+│       ├── development.js  # 28% - 字数范围/细节密度/argStructure ceiling (2026-04-12 from 24%; email 跳过 ceiling)
+│       ├── style.js      # 7% - TTR/句长方差/重复惩罚/句型多样性/casual penalty (2026-04-12 from 3%)
 │       ├── wordlist.js   # validWords 15k + commonWords 5k
 │       ├── relevance.js  # 5% - keyword overlap with prompt (stem-normalized, 2026-04-12 from 8%)
 │       └── english-words.js # 275k 词典 (2.7MB, Vite manual chunk)

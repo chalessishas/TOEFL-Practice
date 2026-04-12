@@ -129,6 +129,13 @@ export function score(text) {
       msg: 'SVA: "each" takes a singular verb (is/was/has)' },
     { re: /\b(the\s+)?(information|advice|news|knowledge|furniture|equipment|progress)\s+are\b/i,
       msg: 'SVA: uncountable noun takes a singular verb ("is")' },
+    // Third-person pronoun agreement — almost zero false positives
+    { re: /\b(he|she|it)\s+have\b/i,
+      msg: 'SVA: "he/she/it" takes "has" not "have"' },
+    { re: /\b(he|she|it)\s+are\b/i,
+      msg: 'SVA: "he/she/it" takes "is" not "are"' },
+    { re: /\b(you|we|they)\s+was\b/i,
+      msg: 'SVA: "you/we/they" takes "were" not "was"' },
   ]
   SVA_PATTERNS.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)

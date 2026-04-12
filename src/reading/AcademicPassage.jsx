@@ -155,14 +155,46 @@ const AcademicPassage = ({ section, onComplete }) => {
     }
   }, [currentQuestion]);
 
-  // Render passage text with highlighted word
+  // Render passage text with highlighted word or text-insertion markers
   const renderParagraph = (para, idx) => {
+    const paraLabel = <span style={{ fontSize: 10, fontWeight: 600, color: '#C4B5A0', marginRight: 6 }}>P{idx + 1}</span>;
+
+    // Text insertion: inject ■A ■B ■C ■D before each insertion_points anchor
+    if (currentQ?.question_type === 'text_insertion' && currentQ?.paragraph === idx && currentQ?.insertion_points?.length) {
+      let remaining = para;
+      const segments = [];
+      currentQ.insertion_points.forEach((anchor, i) => {
+        const pos = remaining.indexOf(anchor);
+        if (pos === -1) return;
+        segments.push(remaining.slice(0, pos));
+        segments.push({ marker: String.fromCharCode(65 + i) }); // A B C D
+        remaining = remaining.slice(pos);
+      });
+      segments.push(remaining);
+      return (
+        <>
+          {paraLabel}
+          {segments.map((s, i) =>
+            typeof s === 'string' ? s : (
+              <span key={i} style={{
+                display: 'inline-block', margin: '0 2px', padding: '0 5px',
+                background: 'rgba(74,128,96,0.12)', border: '1.5px solid rgba(74,128,96,0.4)',
+                borderRadius: 4, fontSize: 12, fontWeight: 700, color: '#3a7050',
+                cursor: 'default', verticalAlign: 'middle',
+              }}>■{s.marker}</span>
+            )
+          )}
+        </>
+      );
+    }
+
+    // Highlighted word/sentence
     const hw = currentQ?.highlighted_word;
     if (hw && currentQ?.paragraph === idx && para.includes(hw)) {
       const parts = para.split(hw);
       return (
         <>
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#C4B5A0', marginRight: 6 }}>P{idx + 1}</span>
+          {paraLabel}
           {parts[0]}
           <span style={{
             background: 'rgba(82,130,175,0.15)', padding: '1px 3px', borderRadius: 3,
@@ -172,12 +204,8 @@ const AcademicPassage = ({ section, onComplete }) => {
         </>
       );
     }
-    return (
-      <>
-        <span style={{ fontSize: 10, fontWeight: 600, color: '#C4B5A0', marginRight: 6 }}>P{idx + 1}</span>
-        {para}
-      </>
-    );
+
+    return <>{paraLabel}{para}</>;
   };
 
   // Test interface
@@ -265,8 +293,19 @@ const AcademicPassage = ({ section, onComplete }) => {
           <h3 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
             fontSize: 18, color: colors.text, lineHeight: 1.5,
-            marginBottom: 24, fontWeight: 400,
+            marginBottom: currentQ.insert_sentence ? 12 : 24, fontWeight: 400,
           }}>{currentQ.text}</h3>
+
+          {currentQ.insert_sentence && (
+            <div style={{
+              padding: '12px 16px', marginBottom: 20,
+              background: 'rgba(74,128,96,0.06)', border: '1.5px solid rgba(74,128,96,0.25)',
+              borderRadius: 8, fontFamily: "'Georgia', serif",
+              fontSize: 15, color: colors.text, lineHeight: 1.6,
+            }}>
+              {currentQ.insert_sentence}
+            </div>
+          )}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {currentQ.options.map((opt, idx) => {

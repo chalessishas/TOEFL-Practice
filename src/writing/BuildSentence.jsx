@@ -7,7 +7,12 @@ import { buildSentenceItems } from './data/buildSentenceData.js';
 
 const STORAGE_KEY = 'toefl-writing-build-sentence';
 const TOTAL_TIME = 7 * 60;
-const TOTAL_ITEMS = buildSentenceItems.length;
+const SESSION_SIZE = 10;
+
+const shuffleAndPick = () => {
+  const shuffled = [...buildSentenceItems].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, SESSION_SIZE);
+};
 
 const loadSaved = () => {
   try {
@@ -33,6 +38,9 @@ const BuildSentence = () => {
   const savedData = useRef(loadSaved());
 
   const [started, setStarted] = useState(!!savedData.current);
+  const [sessionItems, setSessionItems] = useState(() =>
+    savedData.current?.sessionItems || shuffleAndPick()
+  );
   const [currentItem, setCurrentItem] = useState(savedData.current?.currentItem || 0);
 
   useEffect(() => { document.title = 'Build a Sentence — TOEFL Practice' }, []);
@@ -61,9 +69,9 @@ const BuildSentence = () => {
   // Save progress
   useEffect(() => {
     if (started && !showResult) {
-      saveProg({ currentItem, answers, timer });
+      saveProg({ currentItem, answers, timer, sessionItems });
     }
-  }, [currentItem, answers, timer, started, showResult]);
+  }, [currentItem, answers, timer, sessionItems, started, showResult]);
 
   // Fade animation on item change
   useEffect(() => {
@@ -80,7 +88,7 @@ const BuildSentence = () => {
         setPaused(p => !p);
       }
       if (e.code === 'ArrowRight' && started && !showResult && !showConfirm) {
-        if (currentItem < TOTAL_ITEMS - 1) goToItem(currentItem + 1);
+        if (currentItem < SESSION_SIZE - 1) goToItem(currentItem + 1);
       }
       if (e.code === 'ArrowLeft' && started && !showResult && !showConfirm) {
         if (currentItem > 0) goToItem(currentItem - 1);
@@ -99,7 +107,7 @@ const BuildSentence = () => {
   const getCurrentPlaced = () => answers[currentItem] || [];
 
   const handlePlaceWord = (word) => {
-    const item = buildSentenceItems[currentItem];
+    const item = sessionItems[currentItem];
     const placed = getCurrentPlaced();
     if (placed.includes(word)) return;
     if (placed.length >= item.correctOrder.length) return;
@@ -117,7 +125,7 @@ const BuildSentence = () => {
   };
 
   const isItemAnswered = (idx) => {
-    const item = buildSentenceItems[idx];
+    const item = sessionItems[idx];
     const placed = answers[idx] || [];
     return placed.length === item.correctOrder.length;
   };
@@ -128,7 +136,7 @@ const BuildSentence = () => {
   };
 
   const isItemCorrect = (idx) => {
-    const item = buildSentenceItems[idx];
+    const item = sessionItems[idx];
     const placed = answers[idx] || [];
     if (placed.length !== item.correctOrder.length) return false;
     return placed.every((w, i) => w === item.correctOrder[i]);
@@ -141,6 +149,7 @@ const BuildSentence = () => {
 
   const handleRetry = () => {
     clearProg();
+    setSessionItems(shuffleAndPick());
     setStarted(false);
     setCurrentItem(0);
     setAnswers({});
@@ -152,7 +161,7 @@ const BuildSentence = () => {
     savedData.current = null;
   };
 
-  const score = buildSentenceItems.filter((_, i) => isItemCorrect(i)).length;
+  const score = sessionItems.filter((_, i) => isItemCorrect(i)).length;
 
   // ─── LANDING ───
   if (!started) {
@@ -232,7 +241,7 @@ const BuildSentence = () => {
 
   // ─── RESULT ───
   if (showResult && !showReview) {
-    const pct = Math.round((score / TOTAL_ITEMS) * 100);
+    const pct = Math.round((score / SESSION_SIZE) * 100);
     const title = score >= 8 ? 'Excellent Work' : score >= 6 ? 'Good Effort' : 'Keep Practicing';
 
     return (
@@ -260,7 +269,7 @@ const BuildSentence = () => {
                 fontFamily: "'Instrument Serif', Georgia, serif",
                 fontSize: 36, color: colors.text, lineHeight: 1,
               }}>{score}</span>
-              <span style={{ fontSize: 11, color: '#aaa' }}>/ {TOTAL_ITEMS}</span>
+              <span style={{ fontSize: 11, color: '#aaa' }}>/ {SESSION_SIZE}</span>
             </div>
           </div>
 
@@ -271,7 +280,7 @@ const BuildSentence = () => {
             {title}
           </h2>
           <p style={{ fontSize: 14, color: '#888', marginBottom: 28 }}>
-            {score} of {TOTAL_ITEMS} sentences correct
+            {score} of {SESSION_SIZE} sentences correct
           </p>
 
           {/* Item grid */}
@@ -279,7 +288,7 @@ const BuildSentence = () => {
             display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8,
             maxWidth: 300, margin: '0 auto 32px',
           }}>
-            {buildSentenceItems.map((_, i) => {
+            {sessionItems.map((_, i) => {
               const correct = isItemCorrect(i);
               return (
                 <div key={i} style={{
@@ -363,7 +372,7 @@ const BuildSentence = () => {
             Answer Review
           </h2>
 
-          {buildSentenceItems.map((item, i) => {
+          {sessionItems.map((item, i) => {
             const correct = isItemCorrect(i);
             const placed = answers[i] || [];
 
@@ -444,12 +453,12 @@ const BuildSentence = () => {
   }
 
   // ─── TEST INTERFACE ───
-  const item = buildSentenceItems[currentItem];
+  const item = sessionItems[currentItem];
   const placed = getCurrentPlaced();
   const slotsTotal = item.correctOrder.length;
   const slotsRemaining = slotsTotal - placed.length;
   const isAnswered = isItemAnswered(currentItem);
-  const isLast = currentItem === TOTAL_ITEMS - 1;
+  const isLast = currentItem === SESSION_SIZE - 1;
   const answeredCount = Object.keys(answers).filter(k => isItemAnswered(Number(k))).length;
 
   return (
@@ -461,7 +470,7 @@ const BuildSentence = () => {
           <div className="confirm-dialog" onClick={e => e.stopPropagation()}>
             <h3>Submit Practice?</h3>
             <p>
-              {answeredCount} / {TOTAL_ITEMS} completed · {formatTime(timer)} remaining
+              {answeredCount} / {SESSION_SIZE} completed · {formatTime(timer)} remaining
             </p>
             <div className="confirm-actions">
               <button className="btn-cancel" onClick={() => setShowConfirm(false)}>Continue</button>
@@ -492,7 +501,7 @@ const BuildSentence = () => {
 
         {/* Question nav dots */}
         <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-          {buildSentenceItems.map((_, i) => {
+          {sessionItems.map((_, i) => {
             const done = isItemAnswered(i);
             const isCurrent = i === currentItem;
             return (
@@ -512,7 +521,7 @@ const BuildSentence = () => {
             );
           })}
           <span style={{ fontSize: 11, color: '#aaa', marginLeft: 6 }}>
-            {answeredCount}/{TOTAL_ITEMS}
+            {answeredCount}/{SESSION_SIZE}
           </span>
         </div>
       </div>

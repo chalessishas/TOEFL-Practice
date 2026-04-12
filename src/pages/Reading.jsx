@@ -11,10 +11,16 @@ const HISTORY_KEY = 'toefl-completion-history';
 const loadHistory = () => {
   try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || {}; } catch { return {}; }
 };
+const totalCorrect = (results) => results.reduce((s, r) => s + (r.correct || 0), 0)
+
 const saveHistory = (moduleId, results) => {
   try {
     const h = loadHistory();
-    h[moduleId] = { results, date: new Date().toISOString() };
+    const existing = h[moduleId]
+    // Keep best attempt (highest total correct), not just latest
+    if (!existing || totalCorrect(results) >= totalCorrect(existing.results || [])) {
+      h[moduleId] = { results, date: new Date().toISOString() }
+    }
     localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
   } catch {}
 };

@@ -169,8 +169,9 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {pack6.modules.map((mod, mi) => {
               const done = history[mod.id];
-              const readingScore = done
-                ? done.reduce((acc, r) => ({ correct: acc.correct + (r.correct || 0), total: acc.total + (r.total || 0) }), { correct: 0, total: 0 })
+              const doneResults = done?.results || (Array.isArray(done) ? done : [])
+              const readingScore = doneResults.length
+                ? doneResults.reduce((acc, r) => ({ correct: acc.correct + (r.correct || 0), total: acc.total + (r.total || 0) }), { correct: 0, total: 0 })
                 : null;
               const sectionTags = mod.sections.map(s => {
                 if (s.type === 'complete_words') return { label: 'Fill Words', color: '#e65100' };

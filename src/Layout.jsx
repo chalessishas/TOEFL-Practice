@@ -478,7 +478,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
               a.href = URL.createObjectURL(blob)
               a.download = 'toefl-vocabulary.txt'
               a.click()
-              URL.revokeObjectURL(a.href)
+              setTimeout(() => URL.revokeObjectURL(a.href), 100)
             }} style={{
               fontSize: 10, color: c.textMuted, background: 'none', border: 'none',
               cursor: 'pointer', padding: '2px 4px', fontFamily: 'inherit',

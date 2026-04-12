@@ -115,7 +115,7 @@ export default function Home() {
   const readingAccuracy = (() => {
     try {
       const rh = JSON.parse(localStorage.getItem('toefl-completion-history')) || {}
-      const all = Object.values(rh).flat()
+      const all = Object.values(rh).flatMap(v => v?.results || (Array.isArray(v) ? v : []))
       if (!all.length) return null
       const tot = all.reduce((a, r) => ({ c: a.c + (r.correct || 0), t: a.t + (r.total || 0) }), { c: 0, t: 0 })
       return tot.t ? Math.round((tot.c / tot.t) * 100) : null

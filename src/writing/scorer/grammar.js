@@ -4,6 +4,28 @@ const CONJUNCTIONS = new Set([
   'wherever','whether','that','which','who','whom','where','why','how',
 ])
 
+// Module-level constants to avoid re-instantiation on every score() call
+const SPLICE_SAFE_WORDS = new Set([
+  'however', 'moreover', 'furthermore', 'additionally', 'nevertheless',
+  'therefore', 'consequently', 'meanwhile', 'otherwise', 'instead',
+  'unfortunately', 'fortunately', 'similarly', 'alternatively',
+  'specifically', 'honestly', 'personally', 'apparently', 'obviously',
+  'clearly', 'indeed', 'certainly', 'naturally', 'surprisingly',
+  'interestingly', 'importantly', 'ideally', 'typically', 'generally',
+  'and', 'but', 'so', 'or', 'nor', 'yet', 'for',
+  'if', 'when', 'while', 'because', 'since', 'although', 'though',
+  'unless', 'until', 'after', 'before', 'where', 'whereas',
+  'forward', 'overall', 'finally', 'personally', 'frankly',
+])
+const SPLICE_SAFE_PHRASES = [
+  'moving forward', 'looking ahead', 'in addition', 'on the other hand',
+  'in contrast', 'as a result', 'in conclusion', 'to summarize',
+  'in summary', 'for example', 'in particular', 'in fact',
+  'of course', 'after all', 'at the same time', 'on the whole',
+  'in general', 'to be honest', 'to be fair', 'in my opinion',
+  'in other words', 'that said', 'having said that',
+]
+
 export function score(text) {
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0)
   if (sentences.length === 0) return { value: 0, details: 'No sentences found', errors: [] }
@@ -33,26 +55,6 @@ export function score(text) {
   })
 
   // Comma splice detection
-  const safeWords = new Set([
-    'however', 'moreover', 'furthermore', 'additionally', 'nevertheless',
-    'therefore', 'consequently', 'meanwhile', 'otherwise', 'instead',
-    'unfortunately', 'fortunately', 'similarly', 'alternatively',
-    'specifically', 'honestly', 'personally', 'apparently', 'obviously',
-    'clearly', 'indeed', 'certainly', 'naturally', 'surprisingly',
-    'interestingly', 'importantly', 'ideally', 'typically', 'generally',
-    'and', 'but', 'so', 'or', 'nor', 'yet', 'for',
-    'if', 'when', 'while', 'because', 'since', 'although', 'though',
-    'unless', 'until', 'after', 'before', 'where', 'whereas',
-    'forward', 'overall', 'finally', 'personally', 'frankly',
-  ])
-  const safePhrases = [
-    'moving forward', 'looking ahead', 'in addition', 'on the other hand',
-    'in contrast', 'as a result', 'in conclusion', 'to summarize',
-    'in summary', 'for example', 'in particular', 'in fact',
-    'of course', 'after all', 'at the same time', 'on the whole',
-    'in general', 'to be honest', 'to be fair', 'in my opinion',
-    'in other words', 'that said', 'having said that',
-  ]
   const lines = text.split('\n')
   lines.forEach(line => {
     const commaSpliceRegex = /,\s+(I|he|she|they|we|it)\s+\w+/gi
@@ -62,8 +64,8 @@ export function score(text) {
       const before = line.substring(Math.max(0, pos - 50), pos).toLowerCase()
       const lastWordMatch = before.match(/(\w+)\s*$/)
       const lastWord = lastWordMatch ? lastWordMatch[1] : ''
-      const hasPhrase = safePhrases.some(p => before.includes(p))
-      if (!safeWords.has(lastWord) && !hasPhrase) {
+      const hasPhrase = SPLICE_SAFE_PHRASES.some(p => before.includes(p))
+      if (!SPLICE_SAFE_WORDS.has(lastWord) && !hasPhrase) {
         errors.push(`Possible comma splice: "${csMatch[0].trim()}"`)
       }
     }

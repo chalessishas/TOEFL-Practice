@@ -60,12 +60,12 @@ src/
 │       ├── index.js      # 加权聚合 → TOEFL [0-5] 标度
 │       ├── grammar.js    # 7% - 片段句/连缀句/双重否定
 │       ├── mechanics.js  # 10% - 275k 词典拼写检查
-│       ├── vocabulary.js # 18% - 词长 + 稀有词比例
-│       ├── organization.js # 30% - 篇章标记词/段落/任务线索/peer engagement (5-tier)
-│       ├── development.js  # 24% - 字数范围/细节密度
+│       ├── vocabulary.js # 14% - 词长 + 稀有词比例 (2026-04-12 recalibrated from 18%)
+│       ├── organization.js # 33% - 篇章标记词/段落/任务线索/peer engagement (2026-04-12 from 30%)
+│       ├── development.js  # 28% - 字数范围/细节密度 (2026-04-12 recalibrated from 24%)
 │       ├── style.js      # 3% - TTR/句长方差/重复惩罚/句型多样性 (5 syntactic patterns)
 │       ├── wordlist.js   # validWords 15k + commonWords 5k
-│       ├── relevance.js  # 8% - keyword overlap with prompt (stem-normalized)
+│       ├── relevance.js  # 5% - keyword overlap with prompt (stem-normalized, 2026-04-12 from 8%)
 │       └── english-words.js # 275k 词典 (2.7MB, Vite manual chunk)
 └── shared/
     ├── Timer.jsx         # 倒计时, props: totalTime/paused/onTimeUp
@@ -97,7 +97,7 @@ src/
 2. **Reading.jsx 已重构**: 拆为 src/reading/ 4 个子组件（ReadingHome / DailyLifeReading / AcademicPassage / LegacyReadingTest），orchestrator 228 行
 3. **localStorage 无迁移机制**: 数据结构变更会导致旧数据失效，缺少版本号 + 迁移逻辑
 4. **Grammar 模块误判**: 动词模式匹配阈值已调过一轮，但仍有边界 case
-5. **Dark Mode 开关存在但未接入**: Layout Settings 面板有 UI，逻辑空置
+5. **Dark Mode 已接入**: ThemeContext + useTheme() hook，Settings 面板 toggle 可用，localStorage 持久化
 6. **Error Boundary**: ErrorBoundary.jsx wraps Layout — shows error message + Go Home button on uncaught exceptions
 7. **无输入 sanitization**: textarea 内容未做 XSS 防护
 8. **评分权重手动调整**: 未与真实 TOEFL 评分做基准验证

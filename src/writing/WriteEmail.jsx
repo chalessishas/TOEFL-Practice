@@ -35,7 +35,7 @@ const WriteEmail = () => {
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
-  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? 0)
+  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? Math.floor(Math.random() * emailPrompts.length))
 
   useEffect(() => { document.title = 'Write an Email — TOEFL Practice' }, [])
   const [subject, setSubject] = useState(savedData.current?.subject ?? '')
@@ -78,6 +78,7 @@ const WriteEmail = () => {
     setPaused(false)
     setShowResult(false)
     setScoreResult(null)
+    setPromptIdx(Math.floor(Math.random() * emailPrompts.length))
     savedData.current = null
   }
 

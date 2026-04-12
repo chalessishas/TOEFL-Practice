@@ -35,7 +35,7 @@ const AcademicDiscussion = () => {
   const savedData = useRef(loadSaved())
 
   const [started, setStarted] = useState(!!savedData.current)
-  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? 0)
+  const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? Math.floor(Math.random() * discussionPrompts.length))
 
   useEffect(() => { document.title = 'Academic Discussion — TOEFL Practice' }, [])
   const [response, setResponse] = useState(savedData.current?.response ?? '')
@@ -73,6 +73,7 @@ const AcademicDiscussion = () => {
     setPaused(false)
     setShowResult(false)
     setScoreResult(null)
+    setPromptIdx(Math.floor(Math.random() * discussionPrompts.length))
     savedData.current = null
   }
 

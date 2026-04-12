@@ -102,6 +102,21 @@ export function score(text) {
     }
   })
 
+  // Article misuse (a vs an) — #2 ESL error type in e-rater.
+  // Only flag the high-precision case: "a" before a vowel-sounding word.
+  // Exclude words that start with a vowel letter but have a consonant sound (/j/ or /w/):
+  //   uni*, eu*, use/user/usual/utility, one/once/only, hour (silent h → valid "an hour")
+  const articlePattern = /\ba\s+([aeiou]\w*)/gi
+  // Words starting with vowel letter but /j/ or /w/ sound — "a" is correct before these
+  const jawSound = /^(uni|eu|use|user|usual|usua|utili|one\b|once\b|onc)/i
+  let artMatch
+  while ((artMatch = articlePattern.exec(text)) !== null) {
+    const word = artMatch[1]
+    if (!jawSound.test(word)) {
+      errors.push(`Possible article error: "a ${word.substring(0, 15)}" — should be "an" before a vowel sound`)
+    }
+  }
+
   // SVA (subject-verb agreement) — #1 penalized feature for ESL writers in e-rater
   // High-precision patterns: the erroneous form is structurally distinctive enough
   // that false positives are very rare in normal academic prose.
@@ -142,5 +157,7 @@ export function suggest(analysis) {
     tips.push('Avoid using two negatives in the same clause.')
   if (analysis.errors.some(e => e.includes('SVA')))
     tips.push('Check subject-verb agreement: "everyone/nobody/each" takes a singular verb, and uncountable nouns (information, advice, news) always use "is" not "are".')
+  if (analysis.errors.some(e => e.includes('article error')))
+    tips.push('Use "an" before words that begin with a vowel sound (an important point, an example, an idea).')
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

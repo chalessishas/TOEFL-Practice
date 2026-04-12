@@ -52,7 +52,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 ## 已完成
 - [100%] 阅读模块：Urban Agriculture 文章 + 10 题 + Pack 6 (6 模块)
 - [100%] 填空题 (Complete Words)
-- [100%] 写作三大任务：造句 / 邮件 / 讨论
+- [100%] 写作三大任务：造句（20 题选 10）/ 邮件（10 条 prompt）/ 讨论（10 条 prompt）
 - [100%] e-rater 6 维评分引擎 + 275k 英文词典（拼写误报率接近 0）
 - [100%] 字母评级系统 (Excellent/Good/Fair/Weak)
 - [100%] 定时器 + 全屏任务界面

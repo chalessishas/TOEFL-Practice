@@ -110,7 +110,7 @@ export function score(text) {
       msg: 'SVA: indefinite pronouns (everyone, nobody, etc.) take singular verbs (is/was/has/does)' },
     { re: /\bthe\s+number\s+of\s+\w+\s+are\b/i,
       msg: 'SVA: "the number of [noun]" takes a singular verb ("is")' },
-    { re: /\beach\s+(of\s+(the|these|those)\s+\w+\s+)?(are|were|have)\b/i,
+    { re: /\beach\s+(?:of\s+(?:the|these|those)\s+)?\w+\s+(are|were|have)\b/i,
       msg: 'SVA: "each" takes a singular verb (is/was/has)' },
     { re: /\b(the\s+)?(information|advice|news|knowledge|furniture|equipment|progress)\s+are\b/i,
       msg: 'SVA: uncountable noun takes a singular verb ("is")' },

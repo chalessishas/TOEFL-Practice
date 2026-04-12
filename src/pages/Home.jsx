@@ -125,16 +125,16 @@ export default function Home() {
       .slice(-10)
       .map(h => h.score)
     if (pts.length < 2) return null
-    const W = 260, H = 40, pad = 4
-    const minV = Math.min(...pts), maxV = Math.max(...pts)
-    const range = maxV - minV || 1
-    const x = (i) => pad + (i / (pts.length - 1)) * (W - pad * 2)
-    const y = (v) => H - pad - ((v - minV) / range) * (H - pad * 2)
+    const W = 260, H = 44, padX = 4, padY = 6
+    // Fixed 0–5 axis so score level is visible, not just relative change
+    const x = (i) => padX + (i / (pts.length - 1)) * (W - padX * 2)
+    const y = (v) => H - padY - (v / 5) * (H - padY * 2)
     const points = pts.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
-    const rising = pts[pts.length - 1] > pts[0]
-    const flat = pts[pts.length - 1] === pts[0]
-    const color = flat ? '#aaa' : rising ? '#22c55e' : '#f87171'
-    return { points, color, W, H, pts, x, y }
+    const last = pts[pts.length - 1], first = pts[0]
+    const delta = last - first
+    const color = Math.abs(delta) < 0.1 ? '#aaa' : delta > 0 ? '#22c55e' : '#f87171'
+    const deltaLabel = delta > 0 ? `+${delta.toFixed(1)}` : delta < 0 ? delta.toFixed(1) : '—'
+    return { points, color, W, H, pts, x, y, deltaLabel }
   })()
 
   return (
@@ -184,10 +184,25 @@ export default function Home() {
           border: `1px solid ${colors.borderLight}`,
         }}>
           <div style={{
-            fontSize: 10, color: '#aaa', textTransform: 'uppercase',
-            letterSpacing: '0.05em', fontFamily: fonts.body, marginBottom: 8,
-          }}>Writing score trend (last {writingTrend.pts.length})</div>
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8,
+          }}>
+            <div style={{
+              fontSize: 10, color: colors.textMuted, textTransform: 'uppercase',
+              letterSpacing: '0.05em', fontFamily: fonts.body,
+            }}>Writing score trend (last {writingTrend.pts.length})</div>
+            <div style={{
+              fontSize: 11, fontWeight: 700, color: writingTrend.color, fontFamily: fonts.body,
+            }}>{writingTrend.deltaLabel}</div>
+          </div>
           <svg width="100%" viewBox={`0 0 ${writingTrend.W} ${writingTrend.H}`} style={{ display: 'block', overflow: 'visible' }}>
+            {/* Y-axis reference lines at 0, 2.5, 5 */}
+            {[0, 2.5, 5].map(v => (
+              <line key={v}
+                x1="0" y1={writingTrend.y(v).toFixed(1)}
+                x2={writingTrend.W} y2={writingTrend.y(v).toFixed(1)}
+                stroke={colors.borderLight} strokeWidth="0.5" strokeDasharray="3,3"
+              />
+            ))}
             <polyline
               points={writingTrend.points}
               fill="none"

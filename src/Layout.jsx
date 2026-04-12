@@ -466,7 +466,25 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
 
     return (
       <>
-        {sectionTitle('Vocabulary Notebook')}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: 16 }}>
+          {sectionTitle('Vocabulary Notebook')}
+          {vocab.length > 0 && (
+            <button onClick={() => {
+              const lines = vocab.map(v =>
+                [v.word, v.meaning, v.context || '', v.mastery || 'new'].join('\t')
+              )
+              const blob = new Blob(['word\tmeaning\tcontext\tmastery\n' + lines.join('\n')], { type: 'text/plain' })
+              const a = document.createElement('a')
+              a.href = URL.createObjectURL(blob)
+              a.download = 'toefl-vocabulary.txt'
+              a.click()
+              URL.revokeObjectURL(a.href)
+            }} style={{
+              fontSize: 10, color: c.textMuted, background: 'none', border: 'none',
+              cursor: 'pointer', padding: '2px 4px', fontFamily: 'inherit',
+            }} title="Export as tab-separated text">↓ export</button>
+          )}
+        </div>
         {/* Mastery filter tabs */}
         {vocab.length > 0 && (() => {
           const counts = { all: vocab.length, new: 0, learning: 0, known: 0 }

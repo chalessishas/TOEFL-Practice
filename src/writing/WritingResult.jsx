@@ -1,6 +1,7 @@
 import React from 'react'
 import './writing.css'
 import { useTheme } from '../shared/ThemeContext.jsx'
+import { getHistory } from './scoreHistory.js'
 
 const DIMENSION_LABELS = {
   grammar:      'Grammar',
@@ -28,6 +29,13 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
   const { colors } = useTheme()
   const pct = Math.round((score.overall / 5) * 100)
   const title = getTitle(score.overall)
+
+  const history = getHistory().filter(h => h.type === taskType)
+  // exclude the just-submitted entry (last item) when computing prior best
+  const prior = history.slice(0, -1)
+  const personalBest = prior.length > 0 ? Math.max(...prior.map(h => h.score)) : null
+  const isNewBest = personalBest !== null && score.overall > personalBest
+  const delta = personalBest !== null ? (score.overall - personalBest).toFixed(1) : null
 
   return (
     <div style={{
@@ -65,10 +73,26 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
 
           <h2 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 28, color: colors.text, fontWeight: 400, marginBottom: 0,
+            fontSize: 28, color: colors.text, fontWeight: 400, marginBottom: 8,
           }}>
             {title}
           </h2>
+          {isNewBest && (
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(90,154,110,0.1)', border: '1px solid rgba(90,154,110,0.3)',
+              borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 600, color: '#5a9a6e',
+            }}>
+              ★ New personal best! +{delta} vs your previous best ({personalBest})
+            </div>
+          )}
+          {!isNewBest && personalBest !== null && (
+            <div style={{
+              fontSize: 12, color: '#aaa',
+            }}>
+              {delta > 0 ? `▲ ${delta} above` : delta < 0 ? `▼ ${Math.abs(delta)} below` : '='} your personal best ({personalBest}/5)
+            </div>
+          )}
         </div>
 
         {/* Dimension Bars */}

@@ -151,11 +151,13 @@ const BuildSentence = () => {
     const finalScore = sessionItems.filter((_, i) => isItemCorrect(i)).length;
     appendScore({ type: 'build-sentence', correct: finalScore, total: SESSION_SIZE });
 
-    // Persist wrong item IDs for adaptive prioritization next session
-    const wrongIds = sessionItems
-      .filter((_, i) => !isItemCorrect(i))
-      .map(it => it.id);
-    saveWrongIds(wrongIds);
+    // Adaptive: merge prev wrong set ∪ this session's wrong, minus this session's correct
+    const prevWrong = new Set(loadWrongIds());
+    sessionItems.forEach((item, i) => {
+      if (isItemCorrect(i)) prevWrong.delete(item.id);
+      else prevWrong.add(item.id);
+    });
+    saveWrongIds([...prevWrong]);
 
     setShowResult(true);
     clearProg();

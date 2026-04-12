@@ -64,6 +64,10 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const [newContext, setNewContext] = useState('')
   const [masteryFilter, setMasteryFilter] = useState('all')
   const [flippedIds, setFlippedIds] = useState(new Set())
+  const [reviewQueue, setReviewQueue] = useState(null)  // null = not in review; array = active session
+  const [reviewIdx, setReviewIdx] = useState(0)
+  const [reviewFlipped, setReviewFlipped] = useState(false)
+  const [reviewDone, setReviewDone] = useState(0)  // count advanced this session
   useEffect(() => { setHistory(getHistory()) }, [activePanel])
 
   const writingEntries = history.filter(h => h.type === 'email' || h.type === 'discussion')
@@ -308,6 +312,103 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
       saveVocab(updated)
     }
 
+    const startReview = (words) => {
+      setReviewQueue([...words].sort(() => Math.random() - 0.5))
+      setReviewIdx(0)
+      setReviewFlipped(false)
+      setReviewDone(0)
+    }
+
+    const advanceReview = (advance) => {
+      const card = reviewQueue[reviewIdx]
+      if (advance) {
+        const order = ['new', 'learning', 'known']
+        const next = order[Math.min(order.indexOf(card.mastery || 'new') + 1, 2)]
+        const updated = vocab.map(v => v.id !== card.id ? v : { ...v, mastery: next })
+        setVocab(updated)
+        saveVocab(updated)
+        setReviewDone(d => d + 1)
+      }
+      if (reviewIdx + 1 >= reviewQueue.length) {
+        setReviewQueue([...reviewQueue])  // keep queue for summary, bump idx past end
+        setReviewIdx(reviewQueue.length)
+      } else {
+        setReviewIdx(i => i + 1)
+        setReviewFlipped(false)
+      }
+    }
+
+    // — Review mode UI —
+    if (reviewQueue !== null) {
+      const finished = reviewIdx >= reviewQueue.length
+      if (finished) {
+        return (
+          <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <div style={{ fontSize: 28 }}>🎉</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: c.textPrimary, textAlign: 'center' }}>
+              Session complete
+            </div>
+            <div style={{ fontSize: 12, color: c.textMuted, textAlign: 'center', lineHeight: 1.5 }}>
+              {reviewDone} of {reviewQueue.length} word{reviewQueue.length !== 1 ? 's' : ''} advanced
+            </div>
+            <button onClick={() => setReviewQueue(null)} style={{
+              marginTop: 8, fontSize: 12, fontWeight: 600, padding: '7px 18px',
+              borderRadius: 20, border: 'none', cursor: 'pointer',
+              background: colors.primary, color: 'white', fontFamily: 'inherit',
+            }}>Back to notebook</button>
+          </div>
+        )
+      }
+
+      const card = reviewQueue[reviewIdx]
+      return (
+        <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button onClick={() => setReviewQueue(null)} style={{
+              fontSize: 11, color: c.textMuted, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+            }}>← Exit</button>
+            <span style={{ fontSize: 11, color: c.textMuted }}>
+              {reviewIdx + 1} / {reviewQueue.length}
+            </span>
+          </div>
+          {/* Card */}
+          <div onClick={() => setReviewFlipped(f => !f)} style={{
+            minHeight: 110, padding: '16px 14px',
+            background: reviewFlipped ? 'rgba(0,105,92,0.06)' : c.cardBg,
+            border: `1px solid ${reviewFlipped ? 'rgba(0,105,92,0.3)' : c.cardBorder}`,
+            borderRadius: 8, cursor: 'pointer', transition: 'background 0.15s',
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6,
+          }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: c.textPrimary }}>{card.word}</div>
+            {card.context && !reviewFlipped && (
+              <div style={{ fontSize: 11, color: c.textMuted, fontStyle: 'italic', lineHeight: 1.4 }}>
+                {card.context.length > 70 ? card.context.slice(0, 70) + '…' : card.context}
+              </div>
+            )}
+            {reviewFlipped
+              ? <div style={{ fontSize: 13, color: colors.primary, fontWeight: 600 }}>{card.meaning}</div>
+              : <div style={{ fontSize: 10, color: c.textMuted, marginTop: 4 }}>tap to reveal meaning</div>
+            }
+          </div>
+          {/* Action buttons */}
+          {reviewFlipped && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => advanceReview(false)} style={{
+                flex: 1, fontSize: 11, fontWeight: 600, padding: '7px 0',
+                borderRadius: 6, border: `1px solid ${c.cardBorder}`,
+                cursor: 'pointer', background: c.cardBg, color: c.textMuted, fontFamily: 'inherit',
+              }}>Still learning</button>
+              <button onClick={() => advanceReview(true)} style={{
+                flex: 1, fontSize: 11, fontWeight: 600, padding: '7px 0',
+                borderRadius: 6, border: 'none',
+                cursor: 'pointer', background: colors.primary, color: 'white', fontFamily: 'inherit',
+              }}>Got it ✓</button>
+            </div>
+          )}
+        </div>
+      )
+    }
+
     return (
       <>
         {sectionTitle('Vocabulary Notebook')}
@@ -322,7 +423,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
             { key: 'known', label: 'Known', color: '#22c55e' },
           ]
           return (
-            <div style={{ display: 'flex', gap: 4, padding: '0 16px 10px' }}>
+            <div style={{ display: 'flex', gap: 4, padding: '0 16px 10px', flexWrap: 'wrap' }}>
               {tabs.map(t => (
                 <button key={t.key} onClick={() => setMasteryFilter(t.key)} style={{
                   fontSize: 10, padding: '3px 7px', borderRadius: 20, border: 'none',
@@ -336,6 +437,17 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
                   {t.label} {counts[t.key]}
                 </button>
               ))}
+              {(() => {
+                const reviewable = vocab.filter(v => masteryFilter === 'all' || (v.mastery || 'new') === masteryFilter)
+                if (reviewable.length === 0) return null
+                return (
+                  <button onClick={() => startReview(reviewable)} style={{
+                    fontSize: 10, padding: '3px 7px', borderRadius: 20, border: 'none',
+                    cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600, marginLeft: 'auto',
+                    background: isDark ? '#2a3a30' : '#e6f4f1', color: colors.primary,
+                  }}>▶ Review</button>
+                )
+              })()}
             </div>
           )
         })()}

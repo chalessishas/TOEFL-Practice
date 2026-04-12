@@ -54,11 +54,12 @@ src/
 │       ├── index.js      # 加权聚合 → TOEFL [0-5] 标度
 │       ├── grammar.js    # 7% - 片段句/连缀句/双重否定
 │       ├── mechanics.js  # 10% - 275k 词典拼写检查
-│       ├── vocabulary.js # 14% - 词长 + 稀有词比例
-│       ├── organization.js # 32% - 篇章标记词/段落/任务线索
-│       ├── development.js  # 30% - 字数范围/细节密度
-│       ├── style.js      # 7% - TTR/句长方差/重复惩罚
+│       ├── vocabulary.js # 18% - 词长 + 稀有词比例
+│       ├── organization.js # 30% - 篇章标记词/段落/任务线索/peer engagement
+│       ├── development.js  # 24% - 字数范围/细节密度
+│       ├── style.js      # 3% - TTR/句长方差/重复惩罚/句型多样性
 │       ├── wordlist.js   # validWords 15k + commonWords 5k
+│       ├── relevance.js  # 8% - keyword overlap with prompt (stem-normalized)
 │       └── english-words.js # 275k 词典 (2.7MB, Vite manual chunk)
 └── shared/
     ├── Timer.jsx         # 倒计时, props: totalTime/paused/onTimeUp

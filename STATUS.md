@@ -101,6 +101,9 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] relevance.js 邮件逐条 goal 评分 — 3 个 goals 独立覆盖检测，suggest() 精确指出未覆盖的 goal (64e31cc)
 - [100%] organization.js 话语标记类别多样性 — 6 种功能类别（对比/补充/结论/举例/顺序/阐发）+ inferential/concessive 比例奖励 (145384e)
 - [100%] 评分引擎 v3 校准 (2026-04-12) — Email 样例平均 4.73/5（原 3.85），Discussion 样例平均 4.01/5（原 3.52）；邮件/讨论任务各维度权重独立校准 (c2087ae)
+- [100%] vocabulary.js MTLD — 双向 MTLD 替换 TTR（McCarthy & Jarvis 2010，与人工评分 r=0.79 vs TTR r=0.61）
+- [100%] organization.js 3-zone bonus — discussion 三区结构检测（Burstein 2003，位置模型 org-score Pearson +4）
+- [100%] scorer/index.js build-a-sentence guard — 2026 新题型直接返回 0 不走 prose 评分
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

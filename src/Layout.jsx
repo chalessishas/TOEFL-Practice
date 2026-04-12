@@ -126,12 +126,14 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   if (activePanel === 'progress') {
     const recent = [...history].reverse().slice(0, 6)
     const typeLabel = { email: 'Email', discussion: 'Discussion', 'build-sentence': 'Build Sentence' }
-    const scoreBar = (label, value, max) => (
+    const scoreBar = (label, value, max, pct = false) => (
       <div key={label} style={{ marginBottom: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
           <span style={{ fontSize: 11, color: c.textMid }}>{label}</span>
           <span style={{ fontSize: 11, color: c.textMuted }}>
-            {value != null ? `${(value * max).toFixed(1)}/${max}` : `—/${max}`}
+            {value != null
+              ? pct ? `${Math.round(value * 100)}%` : `${(value * max).toFixed(1)}/${max}`
+              : pct ? '—' : `—/${max}`}
           </span>
         </div>
         <div style={{ height: 4, background: c.trackBg, borderRadius: 2 }}>
@@ -189,7 +191,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
                 ['Mechanics', avgBreakdown.mechanics],
                 ['Grammar', avgBreakdown.grammar],
                 ['Style', avgBreakdown.style],
-              ].map(([label, val]) => scoreBar(label, val, 100))
+              ].map(([label, val]) => scoreBar(label, val, 1, true))
             : <p style={{ fontSize: 11, color: c.textMuted, lineHeight: 1.6 }}>Submit a writing task to see skill breakdown.</p>
           }
         </div>

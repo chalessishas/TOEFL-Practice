@@ -60,7 +60,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] 侧边栏 5 面板：练习 / 进度 / 笔记本 / 学习计划 / 设置
 
 ## 进行中 / 待完成
-- [0%] 深色模式（UI 有 toggle，逻辑未接通）
+- [100%] 深色模式 — ThemeContext + darkColors + Settings toggle 接通，localStorage 持久化 (da5fb14)
 - [0%] 设置项联动（计时器显隐、快捷键提示等）
 - [0%] 笔记本/生词本后端持久化
 - [0%] 学习计划动态化（当前是静态占位）

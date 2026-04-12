@@ -1091,7 +1091,7 @@ const AcademicPassage = ({ section, onComplete }) => {
 // Legacy Reading Test (original component)
 // ═══════════════════════════════════════════
 const LegacyReadingTest = ({ onBack }) => {
-  const { colors } = useTheme()
+  const { colors, isTimerVisible } = useTheme()
   const TOTAL_TIME = 20 * 60;
   const saved = useRef(loadProgress(STORAGE_KEY));
   const questions = legacyQuestions;
@@ -1247,10 +1247,10 @@ const LegacyReadingTest = ({ onBack }) => {
             <button onClick={onBack} style={{ fontSize: 12, color: colors.textMuted, background: 'none', border: `1px solid ${colors.border}`, borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>← Home</button>
             <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 600, color: colors.text }}>Urban Agriculture</span>
           </div>
-          <button className="timer-btn" onClick={() => setPaused(p => !p)} style={{ color: timer < 120 ? '#b06060' : colors.textMuted, background: timer < 120 ? 'rgba(176,96,96,0.08)' : 'rgba(0,0,0,0.03)' }}>
+          {isTimerVisible && <button className="timer-btn" onClick={() => setPaused(p => !p)} style={{ color: timer < 120 ? '#b06060' : colors.textMuted, background: timer < 120 ? 'rgba(176,96,96,0.08)' : 'rgba(0,0,0,0.03)' }}>
             {paused ? '▶' : '⏸'} {formatTime(timer)}
             {paused && <span className="pause-badge">PAUSED</span>}
-          </button>
+          </button>}
         </div>
         <div ref={passageRef} className="passage-content" style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
           {paragraphs.map((para, idx) => (

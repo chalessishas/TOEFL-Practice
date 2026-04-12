@@ -221,14 +221,14 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
           ].map((s, i) => {
             const teal = isDark ? '#4db6ac' : '#00695c'
             return (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: s.onChange ? 1 : 0.4 }}>
                 <span style={{ fontSize: 12, color: isDark ? '#aaa' : '#555' }}>{s.label}</span>
                 <div
                   onClick={s.onChange ?? undefined}
                   style={{
                     width: 32, height: 18, borderRadius: 9,
                     background: s.value ? teal : (isDark ? '#444' : '#ccc'),
-                    position: 'relative', cursor: s.onChange ? 'pointer' : 'default',
+                    position: 'relative', cursor: s.onChange ? 'pointer' : 'not-allowed',
                     transition: 'background 0.2s',
                   }}
                 >

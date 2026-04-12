@@ -70,18 +70,29 @@ export function score(text, taskType = 'general') {
 
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}`,
+    details: `${uniqueMarkers} unique discourse markers, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}`,
   }
 }
 
 export function suggest(analysis) {
   if (analysis.value >= 0.8) return []
   const tips = []
+  const taskTypeMatch = analysis.details.match(/taskType=(\w+)/)
+  const taskType = taskTypeMatch ? taskTypeMatch[1] : 'general'
+
   if (analysis.details.includes('0 unique discourse markers') || analysis.value < 0.5)
     tips.push('Use discourse markers (however, moreover, in conclusion) to connect your ideas.')
   if (analysis.details.includes('1 paragraph'))
     tips.push('Divide your response into multiple paragraphs for clarity.')
-  if (analysis.details.includes('taskScore=0.00') || analysis.details.includes('taskScore=0.10') || analysis.details.includes('taskScore=0.30'))
-    tips.push('For Academic Discussion: explicitly reference a classmate\'s idea — mention what they said and build on or contrast it.')
+
+  const lowTaskScore = analysis.details.includes('taskScore=0.00') || analysis.details.includes('taskScore=0.10') || analysis.details.includes('taskScore=0.30')
+  if (lowTaskScore) {
+    if (taskType === 'discussion')
+      tips.push('Explicitly reference a classmate\'s idea — mention what they said and build on or contrast it.')
+    else if (taskType === 'email')
+      tips.push('Open with a greeting (Dear..., Hello...) and close with a sign-off (Regards, Thank you, Best wishes).')
+    else
+      tips.push('Add an opening sentence that states your purpose and a closing sentence that wraps up your main point.')
+  }
   return tips.length > 0 ? tips : ['Improve cohesion by using transition phrases between ideas.']
 }

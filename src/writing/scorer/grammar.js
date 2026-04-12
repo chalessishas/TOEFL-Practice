@@ -25,6 +25,13 @@ const SPLICE_SAFE_PHRASES = [
   'in general', 'to be honest', 'to be fair', 'in my opinion',
   'in other words', 'that said', 'having said that',
 ]
+// Subordinating conjunctions that start a dependent clause — if a sentence
+// begins with one of these, the pattern "Dep clause, I/he/..." is valid grammar.
+const SENTENCE_STARTERS = new Set([
+  'while','although','though','even though','whereas','when','whenever',
+  'since','because','if','unless','until','after','before','as',
+  'once','wherever','whether','provided','given','assuming',
+])
 
 export function score(text) {
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0)
@@ -57,6 +64,11 @@ export function score(text) {
   // Comma splice detection
   const lines = text.split('\n')
   lines.forEach(line => {
+    // Skip lines that begin with a subordinating conjunction — these use the valid
+    // "Dependent clause, Main clause" structure (e.g. "While X is true, I believe Y")
+    const firstWord = line.trim().split(/\s+/)[0]?.toLowerCase() ?? ''
+    if (SENTENCE_STARTERS.has(firstWord)) return
+
     const commaSpliceRegex = /,\s+(I|he|she|they|we|it)\s+\w+/gi
     let csMatch
     while ((csMatch = commaSpliceRegex.exec(line)) !== null) {

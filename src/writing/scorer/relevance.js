@@ -29,6 +29,42 @@ function extractKeywords(text, topN = 15) {
     .map(([w]) => w)
 }
 
+// For short goal strings, frequency ranking is meaningless — just return all content words
+function extractGoalKeywords(goalText) {
+  return (goalText.match(/[a-zA-Z]+/g) || [])
+    .map(w => w.toLowerCase())
+    .filter(w => w.length > 3 && !STOP_WORDS.has(w))
+}
+
+// Per-goal scoring for email tasks: each goal is scored as covered (≥1 keyword match) or not
+function scoreByGoals(responseText, goals) {
+  const responseTokens = (responseText.match(/[a-zA-Z]+/g) || []).map(w => w.toLowerCase())
+  const responseStems = new Set(responseTokens.map(stem))
+
+  const goalResults = goals.map(goal => {
+    const keywords = extractGoalKeywords(goal)
+    const stemmed = keywords.map(stem)
+    const matches = stemmed.filter(s => responseStems.has(s)).length
+    // A goal is covered if at least 1 of its content words (stemmed) appears in the response.
+    // For 2-4 word goals, matching 1 content word is a reasonable proxy for addressing the intent.
+    const covered = matches >= 1
+    return { goal, covered }
+  })
+
+  const coveredCount = goalResults.filter(r => r.covered).length
+  const value = goals.length > 0 ? coveredCount / goals.length : 0.7
+
+  const uncoveredGoals = goalResults.filter(r => !r.covered).map(r => r.goal)
+  const errors = uncoveredGoals.map(g => `Goal not clearly addressed: "${g}"`)
+
+  return {
+    value,
+    details: `Addressed ${coveredCount}/${goals.length} email goal(s)`,
+    errors,
+    uncoveredGoals,
+  }
+}
+
 // Simple stemmer: strip common suffixes to improve match rate
 function stem(word) {
   return word
@@ -49,8 +85,14 @@ function stem(word) {
  * Returns { value: 0–1, details, errors }
  *
  * Called from scorer/index.js with the prompt text injected per task.
+ * @param {string[]} [goals] - Optional: email task goal bullets for per-goal scoring
  */
-export function score(responseText, promptText = '') {
+export function score(responseText, promptText = '', goals = null) {
+  // Email tasks: score per goal bullet for precise task-completion feedback
+  if (goals && goals.length > 0) {
+    return scoreByGoals(responseText, goals)
+  }
+
   if (!promptText || promptText.trim().length === 0) {
     return { value: 0.7, details: 'No prompt provided — skipping relevance check', errors: [] }
   }
@@ -83,6 +125,10 @@ export function score(responseText, promptText = '') {
 
 export function suggest(analysis) {
   if (analysis.value >= 0.7) return []
+  // Per-goal mode: surface which specific bullets weren't addressed
+  if (analysis.uncoveredGoals && analysis.uncoveredGoals.length > 0) {
+    return analysis.uncoveredGoals.map(g => `Make sure to address this goal in your email: "${g}"`)
+  }
   const coverMatch = analysis.details.match(/coverage: (\d+)%/)
   if (coverMatch && parseInt(coverMatch[1]) < 50) {
     return ['Make sure you directly address the professor\'s question — use key terms from the prompt in your response.']

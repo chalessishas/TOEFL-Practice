@@ -27,12 +27,13 @@ const WEIGHTS = {
 /**
  * Score a writing sample.
  *
- * @param {string} text       - The essay/email/discussion text
- * @param {string} taskType   - 'email' | 'discussion' | 'general'
- * @param {string} promptText - Optional: the prompt/question text for relevance scoring
+ * @param {string}   text       - The essay/email/discussion text
+ * @param {string}   taskType   - 'email' | 'discussion' | 'general'
+ * @param {string}   promptText - Optional: the prompt/question text for relevance scoring
+ * @param {string[]} goals      - Optional: email goal bullets for per-goal relevance scoring
  * @returns {{ overall: number, breakdown: object, suggestions: string[] }}
  */
-export function scoreWriting(text, taskType = 'general', promptText = '') {
+export function scoreWriting(text, taskType = 'general', promptText = '', goals = null) {
   const analyses = {
     grammar:      grammar.score(text),
     mechanics:    mechanics.score(text),
@@ -40,7 +41,7 @@ export function scoreWriting(text, taskType = 'general', promptText = '') {
     organization: organization.score(text, taskType),
     development:  development.score(text, taskType),
     style:        style.score(text),
-    relevance:    relevance.score(text, promptText),
+    relevance:    relevance.score(text, promptText, goals),
   }
 
   // Weighted sum → raw score in [0, 1]

@@ -34,6 +34,9 @@ const WEIGHTS = {
  * @returns {{ overall: number, breakdown: object, suggestions: string[] }}
  */
 export function scoreWriting(text, taskType = 'general', promptText = '', goals = null) {
+  // Build-a-sentence is a syntax assembly task — prose rubrics do not apply.
+  if (taskType === 'build-a-sentence') return { overall: 0, breakdown: {}, suggestions: [] }
+
   const analyses = {
     grammar:      grammar.score(text),
     mechanics:    mechanics.score(text),

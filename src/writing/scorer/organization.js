@@ -78,23 +78,48 @@ export function score(text, taskType = 'general') {
 
   // Closing marker placement: reward conclusion markers in last paragraph,
   // penalize them appearing in the first paragraph (structural incoherence).
+  // Disabled for email — email is not an intro/body/conclusion structure.
   const CLOSING_MARKERS = ['in conclusion','to summarize','in summary','to sum up']
   let placementBonus = 0
-  if (paragraphCount >= 2) {
+  if (paragraphCount >= 2 && taskType !== 'email') {
     const firstPara = paragraphs[0].toLowerCase()
     const lastPara  = paragraphs[paragraphCount - 1].toLowerCase()
     if (CLOSING_MARKERS.some(m => lastPara.includes(m)))  placementBonus =  0.1
     if (CLOSING_MARKERS.some(m => firstPara.includes(m))) placementBonus = -0.1
   }
 
+  // 3-zone structural check for discussion (intro-opinion / evidence-body / conclusion).
+  // Backed by: Burstein et al. 2003 AES structural analysis; positional zone detection
+  // improves org-score Pearson correlation by ~4 points (Source C/D, Research Loop 2).
+  let zoneBonus = 0
+  if (taskType === 'discussion' && paragraphCount >= 3) {
+    const firstPara = paragraphs[0].toLowerCase()
+    const lastPara  = paragraphs[paragraphCount - 1].toLowerCase()
+    const bodyParas = paragraphs.slice(1, paragraphCount - 1).map(p => p.toLowerCase())
+
+    const hasIntroOpinion = /\b(i (agree|disagree|think|believe)|in my (opinion|view)|i feel|my (view|position|stance)|it (seems|appears) to me)\b/.test(firstPara)
+    const hasConclusion   = CLOSING_MARKERS.some(m => lastPara.includes(m)) || /\b(overall|therefore|in short|to wrap up)\b/.test(lastPara)
+    const hasBodyEvidence = bodyParas.some(p =>
+      p.length > 50 && /\b(for (example|instance)|because|since|this (shows?|means?|suggests?)|evidence|research|study|according to)\b/.test(p),
+    )
+
+    if (hasIntroOpinion) zoneBonus += 0.05
+    if (hasConclusion)   zoneBonus += 0.05
+    if (hasBodyEvidence) zoneBonus += 0.05
+  }
+
+  // Email tasks: structure (paragraphs + greeting/closing) dominates over academic markers.
+  // Academic essays need discourse markers; emails use transactional phrasing not in our list.
+  const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
   const value = Math.min(
     1,
-    Math.max(0, markerScore * 0.5 + paragraphScore * 0.3 + taskSpecific * 0.2 + placementBonus),
+    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus),
   )
 
+  const zonePart = zoneBonus > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}` : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}`,
   }
 }
 

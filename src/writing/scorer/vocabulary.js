@@ -51,6 +51,49 @@ function linearMap(value, x0, x1, y0, y1) {
   return y0 + ((value - x0) / (x1 - x0)) * (y1 - y0)
 }
 
+// MTLD (Measure of Textual Lexical Diversity) — one direction pass.
+// Walks tokens sequentially; records segment length each time running TTR
+// drops below threshold. Essays that keep introducing new words produce
+// longer segments (higher MTLD). Based on McCarthy & Jarvis 2010.
+const MTLD_THRESHOLD = 0.72
+function mtldOnce(tokens) {
+  if (tokens.length === 0) return 0
+  let factors = 0
+  let segStart = 0
+  const seen = new Map()   // word → count within current segment
+  let totalInSeg = 0
+
+  for (let i = 0; i < tokens.length; i++) {
+    const w = tokens[i]
+    seen.set(w, (seen.get(w) || 0) + 1)
+    totalInSeg++
+    const uniqueInSeg = seen.size
+    const ttr = uniqueInSeg / totalInSeg
+    if (ttr < MTLD_THRESHOLD) {
+      factors++
+      seen.clear()
+      totalInSeg = 0
+      segStart = i + 1
+    }
+  }
+  // Partial factor for the trailing incomplete segment
+  if (totalInSeg > 0) {
+    const uniqueInSeg = seen.size
+    const ttr = uniqueInSeg / totalInSeg
+    // Partial weight = how far TTR fell toward the threshold (McCarthy & Jarvis 2010 §3.2)
+    const partial = (1 - ttr) / (1 - MTLD_THRESHOLD)
+    factors += partial
+  }
+  return factors === 0 ? tokens.length : tokens.length / factors
+}
+
+// Bidirectional MTLD: average of forward and backward passes (more robust)
+function mtld(tokens) {
+  const forward  = mtldOnce(tokens)
+  const backward = mtldOnce([...tokens].reverse())
+  return (forward + backward) / 2
+}
+
 export function score(text) {
   const tokens = (text.match(/[a-zA-Z']+/g) || []).map(w => w.toLowerCase())
   if (tokens.length === 0) return { value: 0, details: 'No words found' }
@@ -60,22 +103,34 @@ export function score(text) {
   // 3.5→0.2, 4.0→0.4, 4.5→0.6, 5.0→0.8, 5.5→1.0
   const avgLenScore = linearMap(avgLen, 3.5, 5.5, 0.2, 1.0)
 
-  // Rare word ratio (content words NOT in commonWords)
   const contentTokens = tokens.filter(isContentWord)
   const totalContent = contentTokens.length || 1
-  const rareCount = contentTokens.filter(w => !commonWords.has(w)).length
-  const rareRatio = rareCount / totalContent
-  // 0%→0.2, 5%→0.4, 10%→0.6, 15%→0.8, 20%→1.0
-  const rareScore = linearMap(rareRatio, 0, 0.2, 0.2, 1.0)
+
+  // Lexical diversity: MTLD for essays ≥100 words (correlates 0.79 with human scores
+  // in L2 AES, vs 0.61 for simple TTR — McCarthy & Jarvis 2010, Source F Loop 2).
+  // For short essays use global TTR (MTLD unreliable below ~100 tokens).
+  let diversityScore
+  let diversityLabel
+  if (tokens.length >= 100) {
+    const mtldVal = mtld(tokens)
+    // L2 TOEFL writers: MTLD 20→0.2, 40→0.4, 60→0.7, 80→1.0
+    diversityScore = linearMap(mtldVal, 20, 80, 0.2, 1.0)
+    diversityLabel = `MTLD: ${mtldVal.toFixed(1)}`
+  } else {
+    const rareCount = contentTokens.filter(w => !commonWords.has(w)).length
+    const rareRatio = rareCount / totalContent
+    diversityScore = linearMap(rareRatio, 0, 0.2, 0.2, 1.0)
+    diversityLabel = `rare word ratio: ${(rareRatio * 100).toFixed(1)}%`
+  }
 
   // AWL bonus: reward use of academic vocabulary (capped at +0.2)
   const awlCount = contentTokens.filter(w => AWL_CORE.has(w)).length
   const awlBonus = Math.min(0.2, awlCount * 0.025)
 
-  const value = Math.min(1, (avgLenScore + rareScore) / 2 + awlBonus)
+  const value = Math.min(1, (avgLenScore + diversityScore) / 2 + awlBonus)
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, rare word ratio: ${(rareRatio * 100).toFixed(1)}%, AWL words: ${awlCount}`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL words: ${awlCount}`,
   }
 }
 

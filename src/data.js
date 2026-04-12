@@ -108,6 +108,7 @@ export const typeLabels = {
   attitude: 'Author Attitude',
   purpose: 'Author Purpose',
   negative_fact: 'Negative Fact',
+  sentence_simplification: 'Sentence Simplification',
   multiple: 'Select Multiple',
 };
 
@@ -118,5 +119,6 @@ export const typeColors = {
   attitude: { bg: 'rgba(100, 150, 120, 0.08)', text: '#5a9a6e', border: 'rgba(100, 150, 120, 0.2)' },
   purpose: { bg: 'rgba(80, 140, 160, 0.08)', text: '#4a8fa0', border: 'rgba(80, 140, 160, 0.2)' },
   negative_fact: { bg: 'rgba(160, 100, 80, 0.08)', text: '#a06850', border: 'rgba(160, 100, 80, 0.2)' },
+  sentence_simplification: { bg: 'rgba(100, 120, 160, 0.08)', text: '#607090', border: 'rgba(100, 120, 160, 0.2)' },
   multiple: { bg: 'rgba(170, 100, 100, 0.08)', text: '#b06060', border: 'rgba(170, 100, 100, 0.2)' },
 };

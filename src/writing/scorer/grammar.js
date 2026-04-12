@@ -102,6 +102,23 @@ export function score(text) {
     }
   })
 
+  // SVA (subject-verb agreement) — #1 penalized feature for ESL writers in e-rater
+  // High-precision patterns: the erroneous form is structurally distinctive enough
+  // that false positives are very rare in normal academic prose.
+  const SVA_PATTERNS = [
+    { re: /\b(everyone|everybody|someone|somebody|anyone|anybody|no one|nobody)\s+(are|were|have|do)\b/i,
+      msg: 'SVA: indefinite pronouns (everyone, nobody, etc.) take singular verbs (is/was/has/does)' },
+    { re: /\bthe\s+number\s+of\s+\w+\s+are\b/i,
+      msg: 'SVA: "the number of [noun]" takes a singular verb ("is")' },
+    { re: /\beach\s+(of\s+(the|these|those)\s+\w+\s+)?(are|were|have)\b/i,
+      msg: 'SVA: "each" takes a singular verb (is/was/has)' },
+    { re: /\b(the\s+)?(information|advice|news|knowledge|furniture|equipment|progress)\s+are\b/i,
+      msg: 'SVA: uncountable noun takes a singular verb ("is")' },
+  ]
+  SVA_PATTERNS.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
   // Penalty: errors / total words (matching real e-rater formula)
   const totalWords = text.split(/\s+/).filter(w => w.length > 0).length || 1
   const value = Math.max(0, Math.min(1, 1 - errors.length / totalWords))
@@ -119,5 +136,7 @@ export function suggest(analysis) {
     tips.push('Use a conjunction (and, but, so) or period instead of a comma between independent clauses.')
   if (analysis.errors.some(e => e.includes('double negative')))
     tips.push('Avoid using two negatives in the same clause.')
+  if (analysis.errors.some(e => e.includes('SVA')))
+    tips.push('Check subject-verb agreement: "everyone/nobody/each" takes a singular verb, and uncountable nouns (information, advice, news) always use "is" not "are".')
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

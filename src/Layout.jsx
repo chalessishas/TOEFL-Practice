@@ -75,6 +75,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
     if (reviewQueue === null || reviewIdx >= reviewQueue.length) return
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+      if (e.key === 'Escape') { e.preventDefault(); setReviewQueue(null); return }
       if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         e.preventDefault()
         setReviewFlipped(f => !f)

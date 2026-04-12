@@ -119,6 +119,24 @@ export default function Home() {
     { label: 'Day Streak', value: streak > 0 ? `${streak}🔥` : '—' },
   ]
 
+  const writingTrend = (() => {
+    const pts = history
+      .filter(h => h.type === 'email' || h.type === 'discussion')
+      .slice(-10)
+      .map(h => h.score)
+    if (pts.length < 2) return null
+    const W = 260, H = 40, pad = 4
+    const minV = Math.min(...pts), maxV = Math.max(...pts)
+    const range = maxV - minV || 1
+    const x = (i) => pad + (i / (pts.length - 1)) * (W - pad * 2)
+    const y = (v) => H - pad - ((v - minV) / range) * (H - pad * 2)
+    const points = pts.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ')
+    const rising = pts[pts.length - 1] > pts[0]
+    const flat = pts[pts.length - 1] === pts[0]
+    const color = flat ? '#aaa' : rising ? '#22c55e' : '#f87171'
+    return { points, color, W, H, pts, x, y }
+  })()
+
   return (
     <div style={{ padding: '32px 40px', maxWidth: 900 }}>
       {/* Welcome header */}
@@ -157,6 +175,41 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      {/* Writing score trend sparkline */}
+      {writingTrend && (
+        <div style={{
+          marginBottom: 28, padding: '12px 16px',
+          background: colors.white, borderRadius: 8,
+          border: `1px solid ${colors.borderLight}`,
+        }}>
+          <div style={{
+            fontSize: 10, color: '#aaa', textTransform: 'uppercase',
+            letterSpacing: '0.05em', fontFamily: fonts.body, marginBottom: 8,
+          }}>Writing score trend (last {writingTrend.pts.length})</div>
+          <svg width="100%" viewBox={`0 0 ${writingTrend.W} ${writingTrend.H}`} style={{ display: 'block', overflow: 'visible' }}>
+            <polyline
+              points={writingTrend.points}
+              fill="none"
+              stroke={writingTrend.color}
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+            {writingTrend.pts.map((v, i) => (
+              <circle
+                key={i}
+                cx={writingTrend.x(i).toFixed(1)}
+                cy={writingTrend.y(v).toFixed(1)}
+                r="2.5"
+                fill={i === writingTrend.pts.length - 1 ? writingTrend.color : colors.white}
+                stroke={writingTrend.color}
+                strokeWidth="1.5"
+              />
+            ))}
+          </svg>
+        </div>
+      )}
 
       {/* Reading section */}
       <div style={{ marginBottom: 28 }}>

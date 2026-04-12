@@ -91,6 +91,6 @@ src/
 3. **localStorage 无迁移机制**: 数据结构变更会导致旧数据失效，缺少版本号 + 迁移逻辑
 4. **Grammar 模块误判**: 动词模式匹配阈值已调过一轮，但仍有边界 case
 5. **Dark Mode 开关存在但未接入**: Layout Settings 面板有 UI，逻辑空置
-6. **无 Error Boundary**: 未处理异常会白屏
+6. **Error Boundary**: ErrorBoundary.jsx wraps Layout — shows error message + Go Home button on uncaught exceptions
 7. **无输入 sanitization**: textarea 内容未做 XSS 防护
 8. **评分权重手动调整**: 未与真实 TOEFL 评分做基准验证

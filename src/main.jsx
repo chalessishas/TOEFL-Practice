@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
+import { ErrorBoundary } from './ErrorBoundary.jsx'
 import Layout from './Layout.jsx'
 import Reading from './pages/Reading.jsx'
 import Home from './pages/Home.jsx'
@@ -13,6 +14,7 @@ import AcademicDiscussion from './writing/AcademicDiscussion.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
+      <ErrorBoundary>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -23,6 +25,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/writing/discussion" element={<AcademicDiscussion />} />
         </Routes>
       </Layout>
+      </ErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
 )

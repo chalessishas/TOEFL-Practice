@@ -1,32 +1,45 @@
-const DISCOURSE_MARKERS = [
-  'however','moreover','furthermore','additionally','in addition','on the other hand',
-  'nevertheless','for instance','for example','such as','in conclusion','therefore',
-  'consequently','as a result','firstly','secondly','finally','meanwhile','similarly',
-  'in contrast','despite','although','while','whereas','in summary','to summarize',
-  'in particular','notably','specifically','that is','in other words','by contrast',
-  'on the contrary','at the same time','in the meantime','above all','after all',
-  'in fact','indeed','to begin with','first of all','last but not least','overall',
-]
+// Categorised by connector function — reward diversity across categories,
+// not just quantity within one category (e.g. 5 contrast markers ≠ high score).
+const MARKER_CATEGORIES = {
+  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','despite','although','while','on the contrary'],
+  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly'],
+  conclusion:      ['in conclusion','in summary','to summarize','overall','therefore','consequently','as a result','finally'],
+  exemplification: ['for instance','for example','such as','in particular','notably','specifically','that is','in other words'],
+  sequence:        ['firstly','secondly','to begin with','first of all','meanwhile','last but not least'],
+  elaboration:     ['indeed','in fact','after all','at the same time','above all'],
+}
 
-function countUniqueMarkers(text) {
+function countMarkersAndDiversity(text) {
   const lower = text.toLowerCase()
   const found = new Set()
-  DISCOURSE_MARKERS.forEach(marker => {
-    if (lower.includes(marker)) found.add(marker)
-  })
-  return found.size
+  const categoriesUsed = new Set()
+  for (const [category, markers] of Object.entries(MARKER_CATEGORIES)) {
+    for (const marker of markers) {
+      if (lower.includes(marker)) {
+        found.add(marker)
+        categoriesUsed.add(category)
+      }
+    }
+  }
+  return {
+    uniqueCount: found.size,
+    categoriesUsed: categoriesUsed.size,
+    totalCategories: Object.keys(MARKER_CATEGORIES).length,
+  }
 }
 
 export function score(text, taskType = 'general') {
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0)
   const sentenceCount = Math.max(sentences.length, 1)
 
-  // Discourse marker density score
-  const uniqueMarkers = countUniqueMarkers(text)
+  // Discourse marker score: 60% density + 40% functional category diversity
+  // Diversity rewards essays that use contrast + addition + conclusion + example
+  // rather than repeating one category (e.g. "however × 5").
+  const { uniqueCount: uniqueMarkers, categoriesUsed, totalCategories } = countMarkersAndDiversity(text)
   const markerDensity = uniqueMarkers / sentenceCount
-  // Real e-rater: markers per sentence, but more lenient for short texts
-  // 0.15+/sentence → 1.0 (was 0.3 — too aggressive for emails)
-  const markerScore = Math.min(1, markerDensity / 0.15)
+  const densityScore    = Math.min(1, markerDensity / 0.15)
+  const diversityScore  = categoriesUsed / totalCategories  // 0→0, 3/6→0.5, 6/6→1.0
+  const markerScore     = densityScore * 0.6 + diversityScore * 0.4
 
   // Paragraph count score
   const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(p => p.length > 0)
@@ -81,7 +94,7 @@ export function score(text, taskType = 'general') {
 
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}`,
   }
 }
 
@@ -91,8 +104,14 @@ export function suggest(analysis) {
   const taskTypeMatch = analysis.details.match(/taskType=(\w+)/)
   const taskType = taskTypeMatch ? taskTypeMatch[1] : 'general'
 
-  if (analysis.details.includes('0 unique discourse markers') || analysis.value < 0.5)
-    tips.push('Use discourse markers (however, moreover, in conclusion) to connect your ideas.')
+  const catMatch = analysis.details.match(/(\d+)\/(\d+) categories/)
+  const categoriesUsed = catMatch ? parseInt(catMatch[1]) : 0
+  const totalCategories = catMatch ? parseInt(catMatch[2]) : 6
+
+  if (analysis.details.includes('0 unique discourse markers'))
+    tips.push('Use discourse markers (however, moreover, for example, in conclusion) to connect your ideas.')
+  else if (categoriesUsed < 3)
+    tips.push('Vary your transition types — use contrast (however), addition (moreover), and conclusion (therefore/in conclusion) together for a higher organization score.')
   if (analysis.details.includes('1 paragraph'))
     tips.push('Divide your response into multiple paragraphs for clarity.')
 

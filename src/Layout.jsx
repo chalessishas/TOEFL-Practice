@@ -76,7 +76,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
   const avgBreakdown = (() => {
     const withBd = writingEntries.filter(h => h.breakdown)
     if (!withBd.length) return null
-    const keys = ['grammar', 'mechanics', 'vocabulary', 'organization', 'development', 'style']
+    const keys = ['grammar', 'mechanics', 'vocabulary', 'organization', 'development', 'style', 'relevance']
     return Object.fromEntries(keys.map(k => [
       k,
       withBd.reduce((s, h) => s + (h.breakdown[k] || 0), 0) / withBd.length
@@ -259,6 +259,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
             ? [
                 ['Organization', avgBreakdown.organization],
                 ['Development', avgBreakdown.development],
+                ['On-Topic', avgBreakdown.relevance],
                 ['Vocabulary', avgBreakdown.vocabulary],
                 ['Mechanics', avgBreakdown.mechanics],
                 ['Grammar', avgBreakdown.grammar],
@@ -369,6 +370,7 @@ function SidebarContent({ activePanel, navigate, location, isDark, toggleDark, i
               mechanics: 'Proofread for spelling errors and missing punctuation.',
               grammar: 'Avoid run-on sentences and sentence fragments.',
               style: 'Vary sentence length to avoid monotony; avoid repeating the same phrase.',
+              relevance: 'Stay on topic — use key terms from the prompt and address all parts of the question.',
             }
             return Object.entries(avgBreakdown)
               .sort((a, b) => a[1] - b[1])

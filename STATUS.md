@@ -104,6 +104,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] vocabulary.js MTLD — 双向 MTLD 替换 TTR（McCarthy & Jarvis 2010，与人工评分 r=0.79 vs TTR r=0.61）
 - [100%] organization.js 3-zone bonus — discussion 三区结构检测（Burstein 2003，位置模型 org-score Pearson +4）
 - [100%] scorer/index.js build-a-sentence guard — 2026 新题型直接返回 0 不走 prose 评分
+- [100%] E2E 实测通过 — Discussion 4.3/5、Email 4.9/5，7 维 breakdown 正常，On-Topic 维度展示正确
+- [100%] text_insertion 题型标注 "Pre-2026" — Research Loop 3 确认该题型已于 2026-01-21 从 TOEFL 移除，typeLabels 添加 ✦ Pre-2026 提示
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

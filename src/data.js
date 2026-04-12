@@ -109,7 +109,7 @@ export const typeLabels = {
   purpose: 'Author Purpose',
   negative_fact: 'Negative Fact',
   sentence_simplification: 'Sentence Simplification',
-  text_insertion: 'Text Insertion',
+  text_insertion: 'Text Insertion ✦ Pre-2026',
   multiple: 'Select Multiple',
 };
 

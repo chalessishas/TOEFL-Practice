@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEFL Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<style>
+/* ═══ Variables ═══ */
+:root {
+  --bg: #f5f3ee;
+  --surface: #ffffff;
+  --border: #e5e1da;
+  --border-light: #eeebe5;
+  --t1: #1a1917;
+  --t2: #5c5953;
+  --t3: #9b978f;
+  --accent: #b5722e;
+  --accent-soft: rgba(181,114,46,0.07);
+  --accent-border: rgba(181,114,46,0.22);
+  --ok: #2e7d4f;
+  --ok-soft: rgba(46,125,79,0.07);
+  --ok-border: rgba(46,125,79,0.25);
+  --err: #be3a2a;
+  --err-soft: rgba(190,58,42,0.07);
+  --err-border: rgba(190,58,42,0.25);
+  --ui: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --read: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --display: 'Instrument Serif', Georgia, serif;
+  --r: 10px;
+  --rs: 6px;
+}
+
+/* ═══ Reset ═══ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+body { font-family: var(--ui); background: var(--bg); color: var(--t1); min-height: 100%; -webkit-font-smoothing: antialiased; }
+button { font-family: var(--ui); cursor: pointer; border: none; background: none; color: inherit; }
+::selection { background: var(--accent); color: white; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d5d0c8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #c0bab1; }
+
+/* ═══ Layout ═══ */
+.center { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.split { display: flex; height: 100vh; overflow: hidden; }
+.split-passage { width: 55%; display: flex; flex-direction: column; border-right: 1px solid var(--border); background: var(--surface); }
+.split-question { width: 45%; display: flex; flex-direction: column; background: var(--bg); }
+
+/* ═══ Test Header ═══ */
+.test-head { padding: 14px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.test-head-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.test-head-icon { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #9a5f20); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.test-head-info h2 { font-size: 13px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.test-head-info span { font-size: 11px; color: var(--t3); }
+.timer { font-family: var(--ui); font-size: 14px; font-weight: 600; padding: 5px 14px; border-radius: var(--rs); transition: all 0.3s; flex-shrink: 0; }
+.timer-normal { color: var(--t2); background: rgba(0,0,0,0.04); }
+.timer-warn { color: var(--err); background: var(--err-soft); }
+.timer-critical { color: var(--err); background: var(--err-soft); animation: pulse 1.2s ease infinite; }
+
+/* ═══ Passage ═══ */
+.passage-scroll { flex: 1; overflow-y: auto; padding: 28px 36px 40px; }
+.para { font-family: var(--read); font-size: 16px; line-height: 2; color: #2c2b28; margin-bottom: 22px; padding: 10px 16px 10px 20px; border-radius: 6px; border-left: 3px solid transparent; transition: all 0.35s ease; position: relative; }
+.para-active { border-left-color: var(--accent); background: var(--accent-soft); }
+.para-num { position: absolute; left: -28px; top: 12px; font-family: var(--ui); font-size: 10px; font-weight: 700; color: #c4bfb6; width: 20px; text-align: right; }
+.para-active .para-num { color: var(--accent); }
+
+/* ═══ Question Panel ═══ */
+.q-head { padding: 12px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.q-head-left { display: flex; align-items: center; gap: 10px; }
+.q-counter { font-size: 13px; font-weight: 600; color: var(--t1); }
+.q-progress { font-size: 11px; color: var(--t3); }
+.q-review-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: var(--rs); border: 1.5px solid var(--accent-border); color: var(--accent); background: var(--accent-soft); transition: all 0.15s; }
+.q-review-btn:hover { background: rgba(181,114,46,0.12); }
+
+.q-scroll { flex: 1; overflow-y: auto; padding: 28px 28px 20px; }
+.q-badge { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.q-type-tag { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.02em; }
+.q-para-ref { font-size: 10px; font-weight: 600; color: #8a7e6d; background: rgba(140,125,100,0.08); border: 1px solid rgba(140,125,100,0.15); padding: 2px 8px; border-radius: 4px; }
+.q-summary-note { font-size: 10px; font-weight: 600; color: #8050a0; }
+.q-text { font-family: var(--display); font-size: 19px; font-weight: 400; color: var(--t1); line-height: 1.55; margin-bottom: 28px; white-space: pre-line; }
+
+/* ═══ Options ═══ */
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { width: 100%; text-align: left; padding: 13px 16px; border-radius: var(--r); border: 1.5px solid var(--border); background: var(--surface); display: flex; align-items: flex-start; gap: 12px; transition: all 0.15s; }
+.opt:hover { border-color: #cdc8bf; background: #fdfcfa; }
+.opt-on { border-color: var(--accent-border); background: var(--accent-soft); }
+.opt-on:hover { background: rgba(181,114,46,0.1); }
+.opt-letter { width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0; margin-top: 1px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--t3); transition: all 0.15s; }
+.opt-on .opt-letter { border-color: var(--accent); background: var(--accent); color: white; }
+.opt-body { font-size: 14.5px; line-height: 1.6; color: var(--t2); transition: color 0.15s; }
+.opt-on .opt-body { color: var(--t1); }
+.q-sel-count { font-size: 11px; color: var(--t3); margin-top: 14px; }
+
+/* ═══ Bottom Navigation ═══ */
+.nav-bar { padding: 12px 24px; border-top: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 12px; }
+.nav-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; flex: 1; }
+.nav-dot { width: 28px; height: 28px; border-radius: 6px; font-size: 10px; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--t3); display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.nav-dot:hover { border-color: #cdc8bf; }
+.nav-dot-cur { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.nav-dot-done { border-color: var(--ok-border); background: var(--ok-soft); color: var(--ok); }
+.nav-dot-lock { opacity: 0.35; cursor: default; }
+.nav-btn { font-size: 13px; font-weight: 500; color: var(--t2); padding: 8px 16px; border-radius: var(--rs); transition: all 0.15s; white-space: nowrap; }
+.nav-btn:hover { background: rgba(0,0,0,0.04); }
+.nav-btn-dis { color: var(--t3); opacity: 0.4; pointer-events: none; }
+.btn-primary { font-size: 13px; font-weight: 600; color: white; background: linear-gradient(135deg, var(--accent), #9a5f20); padding: 10px 22px; border-radius: 8px; box-shadow: 0 2px 8px rgba(181,114,46,0.25); transition: all 0.2s; white-space: nowrap; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(181,114,46,0.3); }
+.btn-outline { font-size: 13px; font-weight: 500; color: var(--t2); background: var(--surface); border: 1.5px solid var(--border); padding: 10px 20px; border-radius: 8px; transition: all 0.15s; white-space: nowrap; }
+.btn-outline:hover { border-color: var(--accent-border); color: var(--accent); }
+
+/* ═══ Review Panel Overlay ═══ */
+.review-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 200; display: flex; justify-content: flex-end; }
+.review-panel { background: var(--surface); width: 300px; height: 100%; padding: 24px; overflow-y: auto; box-shadow: -4px 0 24px rgba(0,0,0,0.08); animation: slideLeft 0.2s ease-out; }
+.review-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.rp-section { margin-bottom: 20px; }
+.rp-section-title { font-size: 11px; font-weight: 600; color: var(--t3); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.rp-lock-badge { font-size: 9px; background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--accent-border); }
+.rp-dots { display: flex; flex-wrap: wrap; gap: 5px; }
+
+/* ═══ Result Page ═══ */
+.score-ring { width: 150px; height: 150px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; box-shadow: 0 8px 32px rgba(181,114,46,0.12); }
+.score-inner { width: 122px; height: 122px; border-radius: 50%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.result-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-bottom: 36px; }
+.result-dot { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+.result-dot-ok { background: var(--ok-soft); border: 1.5px solid var(--ok-border); color: var(--ok); }
+.result-dot-no { background: var(--err-soft); border: 1.5px solid var(--err-border); color: var(--err); }
+
+/* ═══ Review Answer Cards ═══ */
+.rv-card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border-light); padding: 22px; margin-bottom: 12px; }
+.rv-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.rv-num { width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.rv-num-ok { background: var(--ok-soft); border: 1.5px solid var(--ok-border); color: var(--ok); }
+.rv-num-no { background: var(--err-soft); border: 1.5px solid var(--err-border); color: var(--err); }
+.rv-status { margin-left: auto; font-size: 11px; font-weight: 600; }
+.rv-question { font-size: 13px; color: var(--t1); line-height: 1.65; margin-bottom: 12px; white-space: pre-line; }
+.rv-opt { padding: 8px 12px; border-radius: var(--rs); border: 1.5px solid var(--border-light); display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--t2); margin-bottom: 4px; }
+.rv-opt-ok { background: var(--ok-soft); border-color: var(--ok-border); color: var(--ok); }
+.rv-opt-wrong { background: var(--err-soft); border-color: var(--err-border); color: var(--err); }
+.rv-explain { margin-top: 10px; padding: 12px 14px; border-radius: var(--rs); background: rgba(181,114,46,0.04); border: 1px solid rgba(181,114,46,0.12); }
+.rv-explain p { font-size: 12px; color: #7a6e5c; line-height: 1.7; }
+
+/* ═══ History / Vocab ═══ */
+.page-wrap { max-width: 660px; margin: 0 auto; padding: 48px 24px; }
+.page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 8px; }
+.card { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border-light); padding: 16px 20px; margin-bottom: 8px; }
+
+/* ═══ Dictionary ═══ */
+.dict-bar { border-top: 1px solid var(--border); padding: 12px 20px; background: #fafaf6; }
+.dict-row { display: flex; gap: 8px; align-items: center; }
+.dict-input { flex: 1; padding: 8px 12px; border-radius: var(--rs); border: 1.5px solid var(--border); font-size: 13px; font-family: var(--ui); outline: none; background: var(--surface); }
+.dict-input:focus { border-color: var(--accent-border); }
+.dict-result { background: var(--surface); border-radius: 8px; border: 1px solid var(--border-light); padding: 12px 14px; margin-top: 10px; }
+
+/* ═══ Type Colors ═══ */
+.tc-factual { color: #4a7fa5; background: rgba(74,127,165,0.08); border: 1px solid rgba(74,127,165,0.18); }
+.tc-negative_factual { color: #b06060; background: rgba(176,96,96,0.08); border: 1px solid rgba(176,96,96,0.18); }
+.tc-inference { color: #7a5fb0; background: rgba(122,95,176,0.08); border: 1px solid rgba(122,95,176,0.18); }
+.tc-vocab { color: #b87333; background: rgba(184,115,51,0.08); border: 1px solid rgba(184,115,51,0.18); }
+.tc-rhetorical { color: #5a9a6e; background: rgba(90,154,110,0.08); border: 1px solid rgba(90,154,110,0.18); }
+.tc-simplification { color: #6b6b6b; background: rgba(107,107,107,0.08); border: 1px solid rgba(107,107,107,0.18); }
+.tc-insert { color: #3a8aaa; background: rgba(58,138,170,0.08); border: 1px solid rgba(58,138,170,0.18); }
+.tc-reference { color: #a07040; background: rgba(160,112,64,0.08); border: 1px solid rgba(160,112,64,0.18); }
+.tc-summary { color: #8050a0; background: rgba(128,80,160,0.08); border: 1px solid rgba(128,80,160,0.18); }
+
+/* ═══ Lang Switcher ═══ */
+.lang-bar { position: fixed; top: 14px; left: 16px; display: flex; gap: 4px; z-index: 100; }
+.lang-btn { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: var(--rs); border: 1.5px solid var(--border); background: var(--surface); color: var(--t3); transition: all 0.15s; }
+.lang-btn-on { border-color: var(--accent-border); background: var(--accent-soft); color: var(--accent); }
+
+/* ═══ Animations ═══ */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes slideLeft { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.fade-up { animation: fadeUp 0.5s ease-out; }
+.fade-in { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ═══ Constants ═══
+const TOTAL_TIME = 36 * 60;
+const WARN_TIME = 5 * 60;
+const CRIT_TIME = 60;
+const PROXY = 'http://localhost:3000/api/chat';
+
+const TYPE_LABEL = {
+  factual: 'Factual Information', negative_factual: 'Negative Factual', inference: 'Inference',
+  vocab: 'Vocabulary', rhetorical: 'Rhetorical Purpose', simplification: 'Sentence Simplification',
+  insert: 'Insert Text', reference: 'Reference', summary: 'Prose Summary',
+};
+
+const TOPICS = [
+  { t: "The Cambrian Explosion", f: "Biology", p: "Write a ~700-word academic passage about the Cambrian Explosion—rapid diversification of multicellular life ~541 million years ago. Cover causes (oxygen levels, Hox genes, predator-prey arms race), fossil sites (Burgess Shale, Chengjiang), and ongoing debates. University introductory textbook level. 5-6 paragraphs." },
+  { t: "Cognitive Biases in Decision Making", f: "Psychology", p: "Write a ~700-word academic passage about cognitive biases in human decision-making. Cover Kahneman and Tversky, anchoring bias, availability heuristic, prospect theory, loss aversion, real-world effects in economics and medicine. University introductory textbook level. 5-6 paragraphs." },
+  { t: "Plate Tectonics", f: "Geology", p: "Write a ~700-word academic passage about plate tectonics theory. Cover Wegener's continental drift, seafloor spreading, paleomagnetism evidence, how it explains earthquakes and volcanoes. University introductory textbook level. 5-6 paragraphs." },
+  { t: "The Industrial Revolution", f: "History", p: "Write a ~700-word academic passage about the Industrial Revolution transforming English cities in 18th-19th century. Cover factories, rural migration, public health, social reform, new middle class. University introductory textbook level. 5-6 paragraphs." },
+  { t: "Photosynthesis and Carbon Cycles", f: "Environmental Science", p: "Write a ~700-word academic passage about photosynthesis and the global carbon cycle. Cover light reactions, Calvin cycle, chlorophyll, carbon fixation, deforestation and ocean acidification. University introductory textbook level. 5-6 paragraphs." },
+  { t: "Renaissance Art and Humanism", f: "Art History", p: "Write a ~700-word academic passage about Renaissance art and humanist philosophy. Cover the shift from medieval aesthetics, patronage, Leonardo/Michelangelo/Brunelleschi, technique changes. University introductory textbook level. 5-6 paragraphs." },
+  { t: "Animal Migration Patterns", f: "Zoology", p: "Write a ~700-word academic passage about long-distance animal migration. Cover navigation mechanisms (magnetic fields, celestial cues), monarch butterflies, Arctic terns, wildebeest, climate change disruption. University introductory textbook level. 5-6 paragraphs." },
+  { t: "Water Scarcity Economics", f: "Economics", p: "Write a ~700-word academic passage about water scarcity as an economic problem. Cover tragedy of the commons, water pricing, desalination costs, virtual water trade, regional case studies. University introductory textbook level. 5-6 paragraphs." },
+];
+
+const QPROMPT = (txt) => `You are a TOEFL iBT question writer. Generate exactly 10 questions for this passage as a JSON array.
+
+PASSAGE:
+"""
+${txt}
+"""
+
+Paragraphs numbered P1,P2... (split by double newlines).
+
+Distribution: 2 factual, 1 negative_factual, 2 inference, 1 vocab (quote a specific word from passage), 1 rhetorical, 1 simplification (quote a sentence), 1 insert (provide sentence + 4 positions), 1 summary (MUST be question #10).
+
+Each object: {"type":"factual"|"negative_factual"|"inference"|"vocab"|"rhetorical"|"simplification"|"insert"|"reference"|"summary","paragraph":N|null,"text":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}
+
+For summary (#10): 6 options, correct=[i,j,k] array of 3 indices. Text format:
+"An introductory sentence for a brief summary of the passage is provided below. Complete the summary by selecting the THREE answer choices that express the most important ideas in the passage.\\n\\n[Your introductory summary sentence here]"
+
+3 correct = major ideas. 3 wrong = minor details or errors.
+
+Return ONLY valid JSON array. No markdown, no backticks, no explanation.`;
+
+// ═══ i18n ═══
+const LANGS = { en: 'EN', zh: '中文', ja: '日本語' };
+const I18N = {
+  en: {
+    title: 'TOEFL Reading', sub1: 'AI-generated practice test', sub2: '2 passages · 20 questions · 36 minutes · All 10 question types',
+    start: 'Start New Test', history: 'History', vocab: 'Vocabulary',
+    generating: 'Generating Your Test', passage: n => `Passage ${n}`,
+    lookupPh: 'Look up a word...', lookUp: 'Look Up', save: '+ Save',
+    review: n => `Review — Passage ${n}`, hideExp: 'Hide', showExp: 'Explanation',
+    correct: 'Correct', incorrect: 'Incorrect',
+    prev: 'Previous', next: 'Next', submit: 'Submit', nextPsg: 'Next Passage',
+    reviewAnswers: 'Review Answers', newTest: 'New Test', results: 'Results',
+    excellent: 'Excellent!', good: 'Good Effort', keep: 'Keep Practicing',
+    ofCorrect: (c, t) => `${c} of ${t} correct`, timeUsed: s => `${s} used`,
+    selected: n => `${n} of 3 selected`, worthPts: '2 pts · Select 3',
+    home: 'Home', vocabBook: 'Vocabulary Book', testHistory: 'Test History',
+    noWords: 'No words saved yet.', noTests: 'No tests yet.', questions: 'Questions',
+    locked: 'Locked', answered: 'answered',
+  },
+  zh: {
+    title: 'TOEFL 阅读', sub1: 'AI 生成模拟题', sub2: '2 篇文章 · 20 道题 · 36 分钟 · 全部 10 种题型',
+    start: '开始测试', history: '历史', vocab: '词汇本',
+    generating: '正在生成测试', passage: n => `文章 ${n}`,
+    lookupPh: '查询单词...', lookUp: '查询', save: '+ 保存',
+    review: n => `回顾 — 第 ${n} 篇`, hideExp: '收起', showExp: '解析',
+    correct: '正确', incorrect: '错误',
+    prev: '上一题', next: '下一题', submit: '提交', nextPsg: '下一篇',
+    reviewAnswers: '查看答案', newTest: '新测试', results: '返回结果',
+    excellent: '非常棒！', good: '继续加油', keep: '多加练习',
+    ofCorrect: (c, t) => `${t} 题中答对 ${c} 题`, timeUsed: s => `用时 ${s}`,
+    selected: n => `已选 ${n} / 3`, worthPts: '2 分题 · 选 3 项',
+    home: '首页', vocabBook: '词汇本', testHistory: '测试记录',
+    noWords: '还没有保存的单词。', noTests: '还没有测试记录。', questions: '题目导航',
+    locked: '已锁定', answered: '已答',
+  },
+  ja: {
+    title: 'TOEFL リーディング', sub1: 'AI生成模擬テスト', sub2: '2パッセージ · 20問 · 36分 · 全10問題タイプ',
+    start: 'テスト開始', history: '履歴', vocab: '単語帳',
+    generating: 'テスト生成中', passage: n => `パッセージ ${n}`,
+    lookupPh: '単語を調べる...', lookUp: '検索', save: '+ 保存',
+    review: n => `レビュー — P${n}`, hideExp: '隠す', showExp: '解説',
+    correct: '正解', incorrect: '不正解',
+    prev: '前へ', next: '次へ', submit: '提出', nextPsg: '次のパッセージ',
+    reviewAnswers: '答え確認', newTest: '新しいテスト', results: '結果に戻る',
+    excellent: '素晴らしい！', good: 'よく頑張りました', keep: '練習を続けましょう',
+    ofCorrect: (c, t) => `${t}問中${c}問正解`, timeUsed: s => `使用時間：${s}`,
+    selected: n => `${n} / 3 選択済み`, worthPts: '2点 · 3つ選択',
+    home: 'ホーム', vocabBook: '単語帳', testHistory: 'テスト履歴',
+    noWords: '保存された単語はまだありません。', noTests: '履歴はまだありません。', questions: '問題一覧',
+    locked: 'ロック', answered: '回答済',
+  },
+};
+
+// ═══ App ═══
+const App = () => {
+  const [lang, setLang] = useState(() => localStorage.getItem('tf-lang') || 'en');
+  const t = I18N[lang];
+  const saveLang = l => { setLang(l); try { localStorage.setItem('tf-lang', l); } catch {} };
+
+  const [view, setView] = useState('home');
+  const [passages, setPassages] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [qi, setQi] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [multiSel, setMultiSel] = useState([]);
+  const [timer, setTimer] = useState(TOTAL_TIME);
+  const [loadMsg, setLoadMsg] = useState('');
+  const [showExp, setShowExp] = useState({});
+  const [vocab, setVocab] = useState(() => { try { return JSON.parse(localStorage.getItem('tf-v') || '[]'); } catch { return []; } });
+  const [hist, setHist] = useState(() => { try { return JSON.parse(localStorage.getItem('tf-h') || '[]'); } catch { return []; } });
+  const [dictQ, setDictQ] = useState('');
+  const [dictR, setDictR] = useState(null);
+  const [dictLoading, setDictLoading] = useState(false);
+  const [reviewPsg, setReviewPsg] = useState(0);
+  const [lockedPsg, setLockedPsg] = useState(-1);
+  const [showPanel, setShowPanel] = useState(false);
+  const [histTab, setHistTab] = useState('tests');
+  const timerRef = useRef(null);
+  const passageRef = useRef(null);
+
+  const saveVocab = v => { setVocab(v); try { localStorage.setItem('tf-v', JSON.stringify(v)); } catch {} };
+  const saveHist = h => { setHist(h); try { localStorage.setItem('tf-h', JSON.stringify(h)); } catch {} };
+  const fmt = s => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+
+  // Timer
+  useEffect(() => {
+    if (view === 'test' && timer > 0) {
+      timerRef.current = setInterval(() => setTimer(t => t - 1), 1000);
+      return () => clearInterval(timerRef.current);
+    }
+    if (timer <= 0 && view === 'test') doSubmit();
+  }, [view, timer]);
+
+  // Auto-scroll passage to highlighted paragraph
+  useEffect(() => {
+    if (view === 'test' && passageRef.current) {
+      const el = passageRef.current.querySelector('.para-active');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [qi, view]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (view !== 'test') return;
+    const handler = e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goNext(); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goPrev(); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [view, qi, questions, answers, multiSel]);
+
+  const q = questions[qi];
+  const isSummary = q?.type === 'summary';
+
+  // ─── API ───
+  const apiCall = async (prompt, max = 1500) => {
+    const r = await fetch(PROXY, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: max, messages: [{ role: 'user', content: prompt }] }),
+    });
+    if (!r.ok) throw new Error(`API ${r.status}`);
+    const d = await r.json();
+    return d.content.map(c => c.text || '').join('').trim();
+  };
+
+  const generate = async () => {
+    setView('loading');
+    const sel = [...TOPICS].sort(() => Math.random() - 0.5).slice(0, 2);
+    setLoadMsg(`${sel[0].t}  &  ${sel[1].t}`);
+    try {
+      const [results, facts] = await Promise.all([
+        Promise.all(sel.map(async (tp, i) => {
+          const pt = await apiCall(tp.p + "\n\nReturn ONLY passage text. No titles, no labels. Plain paragraphs separated by double newlines.");
+          let qt = await apiCall(QPROMPT(pt), 3000);
+          qt = qt.replace(/```json|```/g, '').trim();
+          const parsed = JSON.parse(qt);
+          parsed.forEach(q => { q.passageIdx = i; });
+          return { psg: { title: tp.t, field: tp.f, text: pt }, qs: parsed };
+        })),
+        Promise.all(sel.map(tp =>
+          apiCall(`Give one fascinating, specific fun fact about "${tp.t}" in one sentence. Start with "Did you know" or a surprising stat. Max 30 words.`, 100).catch(() => null)
+        )),
+      ]);
+      const validFacts = facts.filter(Boolean);
+      for (const f of validFacts) { setLoadMsg(f); await new Promise(r => setTimeout(r, 2500)); }
+
+      setPassages(results.map(r => r.psg));
+      setQuestions(results.flatMap(r => r.qs));
+      setAnswers({}); setMultiSel([]); setQi(0); setTimer(TOTAL_TIME);
+      setShowExp({}); setLockedPsg(-1); setShowPanel(false);
+      setView('test');
+    } catch (err) {
+      setLoadMsg('ERR:' + (err.message || 'Generation failed'));
+    }
+  };
+
+  // ─── Question Logic ───
+  const isAnswered = i => {
+    const q2 = questions[i];
+    if (!q2) return false;
+    return q2.type === 'summary' ? Array.isArray(answers[i]) && answers[i].length === 3 : answers[i] !== undefined;
+  };
+
+  const isCorrect = i => {
+    const q2 = questions[i];
+    if (!q2) return false;
+    if (q2.type === 'summary') {
+      const u = answers[i] || [];
+      return Array.isArray(u) && Array.isArray(q2.correct) && [...u].sort().join() === [...q2.correct].sort().join();
+    }
+    return answers[i] === q2.correct;
+  };
+
+  const selectOpt = idx => {
+    if (isSummary) {
+      setMultiSel(p => p.includes(idx) ? p.filter(i => i !== idx) : p.length < 3 ? [...p, idx] : p);
+    } else {
+      setAnswers(p => ({ ...p, [qi]: idx }));
+    }
+  };
+
+  const commitMulti = () => {
+    if (isSummary && multiSel.length > 0) setAnswers(p => ({ ...p, [qi]: multiSel }));
+  };
+
+  const jumpTo = i => {
+    const targetPsg = questions[i]?.passageIdx;
+    if (targetPsg !== undefined && targetPsg <= lockedPsg) return;
+    commitMulti();
+    setQi(i);
+    const nextQ = questions[i];
+    setMultiSel(nextQ?.type === 'summary' && Array.isArray(answers[i]) ? answers[i] : []);
+  };
+
+  const goNext = () => { commitMulti(); const n = qi + 1; if (n < questions.length && (questions[n]?.passageIdx > lockedPsg || questions[n]?.passageIdx === undefined)) { setQi(n); setMultiSel(questions[n]?.type === 'summary' && Array.isArray(answers[n]) ? answers[n] : []); } };
+  const goPrev = () => { commitMulti(); const n = qi - 1; if (n >= 0 && (questions[n]?.passageIdx > lockedPsg || questions[n]?.passageIdx === undefined)) { setQi(n); setMultiSel(questions[n]?.type === 'summary' && Array.isArray(answers[n]) ? answers[n] : []); } };
+
+  const goNextPassage = () => {
+    commitMulti();
+    const nextIdx = q.passageIdx + 1;
+    setLockedPsg(q.passageIdx);
+    const first = questions.findIndex(x => x.passageIdx === nextIdx);
+    if (first >= 0) { setQi(first); setMultiSel([]); }
+  };
+
+  const doSubmit = () => {
+    const fa = { ...answers };
+    if (isSummary && multiSel.length > 0) fa[qi] = multiSel;
+    clearInterval(timerRef.current);
+    setAnswers(fa);
+    let c = 0;
+    questions.forEach((q2, i) => {
+      if (q2.type === 'summary') { const u = fa[i] || []; if (Array.isArray(u) && Array.isArray(q2.correct) && [...u].sort().join() === [...q2.correct].sort().join()) c++; }
+      else { if (fa[i] === q2.correct) c++; }
+    });
+    saveHist([{
+      date: new Date().toISOString(), passages: passages.map(p => p.title),
+      score: Math.round((c / questions.length) * 30), correct: c, total: questions.length,
+      timeUsed: TOTAL_TIME - timer, psgData: passages, qsData: questions,
+    }, ...hist].slice(0, 30));
+    setView('result');
+  };
+
+  const score = () => { let c = 0; questions.forEach((_, i) => { if (isCorrect(i)) c++; }); return { c, total: questions.length, scaled: Math.round((c / questions.length) * 30) }; };
+
+  // ─── Dictionary ───
+  const lookup = async w => {
+    if (!w.trim()) return;
+    setDictLoading(true); setDictR(null);
+    try {
+      let r = await apiCall(`Define "${w}" concisely. JSON only: {"word":"...","pos":"...","definition":"...","chinese":"...","example":"..."} No markdown.`, 400);
+      r = r.replace(/```json|```/g, '').trim();
+      setDictR(JSON.parse(r));
+    } catch { setDictR({ word: w, pos: '—', definition: 'Lookup failed.', chinese: '查询失败', example: '' }); }
+    setDictLoading(false);
+  };
+
+  const addVocab = e => {
+    if (vocab.find(v => v.word.toLowerCase() === e.word.toLowerCase())) return;
+    saveVocab([{ ...e, at: new Date().toISOString() }, ...vocab]);
+  };
+
+  // ═══════════════════════════════════════════
+  // ═══ HOME VIEW ═══
+  // ═══════════════════════════════════════════
+  if (view === 'home') return (
+    <div className="center">
+      <div className="lang-bar">
+        {Object.entries(LANGS).map(([k, label]) => (
+          <button key={k} className={`lang-btn ${lang === k ? 'lang-btn-on' : ''}`} onClick={() => saveLang(k)}>{label}</button>
+        ))}
+      </div>
+      <div style={{ maxWidth: 560, textAlign: 'center' }} className="fade-up">
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg, var(--accent), #9a5f20)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px', boxShadow: '0 4px 16px rgba(181,114,46,0.25)' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </div>
+        <h1 style={{ fontFamily: 'var(--display)', fontSize: 46, fontWeight: 400, color: 'var(--t1)', marginBottom: 10, letterSpacing: '-0.02em' }}>{t.title}</h1>
+        <p style={{ fontSize: 14, color: 'var(--t2)', fontWeight: 300, marginBottom: 4 }}>{t.sub1}</p>
+        <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 36 }}>{t.sub2}</p>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn-primary" style={{ fontSize: 15, padding: '14px 36px' }} onClick={generate}>{t.start}</button>
+          {hist.length > 0 && <button className="btn-outline" onClick={() => { setHistTab('tests'); setView('history'); }}>{t.history} ({hist.length})</button>}
+          {vocab.length > 0 && <button className="btn-outline" onClick={() => { setHistTab('vocab'); setView('history'); }}>{t.vocab} ({vocab.length})</button>}
+        </div>
+      </div>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════
+  // ═══ LOADING VIEW ═══
+  // ═══════════════════════════════════════════
+  if (view === 'loading') {
+    const isErr = loadMsg.startsWith('ERR:');
+    return (
+      <div className="center">
+        <div style={{ textAlign: 'center', maxWidth: 480, padding: '0 24px' }} className="fade-up">
+          {!isErr && <div style={{ width: 36, height: 36, border: '3px solid var(--border)', borderTopColor: 'var(--accent)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 32px' }} />}
+          {isErr && <div style={{ fontSize: 32, marginBottom: 20 }}>!</div>}
+          <h2 style={{ fontFamily: 'var(--display)', fontSize: 26, color: 'var(--t1)', marginBottom: 20 }}>
+            {isErr ? 'Something went wrong' : t.generating}
+          </h2>
+          {loadMsg && (
+            <div key={loadMsg} className="fade-up" style={{ background: isErr ? 'var(--err-soft)' : 'var(--surface)', borderRadius: 12, border: `1px solid ${isErr ? 'var(--err-border)' : 'var(--border-light)'}`, padding: '18px 22px', textAlign: 'left' }}>
+              {!isErr && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--accent)', letterSpacing: '0.1em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>FUN FACT</span>}
+              <p style={{ fontSize: 14, color: isErr ? 'var(--err)' : 'var(--t2)', lineHeight: 1.7, fontWeight: 300 }}>{isErr ? loadMsg.slice(4) : loadMsg}</p>
+            </div>
+          )}
+          {isErr && (
+            <div style={{ marginTop: 20, display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button className="btn-primary" onClick={generate}>Retry</button>
+              <button className="btn-outline" onClick={() => setView('home')}>{t.home}</button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // ═══ TEST VIEW ═══
+  // ═══════════════════════════════════════════
+  if (view === 'test' && q) {
+    const pi = q.passageIdx;
+    const p = passages[pi];
+    const paras = p?.text?.split('\n\n') || [];
+    const warn = timer <= WARN_TIME;
+    const crit = timer <= CRIT_TIME;
+    const psgQuestions = questions.map((x, i) => ({ ...x, gi: i })).filter(x => x.passageIdx === pi);
+    const answeredInPsg = psgQuestions.filter(x => isAnswered(x.gi)).length;
+    const isLastQ = qi === psgQuestions[psgQuestions.length - 1]?.gi;
+    const isLastPsg = pi === passages.length - 1;
+
+    return (
+      <div className="split">
+        {/* ─── Review Panel ─── */}
+        {showPanel && (
+          <div className="review-overlay" onClick={() => setShowPanel(false)}>
+            <div className="review-panel" onClick={e => e.stopPropagation()}>
+              <h3>{t.questions} <button onClick={() => setShowPanel(false)} style={{ fontSize: 18, color: 'var(--t3)' }}>&times;</button></h3>
+              {passages.map((ps, pIdx) => {
+                const pQs = questions.map((x, i) => ({ ...x, gi: i })).filter(x => x.passageIdx === pIdx);
+                const locked = pIdx <= lockedPsg;
+                return (
+                  <div key={pIdx} className="rp-section">
+                    <div className="rp-section-title">
+                      {ps.title} {locked && <span className="rp-lock-badge">{t.locked}</span>}
+                    </div>
+                    <div className="rp-dots">
+                      {pQs.map(x => {
+                        const done = isAnswered(x.gi);
+                        const cur = x.gi === qi;
+                        const canClick = pIdx > lockedPsg;
+                        return (
+                          <button key={x.gi}
+                            className={`nav-dot ${cur ? 'nav-dot-cur' : done ? 'nav-dot-done' : ''} ${locked ? 'nav-dot-lock' : ''}`}
+                            onClick={() => { if (canClick) { jumpTo(x.gi); setShowPanel(false); } }}
+                          >{x.gi + 1}</button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Passage Panel ─── */}
+        <div className="split-passage">
+          <div className="test-head">
+            <div className="test-head-left">
+              <div className="test-head-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              </div>
+              <div className="test-head-info">
+                <h2>{t.passage(pi + 1)}: {p?.title}</h2>
+                <span>{p?.field}</span>
+              </div>
+            </div>
+            <div className={`timer ${crit ? 'timer-critical' : warn ? 'timer-warn' : 'timer-normal'}`}>{fmt(timer)}</div>
+          </div>
+
+          <div className="passage-scroll" ref={passageRef}>
+            <div style={{ maxWidth: 640, margin: '0 auto', paddingLeft: 32 }}>
+              {paras.map((pa, idx) => (
+                <p key={idx} className={`para ${q.paragraph === idx + 1 ? 'para-active' : ''}`}>
+                  <span className="para-num">{idx + 1}</span>
+                  {pa}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── Question Panel ─── */}
+        <div className="split-question">
+          <div className="q-head">
+            <div className="q-head-left">
+              <span className="q-counter">Q{qi + 1} / {questions.length}</span>
+              <span className="q-progress">{answeredInPsg}/{psgQuestions.length} {t.answered}</span>
+            </div>
+            <button className="q-review-btn" onClick={() => setShowPanel(true)}>{t.questions} &#9662;</button>
+          </div>
+
+          <div className="q-scroll">
+            <div className="q-badge">
+              <span className={`q-type-tag tc-${q.type}`}>{TYPE_LABEL[q.type] || q.type}</span>
+              {q.paragraph && <span className="q-para-ref">P{q.paragraph}</span>}
+              {isSummary && <span className="q-summary-note">{t.worthPts}</span>}
+            </div>
+            <h3 className="q-text">{q.text}</h3>
+            <div className="opts">
+              {q.options.map((opt, idx) => {
+                const on = isSummary ? multiSel.includes(idx) : answers[qi] === idx;
+                return (
+                  <button key={idx} className={`opt ${on ? 'opt-on' : ''}`} onClick={() => selectOpt(idx)}>
+                    <span className="opt-letter">{String.fromCharCode(65 + idx)}</span>
+                    <span className="opt-body">{opt}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {isSummary && multiSel.length > 0 && <p className="q-sel-count">{t.selected(multiSel.length)}</p>}
+          </div>
+
+          {/* ─── Navigation Bar ─── */}
+          <div className="nav-bar">
+            <button className={`nav-btn ${qi === 0 || (questions[qi - 1]?.passageIdx <= lockedPsg) ? 'nav-btn-dis' : ''}`} onClick={goPrev}>&#8592; {t.prev}</button>
+            <div className="nav-dots">
+              {psgQuestions.map(x => (
+                <button key={x.gi}
+                  className={`nav-dot ${x.gi === qi ? 'nav-dot-cur' : isAnswered(x.gi) ? 'nav-dot-done' : ''}`}
+                  onClick={() => jumpTo(x.gi)}
+                >{x.gi + 1}</button>
+              ))}
+            </div>
+            {isLastQ && !isLastPsg
+              ? <button className="btn-primary" onClick={goNextPassage}>{t.nextPsg} &#8594;</button>
+              : qi < questions.length - 1
+                ? <button className={`nav-btn`} onClick={goNext}>{t.next} &#8594;</button>
+                : <button className="btn-primary" onClick={doSubmit}>{t.submit}</button>
+            }
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // ═══ RESULT VIEW ═══
+  // ═══════════════════════════════════════════
+  if (view === 'result') {
+    const { c, total, scaled } = score();
+    const pct = Math.round((c / total) * 100);
+    return (
+      <div className="center">
+        <div style={{ textAlign: 'center', maxWidth: 520, padding: '0 24px' }} className="fade-up">
+          <div className="score-ring" style={{ background: `conic-gradient(var(--accent) ${pct * 3.6}deg, var(--border) 0deg)` }}>
+            <div className="score-inner">
+              <span style={{ fontFamily: 'var(--display)', fontSize: 48, color: 'var(--t1)', lineHeight: 1 }}>{scaled}</span>
+              <span style={{ fontSize: 12, color: 'var(--t3)', marginTop: 2 }}>/ 30</span>
+            </div>
+          </div>
+          <h2 style={{ fontFamily: 'var(--display)', fontSize: 30, color: 'var(--t1)', marginBottom: 8 }}>
+            {pct >= 80 ? t.excellent : pct >= 60 ? t.good : t.keep}
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--t2)', fontWeight: 300, marginBottom: 4 }}>{t.ofCorrect(c, total)} &middot; {t.timeUsed(fmt(TOTAL_TIME - timer))}</p>
+          <p style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 28 }}>{passages.map(p => p.title).join(' · ')}</p>
+          <div className="result-grid">
+            {questions.map((_, i) => (
+              <div key={i} className={`result-dot ${isCorrect(i) ? 'result-dot-ok' : 'result-dot-no'}`}>{i + 1}</div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+            <button className="btn-outline" onClick={() => { setView('review'); setReviewPsg(0); }}>{t.reviewAnswers}</button>
+            <button className="btn-primary" onClick={() => setView('home')}>{t.newTest}</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // ═══ REVIEW VIEW ═══
+  // ═══════════════════════════════════════════
+  if (view === 'review') {
+    const rp = passages[reviewPsg];
+    const rpParas = rp?.text?.split('\n\n') || [];
+    const rqs = questions.map((q2, i) => ({ ...q2, gi: i })).filter(q2 => q2.passageIdx === reviewPsg);
+
+    return (
+      <div className="split">
+        {/* ─── Passage ─── */}
+        <div className="split-passage">
+          <div className="test-head">
+            <div className="test-head-left">
+              <div className="test-head-info">
+                <h2>{t.passage(reviewPsg + 1)}: {rp?.title}</h2>
+                <span>{rp?.field}</span>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {passages.map((_, i) => (
+                <button key={i} className={`btn-outline`}
+                  style={{ padding: '4px 12px', fontSize: 11, ...(reviewPsg === i ? { borderColor: 'var(--accent-border)', color: 'var(--accent)', background: 'var(--accent-soft)' } : {}) }}
+                  onClick={() => setReviewPsg(i)}>P{i + 1}</button>
+              ))}
+              <button className="btn-outline" style={{ padding: '4px 12px', fontSize: 11 }} onClick={() => setView('result')}>{t.results}</button>
+            </div>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '28px 36px 40px' }}>
+            <div style={{ maxWidth: 640, margin: '0 auto', paddingLeft: 32 }}>
+              {rpParas.map((pa, idx) => (
+                <p key={idx} className="para"><span className="para-num">{idx + 1}</span>{pa}</p>
+              ))}
+            </div>
+          </div>
+          {/* ─── Dictionary ─── */}
+          <div className="dict-bar">
+            <div className="dict-row">
+              <span style={{ fontSize: 16 }}>&#128214;</span>
+              <input className="dict-input" value={dictQ} onChange={e => setDictQ(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') lookup(dictQ); }} placeholder={t.lookupPh} />
+              <button className="btn-primary" style={{ padding: '8px 14px', fontSize: 12 }} onClick={() => lookup(dictQ)} disabled={dictLoading}>{dictLoading ? '...' : t.lookUp}</button>
+            </div>
+            {dictR && (
+              <div className="dict-result fade-up">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div><b>{dictR.word}</b> <span style={{ fontSize: 11, color: 'var(--t3)' }}>{dictR.pos}</span> <span style={{ color: 'var(--accent)', marginLeft: 8, fontSize: 12 }}>{dictR.chinese}</span></div>
+                  <button onClick={() => addVocab(dictR)} style={{ border: '1px solid var(--accent-border)', borderRadius: 4, color: 'var(--accent)', fontSize: 10, fontWeight: 600, padding: '2px 8px' }}>{t.save}</button>
+                </div>
+                <p style={{ fontSize: 12, color: 'var(--t2)', marginTop: 4, lineHeight: 1.5 }}>{dictR.definition}</p>
+                {dictR.example && <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2, fontStyle: 'italic' }}>{dictR.example}</p>}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ─── Answer Review ─── */}
+        <div style={{ width: '45%', overflowY: 'auto', padding: '24px 24px 40px' }}>
+          <h2 style={{ fontFamily: 'var(--display)', fontSize: 22, color: 'var(--t1)', marginBottom: 20 }}>{t.review(reviewPsg + 1)}</h2>
+          {rqs.map((q2, ri) => {
+            const gi = q2.gi;
+            const ok = isCorrect(gi);
+            const ua = answers[gi];
+            const expanded = showExp[gi];
+            return (
+              <div key={ri} className="rv-card" style={{ animation: `fadeUp 0.3s ease-out ${ri * 0.04}s both` }}>
+                <div className="rv-head">
+                  <span className={`rv-num ${ok ? 'rv-num-ok' : 'rv-num-no'}`}>{gi + 1}</span>
+                  <span className={`q-type-tag tc-${q2.type}`} style={{ fontSize: 9 }}>{TYPE_LABEL[q2.type]}</span>
+                  <span className="rv-status" style={{ color: ok ? 'var(--ok)' : 'var(--err)' }}>{ok ? `\u2713 ${t.correct}` : `\u2717 ${t.incorrect}`}</span>
+                </div>
+                <p className="rv-question">{q2.text}</p>
+                {q2.options.map((opt, oi) => {
+                  const isUser = q2.type === 'summary' ? Array.isArray(ua) && ua.includes(oi) : ua === oi;
+                  const isCor = q2.type === 'summary' ? Array.isArray(q2.correct) && q2.correct.includes(oi) : q2.correct === oi;
+                  let cls = 'rv-opt';
+                  if (isCor) cls += ' rv-opt-ok';
+                  if (isUser && !isCor) cls += ' rv-opt-wrong';
+                  return <div key={oi} className={cls}>{isCor ? '\u2713 ' : isUser && !isCor ? '\u2717 ' : '\u00A0\u00A0\u00A0'}{opt}</div>;
+                })}
+                <button onClick={() => setShowExp(p => ({ ...p, [gi]: !p[gi] }))} style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent)', marginTop: 10 }}>
+                  {expanded ? `\u25BE ${t.hideExp}` : `\u25B8 ${t.showExp}`}
+                </button>
+                {expanded && (
+                  <div className="rv-explain fade-up"><p>{q2.explanation}</p></div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // ═══ HISTORY VIEW ═══
+  // ═══════════════════════════════════════════
+  if (view === 'history') {
+    const isVocab = histTab === 'vocab';
+    return (
+      <div className="page-wrap">
+        <div className="page-head">
+          <h1 style={{ fontFamily: 'var(--display)', fontSize: 28, color: 'var(--t1)' }}>{isVocab ? t.vocabBook : t.testHistory}</h1>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {!isVocab && vocab.length > 0 && <button className="btn-outline" style={{ padding: '6px 14px', fontSize: 12 }} onClick={() => setHistTab('vocab')}>{t.vocabBook}</button>}
+            {isVocab && <button className="btn-outline" style={{ padding: '6px 14px', fontSize: 12 }} onClick={() => setHistTab('tests')}>{t.testHistory}</button>}
+            <button className="btn-outline" style={{ padding: '6px 14px', fontSize: 12 }} onClick={() => setView('home')}>{t.home}</button>
+          </div>
+        </div>
+        {isVocab ? (
+          vocab.length === 0 ? <p style={{ color: 'var(--t3)' }}>{t.noWords}</p> :
+          vocab.map((v, i) => (
+            <div key={i} className="card">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div><b>{v.word}</b> <span style={{ fontSize: 11, color: 'var(--t3)' }}>{v.pos}</span> <span style={{ color: 'var(--accent)', marginLeft: 8 }}>{v.chinese}</span></div>
+                <button onClick={() => saveVocab(vocab.filter(x => x.word !== v.word))} style={{ color: '#ccc', fontSize: 16 }}>&times;</button>
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--t2)', marginTop: 3 }}>{v.definition}</p>
+              {v.example && <p style={{ fontSize: 11, color: 'var(--t3)', fontStyle: 'italic', marginTop: 2 }}>{v.example}</p>}
+            </div>
+          ))
+        ) : (
+          hist.length === 0 ? <p style={{ color: 'var(--t3)' }}>{t.noTests}</p> :
+          hist.map((h, i) => (
+            <div key={i} className="card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <span style={{ fontFamily: 'var(--display)', fontSize: 26, color: 'var(--t1)' }}>{h.score}</span>
+                  <span style={{ fontSize: 12, color: 'var(--t3)' }}> / 30</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, color: 'var(--t3)' }}>{new Date(h.date).toLocaleDateString()}</span>
+                  {h.psgData && h.qsData && (
+                    <button className="btn-primary" style={{ padding: '4px 14px', fontSize: 11 }} onClick={() => {
+                      setPassages(h.psgData); setQuestions(h.qsData); setAnswers({}); setMultiSel([]);
+                      setQi(0); setTimer(TOTAL_TIME); setShowExp({}); setLockedPsg(-1); setShowPanel(false);
+                      setView('test');
+                    }}>Redo</button>
+                  )}
+                </div>
+              </div>
+              <p style={{ fontSize: 12, color: 'var(--t3)', marginTop: 4 }}>{h.passages?.join(' · ')} — {h.correct}/{h.total} — {fmt(h.timeUsed)}</p>
+            </div>
+          ))
+        )}
+      </div>
+    );
+  }
+
+  return <div className="center"><p style={{ color: 'var(--t3)' }}>Loading...</p></div>;
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

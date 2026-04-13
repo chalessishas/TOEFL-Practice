@@ -24,6 +24,17 @@ const THESIS_MARKERS = [
   'i am convinced','i strongly believe','it is clear that','it seems to me',
 ]
 
+// Stopwords for token-overlap calculation (circular reasoning detection)
+const OVERLAP_STOPWORDS = new Set([
+  'the','a','an','is','are','was','were','be','been','being','have','has','had',
+  'do','does','did','will','would','could','should','may','might','can','and',
+  'or','but','if','when','while','because','for','from','to','in','on','at',
+  'by','with','about','into','as','of','this','that','these','those','it',
+  'he','she','they','we','you','i','my','your','his','her','our','their',
+  'not','no','very','more','most','some','any','all','each','also','just',
+  'so','too','then','than','there','here','which','what','who',
+])
+
 // Evidence signals for per-paragraph completeness check (Stab & Gurevych 2017 baseline).
 // Simpler than DETAIL_MARKERS — just the cleanest premise signals.
 const EVIDENCE_SIGNALS = [
@@ -122,6 +133,8 @@ function argumentStructureScore(text, wordCount, taskType) {
   })
   // 3+ bare claim sentences = repetition pattern, penalize
   const repetitionPenalty = bareClaims.length >= 3 ? 0.15 : 0
+  // Circular reasoning: intra-paragraph token overlap proxy (P3)
+  const circPenalty = circularReasoningPenalty(text, wordCount, taskType)
 
   // Full score: has thesis + ≥2 examples/details + ≥2 reason markers
   // Thin essay penalty: long but ≤1 example marker and ≤1 reason marker
@@ -139,7 +152,74 @@ function argumentStructureScore(text, wordCount, taskType) {
   } else {
     base = 1.0
   }
-  return Math.max(0, base - repetitionPenalty)
+  return Math.max(0, base - repetitionPenalty - circPenalty)
+}
+
+// P3 — Circular reasoning penalty (Research Loop 6).
+// Detects intra-paragraph repetition: if two sentences in the same paragraph
+// share >60% of their non-stopword content tokens, it's likely the writer is
+// restating the claim rather than developing it (Stab & Gurevych 2017 proxy).
+// Returns 0–0.15 penalty. Only applies to discussion essays ≥120 words.
+function circularReasoningPenalty(text, wordCount, taskType) {
+  if (taskType === 'email' || wordCount < 120) return 0
+
+  const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 30)
+  let maxOverlap = 0
+
+  for (const para of paragraphs) {
+    const sentences = para.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 10)
+    if (sentences.length < 2) continue
+
+    // Extract content tokens for each sentence
+    const tokenSets = sentences.map(s =>
+      new Set(
+        (s.match(/[a-zA-Z']+/g) || [])
+          .map(w => w.toLowerCase())
+          .filter(w => w.length >= 4 && !OVERLAP_STOPWORDS.has(w))
+      )
+    )
+
+    // Compare each pair of sentences within this paragraph
+    for (let i = 0; i < tokenSets.length - 1; i++) {
+      for (let j = i + 1; j < tokenSets.length; j++) {
+        const a = tokenSets[i], b = tokenSets[j]
+        if (a.size === 0 || b.size === 0) continue
+        const shared = [...a].filter(t => b.has(t)).length
+        const overlap = shared / Math.min(a.size, b.size)
+        if (overlap > maxOverlap) maxOverlap = overlap
+      }
+    }
+  }
+
+  // >80% overlap = very likely repetition; 60-80% = suspicious
+  if (maxOverlap > 0.80) return 0.15
+  if (maxOverlap > 0.60) return 0.08
+  return 0
+}
+
+// P4 — Numeric/named-entity evidence bonus (Research Loop 6).
+// Concrete statistics, percentages, and years signal the writer is using
+// real-world evidence rather than vague claims. Named entities (proper nouns
+// in non-sentence-initial position) are a proxy for specific references.
+// Returns 0–0.08 additive bonus. Email skipped.
+function numericEvidenceBonus(text, taskType) {
+  if (taskType === 'email') return 0
+
+  // Numeric evidence: percentages, large numbers, years (1900–2099)
+  const percentages = (text.match(/\d+(\.\d+)?%/g) || []).length
+  const years = (text.match(/\b(19|20)\d{2}\b/g) || []).length
+  const bigNumbers = (text.match(/\b\d{1,3}(,\d{3})+|\b\d{4,}\b/g) || []).length
+
+  // Named entity proxy: capitalized words not at sentence start
+  // Matches a capitalized word preceded by a lowercase word (not sentence-initial)
+  const namedEntityMatches = (text.match(/[a-z]\s+[A-Z][a-z]{2,}/g) || []).length
+
+  const numericSignals = percentages + years + bigNumbers
+  const entitySignals = Math.min(2, namedEntityMatches) // cap to avoid noise
+
+  if (numericSignals >= 2 || (numericSignals >= 1 && entitySignals >= 1)) return 0.08
+  if (numericSignals >= 1 || entitySignals >= 2) return 0.04
+  return 0
 }
 
 // Per-paragraph completeness bonus (Research Loop 6, P2).
@@ -200,13 +280,14 @@ export function score(text, taskType = 'general') {
 
   // argScore gates the ceiling: thin ideas cap development at ~0.65 regardless of word count
   const paraBonus = paragraphCompletenessBonus(text, taskType)
-  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus))
+  const numBonus  = numericEvidenceBonus(text, taskType)
+  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus + numBonus))
 
   return {
     value,
     details: `${wordCount} words, ${sentenceCount} sentences, ${
       DETAIL_MARKERS.filter(m => text.toLowerCase().includes(m)).length
-    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}`,
+    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}, num bonus: ${numBonus.toFixed(2)}`,
   }
 }
 

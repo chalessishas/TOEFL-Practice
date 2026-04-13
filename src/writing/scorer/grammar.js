@@ -570,7 +570,10 @@ export function score(text) {
   // Safe version: sentence-initial only, followed by copula/modal — low FP rate.
   // "The society is" / "The technology can" — these are always wrong as generic claims.
   // Exclude: "The technology of X" / "The society that" (specific reference).
-  const THE_GENERIC_SAFE = /(?:^|[.!?]\s+)The\s+(technology|society|education|environment|economy|culture|science|nature|poverty)\s+(?:is|are|was|were|has|have|can|could|should|must|will|would|needs?|plays?|helps?|affects?|influences?|changes?)/gm
+  // Loop 35 (2026-04-13): expanded noun set — added globalization/communication/healthcare/media/youth/government.
+  // All are high-frequency TOEFL Independent Writing topic nouns; "The media is/The government should" at
+  // sentence-start as generic claims are Chinese L1 article over-insertion (Frontiers in Psychology 2021).
+  const THE_GENERIC_SAFE = /(?:^|[.!?]\s+)The\s+(technology|society|education|environment|economy|culture|science|nature|poverty|globalization|communication|healthcare|media|youth|government)\s+(?:is|are|was|were|has|have|can|could|should|must|will|would|needs?|plays?|helps?|affects?|influences?|changes?)/gm
   const genericTheMatches = text.match(THE_GENERIC_SAFE)
   if (genericTheMatches) {
     // Only flag if no specific-reference marker follows (of/in/that/which)
@@ -1062,10 +1065,13 @@ export function score(text) {
   // Conservative adjective whitelist: only adjectives where direct placement is always an error.
   // Frequency: ~8%. FP rate: ~3-5% after guards (main FP: "make possible" as a stock phrase in
   // formal text, e.g. "technology makes possible a new era" — poetic inversion, rare in TOEFL).
-  const MAKE_ADJ_WHITELIST = /\b(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/
-  const MAKE_ADJ_RE = /\b(make|makes|making)\s+(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/i
-  const MADE_ADJ_RE = /\b(made)\s+(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/i
-  const MADE_PASSIVE_RE = /\b(?:was|were|is|are|been|being|get|got|getting|have|has|had)\s+made\s+(?:convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/i
+  // Loop 35 (2026-04-13): expanded adjective set — added dangerous/harmful/equal/sustainable/feasible/enjoyable.
+  // These six are unambiguous: "make dangerous/harmful" without an object NP is always an error.
+  // FP-excluded: "useful/valuable/interesting/practical" — legitimately precede nouns ("make useful contributions").
+  const MAKE_ADJ_WHITELIST = /\b(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available|dangerous|harmful|equal|sustainable|feasible|enjoyable)\b/
+  const MAKE_ADJ_RE = /\b(make|makes|making)\s+(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available|dangerous|harmful|equal|sustainable|feasible|enjoyable)\b/i
+  const MADE_ADJ_RE = /\b(made)\s+(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available|dangerous|harmful|equal|sustainable|feasible|enjoyable)\b/i
+  const MADE_PASSIVE_RE = /\b(?:was|were|is|are|been|being|get|got|getting|have|has|had)\s+made\s+(?:convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available|dangerous|harmful|equal|sustainable|feasible|enjoyable)\b/i
   const makeAdjMatch = text.match(MAKE_ADJ_RE) || (!MADE_PASSIVE_RE.test(text) ? text.match(MADE_ADJ_RE) : null)
   if (makeAdjMatch) {
     const adj = makeAdjMatch[2].toLowerCase()

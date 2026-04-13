@@ -10,7 +10,11 @@ const MARKER_CATEGORIES = {
   // Hedging — epistemic stance markers. ETS e-rater explicitly scores hedging as a
   // dimension of academic register: proficient writers qualify claims rather than
   // asserting them baldly (Source: Research Loop 5, 2026-04-12).
-  hedging:         ['perhaps','possibly','arguably','presumably','it could be argued','it seems','it appears','one might argue','it is worth noting','this suggests','this may indicate'],
+  // Tier-1 hedging: basic stance markers counted for marker diversity.
+  // Tier-2 (arguably, presumably, it could be argued, one might argue, etc.) are
+  // handled separately by HEDGING_TIER2 for the score-5 discrimination bonus — not
+  // counted here to avoid double-crediting the same token (Loop 8, 2026-04-12).
+  hedging:         ['perhaps','possibly','it seems','it appears','this suggests','this may indicate','it is possible','potentially','generally speaking'],
 }
 
 // Markers classified as "inferential" or "concessive" — proficient writers use these

@@ -1315,6 +1315,42 @@ export function score(text) {
     errors.push('Article error: "takes [person] long time" → "takes [person] a long time". The noun phrase "long time" requires the indefinite article "a". (Chinese 花很长时间 has no article — this is a direct transfer error.)')
   }
 
+  // "result to" → "result in" — Loop 34 (2026-04-13).
+  // CLEC preposition collocation data; City University HK ELSS (Laufer & Waldman 2011).
+  // Chinese 导致 is transitive (no preposition); learners pick "to" by analogy with "lead to".
+  // "result to" is categorically non-standard. Guard: "the result to" (noun) won't match — RE
+  // is anchored on the verb form "result/results/resulted/resulting".
+  // FP: VERY LOW (~0%). Exception "result from" is correct and NOT matched.
+  if (/\bresult(?:s|ed|ing)?\s+to\b/i.test(text)) {
+    errors.push('Preposition error: "result to" → "result in". The verb "result" always collocates with "in": "result in problems", "result in benefits". ("Lead to" uses "to" — but "result" uses "in".)')
+  }
+
+  // "succeed to do" / "insist to do" / "devote to + bare verb" — Loop 34 (2026-04-13).
+  // Xia (2012) CLEC infinitive study: 437 tagged errors. City University HK ELSS verb+prep list.
+  // Same mechanism as Loop 23 "look forward to do" and Loop 30 "for purpose of + bare inf":
+  // "to" after succeed/insist/devote is a preposition, not an infinitive marker → requires gerund.
+  // Guard: only fire when followed by a bare verb (no -ing), excluding articles/determiners.
+  // FP: VERY LOW. "succeed to the throne" (monarchy) never appears in TOEFL Independent Writing.
+  const SUCCEED_TO_RE = /\bsucceed(?:s|ed|ing)?\s+to\s+(?!the\b|a\b|an\b|this\b|that\b)([a-z]+)\b(?!ing\b)/i
+  const succeedMatch = text.match(SUCCEED_TO_RE)
+  if (succeedMatch && !succeedMatch[1].endsWith('ing')) {
+    errors.push(`Preposition error: "succeed to ${succeedMatch[1]}" → "succeed in ${succeedMatch[1]}ing". "Succeed" collocates with "in" + gerund: "succeed in achieving", "succeed in solving". (Chinese 成功 + bare verb transfers directly — but "succeed to + verb" is non-standard.)`)
+  }
+
+  const INSIST_TO_RE = /\binsist(?:s|ed|ing)?\s+to\s+(?!the\b|a\b|an\b|this\b|that\b)([a-z]+)\b(?!ing\b)/i
+  const insistMatch = text.match(INSIST_TO_RE)
+  if (insistMatch && !insistMatch[1].endsWith('ing')) {
+    errors.push(`Preposition error: "insist to ${insistMatch[1]}" → "insist on ${insistMatch[1]}ing". "Insist" collocates with "on" + gerund: "insist on doing", "insist on staying". (Chinese 坚持 + bare verb transfers directly — but "insist to + verb" is non-standard.)`)
+  }
+
+  // "devote to + bare verb" (gerund required) — "to" here is a preposition, not infinitive marker.
+  // Guard: exclude pronouns/possessives that signal correct "devote + reflexive/NP + to + gerund".
+  const DEVOTE_TO_BARE_RE = /\bdevote(?:s|d|ing)?\s+to\s+(?!the\b|a\b|an\b|this\b|that\b|their\b|his\b|her\b|my\b|our\b|your\b|its\b|him\b|her\b|them\b|us\b)([a-z]+)\b(?!ing\b)/i
+  const devoteMatch = text.match(DEVOTE_TO_BARE_RE)
+  if (devoteMatch && !devoteMatch[1].endsWith('ing')) {
+    errors.push(`Gerund error: "devote to ${devoteMatch[1]}" → "devote to ${devoteMatch[1]}ing". The "to" in "devote to" is a preposition — it requires a gerund, not a bare verb: "devote to improving", "devote to solving". (Chinese 致力于 + bare verb transfers directly.)`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1541,6 +1577,18 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Punctuation error') && e.includes('such as,'))) {
     tips.push('"Such as" is a preposition that introduces a noun-phrase list — no comma follows it. Write "...subjects such as math and science" not "...subjects, such as, math and science". The comma before "such as" (if mid-clause) is optional, but the comma after "as" is always wrong.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('result to'))) {
+    tips.push('"Result" always pairs with "in" — not "to": write "result in problems", "result in benefits", "result in change". "Lead to" uses "to", but "result in" uses "in". Chinese 导致 is transitive (no preposition), so learners often pick "to" by analogy with "lead to".')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('succeed to'))) {
+    tips.push('"Succeed" collocates with "in" + gerund: write "succeed in achieving", "succeed in getting", "succeed in solving". Chinese 成功 + bare verb transfers as "succeed to + verb" — but "succeed to" is non-standard (except in "succeed to the throne", which never appears in TOEFL essays).')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('insist to'))) {
+    tips.push('"Insist" collocates with "on" + gerund: write "insist on doing", "insist on leaving", "insist on staying". Chinese 坚持 + bare verb transfers as "insist to + verb" — but English requires "insist on + gerund". Note: "insist that [clause]" (with "that") is also correct.')
+  }
+  if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('devote to'))) {
+    tips.push('"Devote to" requires a gerund (-ing) because "to" here is a preposition, not an infinitive marker: write "devote to improving", "devote to solving", "devoted to helping". Compare: "used to doing" / "look forward to seeing" — all follow the same pattern.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

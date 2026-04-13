@@ -635,6 +635,43 @@ export function score(text) {
     errors.push(`Causative verb error: "${ctMatch[0].trim()}" — causative verbs (make/let/have) take a bare infinitive after the object, not "to". Write "${ctMatch[1]} ${ctMatch[2]} ${ctMatch[3]}"`)
   }
 
+  // Null expletive "it" omission — Chinese L1 null-subject transfer (Loop 20, 2026-04-13).
+  // Mandarin: 是很重要的 ("is very important") allows null subject. English requires "It is...".
+  // Lardiere (1998) copula omission; Zeng & Takatsuka (2009): rank #2 Chinese L1 grammar error.
+  // Detection: sentence begins with bare copula + pred-adj + to/that/when/where/why/how.
+  // FP guard: match only at sentence start (implicit — sentences split earlier), so "It is clear" → no match.
+  const NULL_IT_RE = /^(is|are|was|were)\s+(important|clear|obvious|necessary|essential|true|possible|impossible|likely|unlikely|doubtful|interesting|surprising|shocking|remarkable|evident|apparent|fortunate|unfortunate|crucial|critical|vital|significant)\s+(to|that|when|where|why|how)\b/i
+  for (const sent of sentences) {
+    const trimmed = sent.trim()
+    if (NULL_IT_RE.test(trimmed)) {
+      errors.push(`Null subject error: "${trimmed.substring(0, 50).trim()}..." — English requires an expletive subject: "It is ${trimmed.match(NULL_IT_RE)?.[2] || 'important'} ${trimmed.match(NULL_IT_RE)?.[3] || 'to'}..."`)
+    }
+  }
+
+  // Pleonastic reflexive — "I myself think" — Chinese emphatic 我自己认为 → ESL transfer (Loop 20, 2026-04-13).
+  // Celce-Murcia & Larsen-Freeman (1999) §18.3: emphatic reflexives are marked in formal academic writing.
+  // FP guard: comma-separated appositive ("I, myself, believe") is legitimate — skip if comma precedes reflexive.
+  // FP guard: "by myself" (= alone) excluded by anchoring on subject + reflexive + reporting-verb.
+  const PLEONASTIC_RE = /\b(I|you|he|she|we|they|one)\s+(myself|yourself|himself|herself|ourselves|yourselves|themselves|oneself)\s+(think|believe|know|feel|want|prefer|need|suggest|claim|argue|propose|maintain|assert)\b/i
+  const prMatch = text.match(PLEONASTIC_RE)
+  if (prMatch) {
+    const matchIdx = text.indexOf(prMatch[0])
+    const charBefore = text.substring(Math.max(0, matchIdx - 3), matchIdx)
+    if (!charBefore.includes(',')) {
+      errors.push(`Redundant reflexive: "${prMatch[0]}" — emphatic reflexives are unusual in academic English. Write "${prMatch[1]} ${prMatch[3]}" or set the reflexive off with commas: "${prMatch[1]}, ${prMatch[2]}, ${prMatch[3]}"`)
+    }
+  }
+
+  // Reporting verb + not/never + bare infinitive — should be gerund or "that" clause (Loop 20, 2026-04-13).
+  // Laufer & Waldman (2011): ~18% Chinese L1 rate on infinitive errors after reporting verbs.
+  // Mandarin bare-negation pattern: 不去 (not go) → transfer to "reported not find" (not "not finding").
+  // FP guard: exclude "be" as 3rd word to allow passives ("not be done", "not be found").
+  const REPORT_BARE_RE = /\b(report|reported|reporting|claim|claimed|claiming|suggest|suggested|suggesting|recommend|recommended|recommending|advise|advised|advising|argue|argued|arguing)\s+(not|never)\s+(go|come|make|take|find|do|see|know|use|get|give|create|develop|apply|conduct|perform|achieve|show|demonstrate|have|include)\b/i
+  const rbMatch = text.match(REPORT_BARE_RE)
+  if (rbMatch) {
+    errors.push(`Reporting verb error: "${rbMatch[0]}" — after a reporting verb + negation, use a gerund: "${rbMatch[1]} not ${rbMatch[3]}ing" or rewrite as a "that" clause: "${rbMatch[1]} that [subject] did not ${rbMatch[3]}"`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -749,6 +786,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Causative verb error'))) {
     tips.push('Causative verbs (make/let/have) take a bare infinitive after the object — never "to". Write "make him understand" not "make him to understand", "let her go" not "let her to go".')
+  }
+  if (analysis.errors.some(e => e.includes('Null subject error'))) {
+    tips.push('English impersonal sentences require an expletive "it" as subject. Write "It is important to note that..." not "Is important to note that...". Chinese allows null subjects (是很重要的), but English always requires one.')
+  }
+  if (analysis.errors.some(e => e.includes('Redundant reflexive'))) {
+    tips.push('In academic English, emphatic reflexives ("I myself believe") sound informal or redundant. Write "I believe" instead. If you want emphasis, set the reflexive off with commas: "I, myself, believe" — but use this sparingly.')
+  }
+  if (analysis.errors.some(e => e.includes('Reporting verb error'))) {
+    tips.push('After a reporting verb + negation, use a gerund (-ing) form: "The study reported not finding significant differences" — not "reported not find". Alternatively, use a "that" clause: "The study reported that they did not find..."')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

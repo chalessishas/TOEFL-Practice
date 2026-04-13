@@ -86,8 +86,8 @@ export function score(text, taskType = 'general') {
     // ETS: genuine peer engagement = name-reference + build-on/contrast, not just bare opinion
     const PEER_NAMES = /\b(Sarah|Mark|Liam|Maya|Alex|Priya|Emma|James|Sophie|Ethan|Noah|Chloe|Hannah|Marcus|Fatima|Carlos|Amara|Ben|Isabelle|David)\b/
     const hasPeerName = PEER_NAMES.test(text)
-    const engagementVerb = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up|identifies?|overlooks?|is (correct|right|wrong|compelling|mistaken|valid|flawed))/i.test(text)
-    const buildOn = /\b(building on|adding to|unlike|while [A-Z]|although [A-Z]|I (also )?(agree|disagree) with)\b/i.test(text)
+    const engagementVerb = /(makes? a (good |great |valid )?point|said|mentioned|points? out|argues?|suggests?|notes?|raises?|brought? up|identifies?|overlooks?|is (correct|right|wrong|compelling|mistaken|valid|flawed)|as \w+ (noted|mentioned|suggested|pointed out|argued|stated))/i.test(text)
+    const buildOn = /\b(building on|adding to|to expand on|expanding on|I would add to|unlike|while [A-Z]|although [A-Z]|I (also )?(agree|disagree) with|responding to|taking \w+'s point|in response to)\b/i.test(text)
     const hasOpinion = /\b(i agree|i disagree|i think|in my opinion|i believe)\b/i.test(text)
 
     if (hasPeerName && (engagementVerb || buildOn)) taskSpecific = 1.0  // named peer + engagement

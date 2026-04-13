@@ -106,8 +106,11 @@ const DISCUSSION_PEER_NAMES = /\b(sarah|mark|liam|maya|alex|priya|emma|james|sop
 function argumentStructureScore(text, wordCount, taskType) {
   // Email tasks use transactional structure (request/reply/apology), not opinion/thesis
   if (taskType === 'email') return 1.0
-  // Only penalise essays long enough that thin ideas are a choice, not a length issue
-  if (wordCount < 120) return 1.0
+  // Only penalise essays long enough that thin ideas are a choice, not a length issue.
+  // Use task-specific minimums (WORD_COUNT_TARGETS): below minimum, length alone explains thinness.
+  // email≥50 / discussion≥80 / general≥100 — gaming essays at ~93w for discussion now evaluated.
+  const argMinWords = taskType === 'email' ? 50 : taskType === 'discussion' ? 80 : 100
+  if (wordCount < argMinWords) return 1.0
   const lower = text.toLowerCase()
   let hasThesis = THESIS_MARKERS.some(m => lower.includes(m))
 
@@ -147,7 +150,7 @@ function argumentStructureScore(text, wordCount, taskType) {
     // detailCount=0 means no "for example/such as/research shows/%" — connector-only essays
     // that look well-organised but lack specifics should be capped, not rewarded.
     if (detailCount === 0 && reasonCount === 0) base = 0.60
-    else if (detailCount === 0) base = 0.75  // connectors only, no concrete evidence → cap
+    else if (detailCount === 0) base = 0.65  // connectors only, no concrete evidence → cap
     else base = 1.0
   } else if (!hasThesis && detailCount <= 1 && reasonCount <= 1) {
     base = 0.35

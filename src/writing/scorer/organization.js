@@ -1,12 +1,16 @@
 // Categorised by connector function — reward diversity across categories,
 // not just quantity within one category (e.g. 5 contrast markers ≠ high score).
 const MARKER_CATEGORIES = {
-  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','conversely','despite','although','while','on the contrary','in spite of','even though','yet','notwithstanding'],
-  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly','also','what is more'],
-  conclusion:      ['in conclusion','in summary','to summarize','to sum up','in short','overall','therefore','thus','hence','consequently','as a result','finally'],
-  exemplification: ['for instance','for example','such as','in particular','notably','specifically','namely','to illustrate','that is','in other words'],
+  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','conversely','despite','although','while','on the contrary','in spite of','even though','yet','notwithstanding','that said','admittedly','granted'],
+  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly','also','what is more','likewise','in the same way','by the same token'],
+  conclusion:      ['in conclusion','in summary','to summarize','to sum up','in short','overall','therefore','thus','hence','consequently','as a result','finally','it follows that','in light of this'],
+  exemplification: ['for instance','for example','such as','in particular','notably','specifically','namely','to illustrate','that is','in other words','a case in point','this is evident in'],
   sequence:        ['firstly','secondly','thirdly','to begin with','first of all','subsequently','previously','then','next','meanwhile','last but not least','last','finally'],
-  elaboration:     ['indeed','in fact','after all','at the same time','above all','in particular','more importantly'],
+  elaboration:     ['indeed','in fact','after all','at the same time','above all','in particular','more importantly','to be sure','it is true that'],
+  // Hedging — epistemic stance markers. ETS e-rater explicitly scores hedging as a
+  // dimension of academic register: proficient writers qualify claims rather than
+  // asserting them baldly (Source: Research Loop 5, 2026-04-12).
+  hedging:         ['perhaps','possibly','arguably','presumably','it could be argued','it seems','it appears','one might argue','it is worth noting','this suggests','this may indicate'],
 }
 
 // Markers classified as "inferential" or "concessive" — proficient writers use these
@@ -154,7 +158,7 @@ export function suggest(analysis) {
 
   const catMatch = analysis.details.match(/(\d+)\/(\d+) categories/)
   const categoriesUsed = catMatch ? parseInt(catMatch[1]) : 0
-  const totalCategories = catMatch ? parseInt(catMatch[2]) : 6
+  const totalCategories = catMatch ? parseInt(catMatch[2]) : 7
 
   if (analysis.details.includes('0 unique discourse markers'))
     tips.push('Use discourse markers (however, moreover, for example, in conclusion) to connect your ideas.')

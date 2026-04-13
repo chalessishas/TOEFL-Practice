@@ -458,6 +458,32 @@ export function score(text) {
     errors.push('Gerund error: "suggest to do" → "suggest doing" or "suggest that someone do"')
   }
 
+  // Double comparative — always ungrammatical; "more" + already-comparative form.
+  // Hornby (2015) OALD: synthetic comparatives (better/worse/easier) are inflected forms
+  // of their base; "more" + comparative is doubly-marked. Chinese L1 default: "more" is
+  // used as a universal degree marker (更 gèng) regardless of inflection.
+  // FP rate ≈ 0%: no standard English construction uses "more better/worse".
+  const DOUBLE_COMP_RE = /\bmore\s+(better|worse|easier|harder|faster|slower|bigger|smaller|longer|shorter|higher|lower|stronger|weaker|older|younger|richer|poorer|healthier|smarter|simpler|louder|quieter)\b/i
+  const dcMatch = text.match(DOUBLE_COMP_RE)
+  if (dcMatch) {
+    errors.push(`Double comparative: "more ${dcMatch[1]}" — "${dcMatch[1]}" is already a comparative; write just "${dcMatch[1]}"`)
+  }
+
+  // Embedded question word order — interrogative inversion inside indirect questions.
+  // "I don't know what is the reason" / "She asked where are the restrooms."
+  // Quirk et al. (1985) §15.6: embedded interrogatives use declarative order (SV not VS).
+  // Chinese has no inversion rule; learners carry interrogative inversion into embedded clauses.
+  // FP guard: require a determiner (the/a/an/this/these/those/my/your…) after the inverted verb
+  // — this excludes predicative-adjective constructions ("I know what is important") which
+  // are legitimate English. Determiners always precede NP arguments, not adjective predicates.
+  // Conjugation coverage: \w* suffix after base to catch -s/-ed/-ing/-d forms.
+  // Gap {0,2}: allows indirect object ("asked me what") or adverb ("explain clearly what").
+  const EMBED_Q_RE = /\b(?:know|knew|understand\w*|explain\w*|wonder\w*|ask\w*|describe\w*|tell|told|telling|clarif\w*|show\w*|realiz\w*|discover\w*|see|saw|seen|discuss\w*|learn\w*)\s+(?:\w+\s+){0,2}(?:what|where|when|why|how)\s+(?:is|are|was|were|do|does|did|will|would|can|could)\s+(?:the|a|an|this|these|those|my|your|his|her|our|their)\b/i
+  if (EMBED_Q_RE.test(text)) {
+    const eqMatch = text.match(EMBED_Q_RE)
+    errors.push(`Embedded question word order: "${eqMatch[0].trim()}" — indirect questions use statement order (SV), not question order (VS). Write "I don't know what the reason is" not "what is the reason"`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -526,6 +552,22 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Preposition error: "interested'))) {
     tips.push('"interested in" not "interested of" — the adjective "interested" always takes "in".')
+  }
+  if (analysis.errors.some(e => e.includes('Uncountable noun error'))) {
+    const ue = analysis.errors.find(e => e.includes('Uncountable noun error'))
+    const noun = ue?.match(/"(\w+)" is uncountable/)?.[1] || 'this noun'
+    tips.push(`"${noun}" is uncountable — it cannot follow "a" or "an". Write "some ${noun}" or just "${noun}" without an article.`)
+  }
+  if (analysis.errors.some(e => e.includes('Gerund error'))) {
+    const ge = analysis.errors.find(e => e.includes('Gerund error'))
+    tips.push(ge ? ge.replace('Gerund error: ', '') : 'After verbs like enjoy/avoid/finish/keep, use the -ing form: "enjoy playing" not "enjoy to play".')
+  }
+  if (analysis.errors.some(e => e.includes('Double comparative'))) {
+    const dc = analysis.errors.find(e => e.includes('Double comparative'))
+    tips.push(dc ? dc.replace('Double comparative: ', '') : 'Use either "more" + base form OR the -er/-comparative form — never both together: "easier" not "more easier".')
+  }
+  if (analysis.errors.some(e => e.includes('Embedded question word order'))) {
+    tips.push('In indirect questions, use statement word order (subject before verb): "I don\'t know what the reason is" — not "what is the reason". Embedded clauses never use interrogative inversion.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

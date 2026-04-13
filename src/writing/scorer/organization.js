@@ -1,3 +1,5 @@
+import { commonWords } from './wordlist.js'
+
 // Categorised by connector function — reward diversity across categories,
 // not just quantity within one category (e.g. 5 contrast markers ≠ high score).
 const MARKER_CATEGORIES = {
@@ -58,6 +60,23 @@ function countMarkersAndDiversity(text) {
     totalCategories: Object.keys(MARKER_CATEGORIES).length,
     ratioBonus,
   }
+}
+
+// Lexical chain coherence bonus (Loop 19, 2026-04-13)
+// ETS e-rater (Deane 2024): adjacent paragraphs sharing content words = discourse coherence signal.
+// Requires ≥2 paragraph pairs sharing ≥50% of pairs. commonWords filter removes trivial overlap.
+function lexicalChainBonus(text) {
+  const paras = text.split(/\n\n+/).map(p =>
+    (p.toLowerCase().match(/\b[a-z]{5,}\b/g) || []).filter(w => !commonWords.has(w))
+  ).filter(p => p.length > 3)
+  if (paras.length < 2) return 0
+  let linkedPairs = 0
+  for (let i = 0; i < paras.length - 1; i++) {
+    const aSet = new Set(paras[i])
+    if (paras[i + 1].some(w => aSet.has(w))) linkedPairs++
+  }
+  const ratio = linkedPairs / (paras.length - 1)
+  return ratio >= 0.75 ? 0.04 : ratio >= 0.5 ? 0.02 : 0
 }
 
 export function score(text, taskType = 'general', promptText = '') {
@@ -192,12 +211,14 @@ export function score(text, taskType = 'general', promptText = '') {
   const paraInitCount = sentences.filter(s => PARA_INIT_RE.test(s)).length
   const paraInitBonus = paraInitCount >= 3 ? 0.06 : paraInitCount >= 2 ? 0.04 : 0
 
+  const lexChainBonus = lexicalChainBonus(text)
+
   // Email tasks: structure (paragraphs + greeting/closing) dominates over academic markers.
   // Academic essays need discourse markers; emails use transactional phrasing not in our list.
   const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
   const rawValue = Math.min(
     1,
-    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus + hedgingTierBonus + paraInitBonus),
+    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus + hedgingTierBonus + paraInitBonus + lexChainBonus),
   )
 
   // Connector misuse penalty — Granger & Tyson (1996): Chinese L1 writers use "however"
@@ -221,9 +242,10 @@ export function score(text, taskType = 'general', promptText = '') {
   const hedgingTierPart    = hedgingTierBonus    > 0 ? `, hedgingTier=+${hedgingTierBonus.toFixed(2)}`                : ''
   const paraInitPart       = paraInitBonus       > 0 ? `, paraInit=+${paraInitBonus.toFixed(2)}`                      : ''
   const connectorMisusePart = connectorMisusePenalty > 0 ? `, connectorMisuse=-${connectorMisusePenalty.toFixed(2)}`  : ''
+  const lexChainPart        = lexChainBonus        > 0 ? `, lexChain=+${lexChainBonus.toFixed(2)}`                   : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}${lexChainPart}`,
   }
 }
 

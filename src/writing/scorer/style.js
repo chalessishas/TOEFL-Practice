@@ -114,6 +114,13 @@ export function score(text, taskType = 'general') {
   const casualHits = CASUAL_TERM_REGEXES.filter(({ re }) => re.test(text)).length
   const casualPenalty = Math.min(0.3, casualHits * 0.07)
 
+  // Weak intensifier penalty (ERIC EJ1272190: "very + common adjective" 3x more frequent in
+  // Score-3/4 vs Score-5; academic writing uses "particularly/highly/substantially" + precise
+  // adjectives). Threshold ≥2 avoids penalizing a single instance; targets patterns of overuse.
+  const WEAK_INTENSIFIER_RE = /\bvery\s+(?:good|bad|big|small|important|interesting|difficult|easy|common|different|similar|clear|high|low|strong|weak|fast|slow|long|short|often|many|much|few|little|new|old)\b/gi
+  const weakIntHits = (text.match(WEAK_INTENSIFIER_RE) || []).length
+  const weakIntPenalty = weakIntHits >= 3 ? 0.04 : weakIntHits >= 2 ? 0.02 : 0
+
   // Nominalization density (Kyle 2018 on TOEFL data: CN/T explains 18.9% of score variance).
   // Proxy: count long words with academic nominalization suffixes per 100 tokens.
   // Length filter (≥7 chars) excludes noise like "city" (-ity) and "moment" (-ment).
@@ -168,11 +175,11 @@ export function score(text, taskType = 'general') {
   }
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition penalty` : ''}${emailRegisterBonus > 0 ? `, email register bonus: +${emailRegisterBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}`,
   }
 }
 

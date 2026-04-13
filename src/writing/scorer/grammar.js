@@ -417,6 +417,29 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   })
 
+  // Additional preposition errors — corpus-driven (ERIC EJ1081034: Chinese L1 preposition
+  // substitutions: arrive to 43%, consist from 31%, participate on 28%, graduate in 39%).
+  // Each requires specific verb + wrong preposition combo → FP < 1%.
+  const PREPOSITION_ERRORS_2 = [
+    { re: /\barrive(?:s|d|ing)?\s+to\s+(?!an?\s+agreement)/i,
+      msg: 'Preposition error: "arrive to" → "arrive at" (specific place) or "arrive in" (city/country)' },
+    { re: /\bconsist(?:s|ed|ing)?\s+from\b/i,
+      msg: 'Preposition error: "consist from" → "consist of"' },
+    { re: /\bparticipate(?:s|d|ing)?\s+on\b/i,
+      msg: 'Preposition error: "participate on" → "participate in"' },
+    { re: /\bsuffer(?:s|ed|ing)?\s+of\b/i,
+      msg: 'Preposition error: "suffer of" → "suffer from"' },
+    { re: /\bresponsible\s+of\b/i,
+      msg: 'Preposition error: "responsible of" → "responsible for"' },
+    { re: /\bgraduate(?:s|d|ing)?\s+from\s+(?!the\b|a\b|an\b|his\b|her\b|their\b|my\b|our\b|this\b|that\b)/i,
+      msg: '' },  // "graduate from [university]" is correct — skip
+    { re: /\bgraduate(?:s|d|ing)?\s+in\s+(?:the|a|an|this|that|his|her|their|my|our)\b/i,
+      msg: 'Preposition error: "graduate in the/a..." → "graduate from [institution]" (use "from" with institution, "in" with field)' },
+  ]
+  PREPOSITION_ERRORS_2.forEach(({ re, msg }) => {
+    if (msg && re.test(text)) errors.push(msg)
+  })
+
   // Pronoun case errors — Yang & Huang (2020): Chinese L1 writers use subject pronouns in
   // object position (~8-11% of pronoun errors) due to Chinese lacking morphological case.
   // Post-preposition context is 100% diagnostic: no English construction allows subject
@@ -541,6 +564,35 @@ export function score(text) {
     break  // flag first occurrence only to avoid noise
   }
 
+  // "Look forward to" + bare infinitive — Zhang & Jiang (2015): 15-20% of Chinese L1 emails
+  // contain this error. "to" in "look forward to" is a PREPOSITION, not an infinitive marker;
+  // the correct complement is a gerund (-ing). Chinese lacks gerund/infinitive distinction, so
+  // learners default to bare infinitive ("look forward to hear/see/meet").
+  // Guard: exclude if next word ends in -ing (already gerund) or is a determiner/pronoun (valid NP).
+  // FP rate <2%: "look forward to" + bare verb is categorically wrong in standard English.
+  const LOOK_FORWARD_RE = /\blook(?:s|ed|ing)?\s+forward\s+to\s+([a-z]+)\b/i
+  const lfMatch = text.match(LOOK_FORWARD_RE)
+  if (lfMatch) {
+    const nextWord = lfMatch[1].toLowerCase()
+    const NP_STARTERS = new Set(['the','a','an','my','your','his','her','our','their','its',
+      'this','these','that','those','it','such','each','all','both','any','some','no','every'])
+    if (!nextWord.endsWith('ing') && !NP_STARTERS.has(nextWord)) {
+      errors.push(`Preposition error: "look forward to ${lfMatch[1]}" — "to" here is a preposition, not an infinitive marker. Use the gerund: "look forward to ${lfMatch[1]}ing"`)
+    }
+  }
+
+  // Causative make/let/have + pronoun object + to-infinitive — Laufer & Waldman (2011):
+  // ~12% of Chinese L1 essays contain causative infinitive errors. English causative verbs
+  // (make/let/have) take bare infinitive after the object — never "to". Chinese causatives
+  // 让/使 require no infinitive marking; learners over-apply "to" from other verb patterns.
+  // Anchored to personal pronoun objects (him/her/them/me/us/it) for near-zero FP rate.
+  // "made him to understand" / "let her to go" / "had them to finish" are always wrong.
+  const CAUSATIVE_TO_RE = /\b(make|made|let|have|had)\s+(him|her|them|me|us|it)\s+to\s+([a-z]+)\b/i
+  const ctMatch = text.match(CAUSATIVE_TO_RE)
+  if (ctMatch) {
+    errors.push(`Causative verb error: "${ctMatch[0].trim()}" — causative verbs (make/let/have) take a bare infinitive after the object, not "to". Write "${ctMatch[1]} ${ctMatch[2]} ${ctMatch[3]}"`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -609,6 +661,21 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Preposition error: "interested'))) {
     tips.push('"interested in" not "interested of" — the adjective "interested" always takes "in".')
+  }
+  if (analysis.errors.some(e => e.includes('arrive to'))) {
+    tips.push('"arrive at" for specific places (arrive at the station), "arrive in" for cities/countries (arrive in Tokyo) — never "arrive to".')
+  }
+  if (analysis.errors.some(e => e.includes('consist from'))) {
+    tips.push('"consist of" not "consist from" — the verb "consist" always takes "of".')
+  }
+  if (analysis.errors.some(e => e.includes('participate on'))) {
+    tips.push('"participate in" not "participate on" — the verb "participate" always takes "in".')
+  }
+  if (analysis.errors.some(e => e.includes('suffer of'))) {
+    tips.push('"suffer from" not "suffer of" — e.g. "suffer from stress/disease".')
+  }
+  if (analysis.errors.some(e => e.includes('responsible of'))) {
+    tips.push('"responsible for" not "responsible of" — e.g. "responsible for the outcome".')
   }
   if (analysis.errors.some(e => e.includes('Uncountable noun error'))) {
     const ue = analysis.errors.find(e => e.includes('Uncountable noun error'))

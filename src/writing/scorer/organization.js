@@ -234,7 +234,20 @@ export function score(text, taskType = 'general', promptText = '') {
       if (!prevHasContrast) { connectorMisusePenalty = 0.03; break }  // cap at 1 misuse
     }
   }
-  const value = Math.max(0, rawValue - connectorMisusePenalty)
+  // Paragraph length balance penalty (Loop 25, 2026-04-13)
+  // Ferris 2014: Score-5 essays have balanced paragraphs; extreme imbalance signals
+  // underdevelopment. Flag when any paragraph is >3× the length of the shortest paragraph
+  // (min 2 paragraphs, min 30-char paragraphs). Email exempt (structure varies legitimately).
+  let paraBalancePenalty = 0
+  if (taskType !== 'email' && paragraphs.length >= 2) {
+    const paraLens = paragraphs.filter(p => p.length >= 30).map(p => p.length)
+    if (paraLens.length >= 2) {
+      const minLen = Math.min(...paraLens)
+      const maxLen = Math.max(...paraLens)
+      if (maxLen > minLen * 3.5) paraBalancePenalty = 0.03
+    }
+  }
+  const value = Math.max(0, rawValue - connectorMisusePenalty - paraBalancePenalty)
 
   const zonePart           = zoneBonus           > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`                          : ''
   const ratioPart          = ratioBonus          > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}`                  : ''
@@ -243,9 +256,10 @@ export function score(text, taskType = 'general', promptText = '') {
   const paraInitPart       = paraInitBonus       > 0 ? `, paraInit=+${paraInitBonus.toFixed(2)}`                      : ''
   const connectorMisusePart = connectorMisusePenalty > 0 ? `, connectorMisuse=-${connectorMisusePenalty.toFixed(2)}`  : ''
   const lexChainPart        = lexChainBonus        > 0 ? `, lexChain=+${lexChainBonus.toFixed(2)}`                   : ''
+  const paraBalancePart     = paraBalancePenalty    > 0 ? `, paraBalance=-${paraBalancePenalty.toFixed(2)}`               : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}${lexChainPart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}${lexChainPart}${paraBalancePart}`,
   }
 }
 

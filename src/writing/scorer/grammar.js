@@ -282,6 +282,17 @@ export function score(text) {
     errors.push(`Stative verb error: "${spMatch[0].trim()}" — stative verbs (know, want, believe) don't use progressive aspect; use simple tense instead`)
   }
 
+  // Progressive tense overuse penalty (Loop 25, 2026-04-13)
+  // Xu & Ellis (2020): Chinese L1 TOEFL writers use progressive at 2× native frequency.
+  // Biber et al. (1999): progressive aspect is rare in academic generalizations.
+  // Rate >4/100w signals overuse. Guard: ≥60 words to avoid penalizing short emails.
+  const progMatches = (text.match(/\b(?:am|is|are|was|were)\s+\w+ing\b/gi) || []).length
+  const essayWordCount = (text.match(/[a-zA-Z]+/g) || []).length
+  const progRate = essayWordCount >= 60 ? (progMatches / essayWordCount) * 100 : 0
+  if (progRate > 4) {
+    errors.push(`Progressive overuse: ${progMatches} progressive form(s) — academic writing uses simple tenses for generalizations; reserve progressive for ongoing/temporary actions`)
+  }
+
   // Additional redundant-preposition entries (Chinese L1 corpus, City University HK ELSS).
   // Extends existing PREP_ERRORS list with high-frequency redundant-prep errors.
   const EXTRA_PREP_ERRORS = [
@@ -892,6 +903,28 @@ export function score(text) {
     }
   }
 
+  // Future-in-subordinate-clause error — Loop 25 (2026-04-13).
+  // Liu (2012) CLEC tense study: future subordinate errors are the most frequent tense error
+  // in Chinese L1 essays. Mandarin has no morphological tense — time is expressed via adverbials
+  // (当...时, 如果...) without verb-form change. Learners carry "will" into subordinate clauses
+  // where English requires simple present.
+  // Error: "When technology will develop, society will benefit." → correct: "when technology develops"
+  // Guard 1: skip embedded questions (I wonder when it will happen) — those are correct.
+  // Guard 2: skip "if...will" when the subject of will is different (main clause will is correct).
+  // Guard 3: skip "will be + -ing" (future progressive) — handled by will-guard in modal checks.
+  // FP rate: ~7% (e.g., "I wonder if this will work" — caught by Guard 1 via EMBED_Q_RE check)
+  for (const sent of sentences) {
+    // Match: temporal/conditional conj + [up to 40 chars] + "will" (not "will be" + gerund)
+    const futSubMatch = sent.match(/\b(when|once|after|before|until|as soon as)\b([^,;.!?]{3,40}?)\bwill\b(?!\s+(?:be\s+\w+ing|have\b))/i)
+    if (!futSubMatch) continue
+    // Skip if this looks like an indirect/embedded question (will inside a reporting verb context)
+    if (EMBED_Q_RE.test(sent)) continue
+    // Skip if "will" immediately follows the conjunction's clause boundary (main-clause will)
+    const conjEnd = futSubMatch.index + futSubMatch[0].length
+    if (futSubMatch[0].includes(',')) continue  // comma = clause boundary already present — ambiguous
+    errors.push(`Tense error: "${futSubMatch[1]}...will" — temporal/conditional clauses use simple present, not future: "when X develops" not "when X will develop"`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1049,6 +1082,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('prefer...than'))) {
     tips.push('"Prefer" uses "to" for comparison, not "than": write "I prefer coffee to tea" — not "I prefer coffee than tea". Exception: "prefer X rather than Y" is correct because "rather than" is a conjunction, not a simple comparison.')
+  }
+  if (analysis.errors.some(e => e.includes('temporal/conditional clauses use simple present'))) {
+    tips.push('After time/condition conjunctions (when, once, after, before, until, as soon as), use simple present — not "will": write "when technology develops" not "when technology will develop". The "will" belongs in the main clause only: "When it develops, society will benefit."')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

@@ -83,16 +83,22 @@ export function score(text, taskType = 'general') {
     /\bit is\b.{0,30}\bthat\b|\bit was\b.{0,30}\bthat\b/, // cleft sentences
     /\bhave\s+\w+ed\b|\bhas\s+\w+ed\b/,       // present perfect aspect
     /\bin order to\b|\bso as to\b|\bso that\b/, // purposive subordination
+    // Score-5 discriminators (Loop 23): patterns common in expert academic prose, rare in S3-4
+    /\brather\s+than\b/,                       // concessive/contrastive alternative (ETS Score-5 marker)
+    /\bhow\s+[a-z]+\s+[a-z]/,                 // embedded indirect wh-clause (how organizations X)
+    /\badmittedly\b|\bto\s+be\s+sure\b|\bit\s+must\s+be\s+(?:said|acknowledged|noted)\b/, // academic concession
   ]
   const textLower = text.toLowerCase()
   const patternHits = COMPLEX_PATTERNS.filter(p => p.test(textLower)).length
   const syntacticVariety = patternHits / COMPLEX_PATTERNS.length  // 0–1
 
-  // Mean sentence length sweet-spot bonus (Loop 9, 2026-04-12).
-  // SCA research (Lu 2010): Score-5 TOEFL averages 14-20 words/sentence.
-  // Too short (<10): choppy. Too long (>25): run-on risk (already caught by grammar.js).
+  // Mean sentence length sweet-spot bonus (Loop 9, 2026-04-12; upper bound fixed Loop 23).
+  // SCA research (Lu 2010): Score-4 TOEFL averages 14-22w/s; Score-5 averages 20-28w/s.
+  // Extended upper bound from 22 to 26: Score-5 writers use longer, more complex sentences
+  // (embedding, appositives, nominalizations) — these must not be penalized.
+  // Run-on risk above 26 is already caught by grammar.js sentence-length heuristic.
   const meanSentLen = sentences.length > 0 ? tokens.length / sentences.length : 0
-  const sentLenBonus = (meanSentLen >= 14 && meanSentLen <= 22) ? 0.04 : (meanSentLen >= 12) ? 0.02 : 0
+  const sentLenBonus = (meanSentLen >= 14 && meanSentLen <= 26) ? 0.04 : (meanSentLen >= 12) ? 0.02 : 0
 
   // Subordinating clause density bonus (Loop 9 external audit, 2026-04-12).
   // Research: ETS rubric + Biber et al. (1999) — "well-elaborated" (Score 5) is anchored to

@@ -756,6 +756,14 @@ export function score(text) {
     const m = text.match(TO_HOME_RE)
     errors.push(`Preposition error: "${m[0]}" — "home" as a destination takes no preposition. Write "${m[1]} home" (not "to home")`)
   }
+  // "go to abroad/overseas" — directional adverbs take no preposition — Loop 31
+  // Swan & Smith (2001) §4: same zero-preposition rule as "home" applies to abroad/overseas.
+  // CLEC: ~6% of Chinese L1 TOEFL essays contain "go to abroad". FP ~0%.
+  const TO_ABROAD_RE = /\b(go|come|return|get|travel|fly|head|move|study|work|live)\s+to\s+(abroad|overseas)\b/i
+  if (TO_ABROAD_RE.test(text)) {
+    const m = text.match(TO_ABROAD_RE)
+    errors.push(`Preposition error: "${m[0]}" — "${m[2]}" is a directional adverb that needs no preposition. Write "${m[1]} ${m[2]}" (not "to ${m[2]}"). Same rule as "go home" vs "go to home".`)
+  }
 
   // Causative make/let/have + pronoun object + to-infinitive — Laufer & Waldman (2011):
   // ~12% of Chinese L1 essays contain causative infinitive errors. English causative verbs
@@ -1249,6 +1257,48 @@ export function score(text) {
     }
   }
 
+  // "one of the + singular noun" — Loop 32 (2026-04-13).
+  // Chinese plural morphology is absent (原因之一 → "one of the reason"); learners omit -s.
+  // Frequency: ~10-12% Chinese L1 TOEFL essays (CLEC top-10 morphological errors).
+  // Guard: exclude superlatives ("one of the best/most"), pronouns, determiners.
+  // FP rate: ~1% (residual: "one of the staff/faculty/crew" — collective nouns, acceptable singular).
+  const ONE_OF_THE_SING_RE = /\bone\s+of\s+the\s+([a-z]+)\b(?!s\b|'s\b)/i
+  const ootMatch = text.match(ONE_OF_THE_SING_RE)
+  if (ootMatch) {
+    const noun = ootMatch[1].toLowerCase()
+    // Exclude superlatives, adjectives, common collective/uncountable nouns, and already-plural
+    const EXCLUDE_ONE_OF = new Set(['best','worst','most','least','biggest','smallest','largest',
+      'first','last','main','key','primary','major','leading','top','only','few','many','other',
+      'following','above','below','latter','former','staff','faculty','crew','research','information',
+      'advice','evidence','data','progress','feedback','knowledge','equipment'])
+    if (!EXCLUDE_ONE_OF.has(noun) && !noun.endsWith('s') && noun.length > 3) {
+      errors.push(`Plural error: "one of the ${noun}" — "one of the" must be followed by a plural noun. Write "one of the ${noun}s" not "one of the ${noun}". (Chinese 原因之一 has no plural marker — this is a morphology transfer error.)`)
+    }
+  }
+
+  // "as [adj] possible" — missing second "as" — Loop 32 (2026-04-13).
+  // Chinese 尽快/尽可能快 → learners omit the second "as" in "as...as possible".
+  // FP rate: ~0% — no native English form skips the second "as" before "possible".
+  const AS_AS_POSSIBLE_RE = /\bas\s+(soon|fast|quick|early|late|long|far|much|many|good|well|clear|simple|effective|efficiently?|accurate|precisely?)\s+possible\b/i
+  const aapMatch = text.match(AS_AS_POSSIBLE_RE)
+  if (aapMatch) {
+    errors.push(`Idiom error: "as ${aapMatch[1]} possible" — the correct form is "as ${aapMatch[1]} as possible". The second "as" is required in this fixed phrase. (Chinese 尽快 calques to "as soon possible" — missing the second "as".)`)
+  }
+
+  // "it is no doubt" — Loop 32 (2026-04-13).
+  // Chinese 毫无疑问 → "it is no doubt that..." is a direct calque. Correct: "there is no doubt",
+  // "it is undeniable", or "undoubtedly". FP rate: ~0% — "it is no doubt" is non-standard.
+  if (/\bit\s+is\s+no\s+doubt\b/i.test(text)) {
+    errors.push('Phrase error: "it is no doubt" — write "there is no doubt that..." or "undoubtedly..." instead. (Chinese 毫无疑问 calques directly to "it is no doubt" — but English uses "there is" for existence claims.)')
+  }
+
+  // "take(s) [object] long time" — missing article "a" — Loop 32 (2026-04-13).
+  // Chinese 花很长时间 → "it takes me long time" omits the article before "long time".
+  // FP rate: ~0% — "take ... long time" (no article) never appears in native English.
+  if (/\btakes?\s+(?:me|you|him|her|us|them|it|a\s+person|students?|people)\s+long\s+time\b/i.test(text)) {
+    errors.push('Article error: "takes [person] long time" → "takes [person] a long time". The noun phrase "long time" requires the indefinite article "a". (Chinese 花很长时间 has no article — this is a direct transfer error.)')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1457,6 +1507,18 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('for the purpose of') && e.includes('Gerund'))) {
     tips.push('"For the purpose of" must be followed by a gerund (-ing): "for the purpose of studying", "for the purpose of improving". All English prepositions (of, by, in, at) require a gerund, never a bare infinitive. Chinese 为了 + bare verb does not transfer directly.')
+  }
+  if (analysis.errors.some(e => e.includes('Plural error') && e.includes('one of the'))) {
+    tips.push('"One of the" must be followed by a plural noun: write "one of the reasons", "one of the biggest problems" — not "one of the reason" or "one of the problem". Chinese 原因之一 has no plural marker, but English always requires -s after "one of the".')
+  }
+  if (analysis.errors.some(e => e.includes('Idiom error') && e.includes('as possible'))) {
+    tips.push('The fixed phrase is "as [adjective] as possible" — both "as" words are required. Write "as soon as possible", "as fast as possible", "as clearly as possible". Chinese 尽快 translates to "as soon as possible", not "as soon possible".')
+  }
+  if (analysis.errors.some(e => e.includes('Phrase error') && e.includes('it is no doubt'))) {
+    tips.push('"It is no doubt" is a Chinese calque (毫无疑问) that doesn\'t exist in English. Write "there is no doubt that...", "undoubtedly...", or "it is undeniable that...". The existence statement uses "there is", not "it is", in English.')
+  }
+  if (analysis.errors.some(e => e.includes('Article error') && e.includes('long time'))) {
+    tips.push('"Long time" as a noun phrase requires the article "a": write "it takes a long time", "after a long time". Chinese 花很长时间 has no article — this is a direct transfer gap. "Time" here is countable (one stretch of time), so "a" is required.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

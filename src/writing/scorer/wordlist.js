@@ -858,4 +858,43 @@ export const validWords = new Set([
   'environmental','governmental','institutional','organizational','constitutional',
   'international','multinational','intergovernmental','socioeconomic',
   'technological','anthropogenic','epidemiological','pharmacological',
+
+  // TOEFL topic domain words — high-frequency in TOEFL writing prompts and essays.
+  // These are NOT rare vocabulary; flagging them as rare produces false signals.
+  // Education domain
+  'student','students','teacher','teachers','professor','professors','school','schools',
+  'university','universities','college','colleges','education','educational',
+  'curriculum','graduate','graduates','undergraduate','undergraduates','faculty',
+  'tuition','course','courses','semester','degree','degrees','major','majors',
+  'minor','minors','study','studies','researcher','researchers','classroom','classrooms',
+  'assignment','assignments','exam','exams','lecture','lectures','campus','campuses',
+
+  // Society & culture domain
+  'tradition','traditions','generation','generations','diversity','equality',
+  'freedom','justice','policy','policies','community','communities','culture','cultures',
+  'society','societies','individual','individuals','population','populations',
+  'citizen','citizens','immigrant','immigrants','democracy','rights',
+
+  // Economy & business domain
+  'consumer','consumers','industry','industries','company','companies',
+  'employee','employees','employer','employers','worker','workers','salary','salaries',
+  'competition','competitive','investment','investments','growth','market','markets',
+
+  // Technology domain
+  'device','devices','software','internet','digital','online','computer','computers',
+  'network','networks','data','algorithm','algorithms','artificial','robot','robots',
+  'machine','machines','automation','innovation','innovations','platform','platforms',
+  'application','applications','smartphone','smartphones','social media',
+
+  // Environment domain
+  'climate','species','habitat','habitats','ecosystem','ecosystems','pollution',
+  'carbon','renewable','sustainable','sustainability','forest','forests','ocean','oceans',
+  'resource','resources','emission','emissions','biodiversity','conservation',
+  'greenhouse','fossil','wildlife',
+
+  // Health domain
+  'disease','diseases','patient','patients','treatment','treatments','nurse','nurses',
+  'therapy','therapies','exercise','diet','nutrition','sleep','stress','symptom','symptoms',
+  'prevention','vaccine','vaccines','obesity','diabetes','anxiety','depression',
+  'mental','physical','healthcare','hospital','hospitals','doctor','doctors',
 ])

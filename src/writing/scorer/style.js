@@ -89,6 +89,16 @@ export function score(text) {
   const meanSentLen = sentences.length > 0 ? tokens.length / sentences.length : 0
   const sentLenBonus = (meanSentLen >= 14 && meanSentLen <= 22) ? 0.04 : (meanSentLen >= 12) ? 0.02 : 0
 
+  // Subordinating clause density bonus (Loop 9 external audit, 2026-04-12).
+  // Research: ETS rubric + Biber et al. (1999) — "well-elaborated" (Score 5) is anchored to
+  // subordinating conjunction density, not just presence. COMPLEX_PATTERNS checks binary
+  // presence; this measures count/100w to reward genuine subordination depth.
+  // Threshold: ≥3/100w → +0.04; ≥1.5/100w → +0.02 (conservative: avoids overlap penalty)
+  const SUBORDINATORS_RE = /\b(although|because|since|while|whereas|when|if|unless|after|before|once|even\s+though|even\s+if|as\s+long\s+as|provided\s+that|given\s+that)\b/gi
+  const subCount = (text.match(SUBORDINATORS_RE) || []).length
+  const subDensity = tokens.length > 0 ? (subCount / tokens.length) * 100 : 0
+  const subDensityBonus = subDensity >= 3.0 ? 0.04 : subDensity >= 1.5 ? 0.02 : 0
+
   // Casual register penalty — ETS penalizes informal language in academic writing
   // Use regex with word boundaries to avoid "cause" matching "because", etc.
   const casualHits = CASUAL_TERM_REGEXES.filter(({ re }) => re.test(text)).length
@@ -108,11 +118,11 @@ export function score(text) {
   else if (nomDensity >= 5)  nomBonus = 0.05
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty + nomBonus + sentLenBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty + nomBonus + sentLenBonus + subDensityBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w`,
   }
 }
 

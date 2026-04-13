@@ -300,6 +300,20 @@ export function score(text) {
     errors.push(`Topic-comment error: "${tcMatch[0].trim()}" — avoid resumptive pronouns; state the subject once: use "This problem needs attention" not "This problem, it needs"`)
   }
 
+  // Tense inconsistency detection (Loop 9 external audit, 2026-04-12).
+  // Research: Tsai (2023) — tense/aspect shift is #2 Chinese ESL error. Academic Discussion
+  // is primarily present tense; past tense > 35% of clause verbs without temporal anchors
+  // indicates L1 interference. Threshold 0.35 (conservative: 0.30 had too many FPs per research).
+  const PRESENT_VERB_RE = /\b(is|are|has|have|do|does|seems?|shows?|suggests?|indicates?|means?|affects?|helps?|works?|requires?|provides?|allows?|makes?|gives?|takes?|shows?|becomes?|remains?|exists?|matters?)\b/gi
+  const PAST_VERB_RE    = /\b(was|were|had|did|seemed|showed|suggested|indicated|meant|affected|helped|worked|required|provided|allowed|made|gave|took|became|remained|existed)\b/gi
+  const TEMPORAL_ANCHOR_RE = /\b(yesterday|last\s+(year|month|week|semester|decade)|in\s+(19|20)\d{2}|\d+\s+years?\s+ago|ago|previously|historically|back\s+in|at\s+that\s+time)\b/i
+  const presentCount = (text.match(PRESENT_VERB_RE) || []).length
+  const pastCount    = (text.match(PAST_VERB_RE) || []).length
+  const tensTotal    = presentCount + pastCount
+  if (tensTotal >= 8 && pastCount / tensTotal > 0.35 && !TEMPORAL_ANCHOR_RE.test(text)) {
+    errors.push(`Tense inconsistency: ${pastCount} past-tense verbs mixed with ${presentCount} present-tense verbs — academic writing typically uses present tense throughout; use past tense only when citing specific past events`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -337,6 +351,8 @@ export function suggest(analysis) {
     const prepErrs = analysis.errors.filter(e => e.includes('Preposition error'))
     tips.push(prepErrs[0].replace('Preposition error: ', ''))
   }
+  if (analysis.errors.some(e => e.includes('Tense inconsistency')))
+    tips.push('Write academic discussion essays in present tense throughout ("research shows", "this means") — switch to past tense only when explicitly referring to specific past events with time markers like "last year" or "in 2020".')
   if (analysis.errors.some(e => e.includes('Double conjunction')))
     tips.push('Avoid using two conjunctions for one relationship: use "although X, Y" OR "X, but Y" — never both. Same for "because/so" — pick one.')
   if (analysis.errors.some(e => e.includes('missing copula')))

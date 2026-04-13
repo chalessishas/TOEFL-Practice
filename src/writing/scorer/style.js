@@ -258,12 +258,22 @@ export function score(text, taskType = 'general') {
     progressiveOverusePenalty = progRate > 5 ? Math.min(0.04, (progRate - 5) * 0.012) : 0
   }
 
+  // "Besides" sentence-initial overuse — Loop 26
+  // Tseng (2015) TPLS: Chinese L1 learners use sentence-initial "Besides," at ~4× native academic rate.
+  // In academic writing "moreover/furthermore/in addition" are preferred; "besides" is colloquial.
+  // Email exempt: informal register makes "besides" more acceptable.
+  let besidespenalty = 0
+  if (taskType !== 'email') {
+    const besidesCount = (text.match(/(?:^|\.\s+|\n)Besides[,\s]/gim) || []).length
+    besidespenalty = besidesCount >= 2 ? 0.02 : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
   }
 }
 

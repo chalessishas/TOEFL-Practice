@@ -150,6 +150,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] Loop 11 P3+P4 — grammar.js 同音字混淆 + style.js 邮件正式语域奖励 (8dd5e58) — 4 个同音字模式（your/you're, its/it's, there/their, then/than，均需上下文确认，FP <1%）；邮件 formal opener+closing → +0.04；10/10 校准维持
 - [100%] Loop 11 质量修复 — wordlist.js 扩展 120+ TOEFL 主题词 (b658084) — 教育/社会/经济/技术/环境/健康 6 大主题域词汇不再被误标为"稀有词"；calibration 中性，无评分改变
 - [100%] Loop 11 P4 — organization.js 连接词误用检测 (c6daf67) — 段落开头 "However" 无前文对比内容时惩罚 -0.03（上限 1 次）；Granger & Tyson 1996 中文 L1 误用率 38% vs 母语者 7%；邮件任务不触发；10/10 校准维持
+- [100%] vocabulary.js AWL_BASIC 重叠修复 (84363ce) — 59 个词同时出现在 AWL_BASIC 和 commonWords（research/data/factor/environment 等）；过去这些词错误地同时享有「学术词汇奖励」和「稀有词多样性」双重加分；修复：AWL_BASIC 奖励排除 commonWords 中的词；2 轮子 Agent 讨论驱动；10/10 校准维持，gaps 不变 — 段落开头 "However" 无前文对比内容时惩罚 -0.03（上限 1 次）；Granger & Tyson 1996 中文 L1 误用率 38% vs 母语者 7%；邮件任务不触发；10/10 校准维持
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

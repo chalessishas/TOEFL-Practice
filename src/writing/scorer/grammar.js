@@ -913,16 +913,16 @@ export function score(text) {
   // Guard 2: skip "if...will" when the subject of will is different (main clause will is correct).
   // Guard 3: skip "will be + -ing" (future progressive) — handled by will-guard in modal checks.
   // FP rate: ~7% (e.g., "I wonder if this will work" — caught by Guard 1 via EMBED_Q_RE check)
+  // Cognitive verb guard for future-in-subordinate: "I wonder when it will happen" is correct
+  const COGNITIVE_VERB_RE = /\b(?:wonder|know|knew|think|thought|see|ask|question|doubt|imagine|predict|expect|hope|fear)\s+(?:\w+\s+){0,3}(?:when|if|whether)\b/i
   for (const sent of sentences) {
-    // Match: temporal/conditional conj + [up to 40 chars] + "will" (not "will be" + gerund)
-    const futSubMatch = sent.match(/\b(when|once|after|before|until|as soon as)\b([^,;.!?]{3,40}?)\bwill\b(?!\s+(?:be\s+\w+ing|have\b))/i)
+    // Match: temporal conj + [3-40 chars, no comma] + "will" (not "will be+ing" or "will have")
+    const futSubMatch = sent.match(/\b(when|once|after|before|until|as\s+soon\s+as)\b([^,;.!?]{3,40}?)\bwill\b(?!\s+(?:be\s+\w+ing|have\b))/i)
     if (!futSubMatch) continue
-    // Skip if this looks like an indirect/embedded question (will inside a reporting verb context)
-    if (EMBED_Q_RE.test(sent)) continue
-    // Skip if "will" immediately follows the conjunction's clause boundary (main-clause will)
-    const conjEnd = futSubMatch.index + futSubMatch[0].length
-    if (futSubMatch[0].includes(',')) continue  // comma = clause boundary already present — ambiguous
-    errors.push(`Tense error: "${futSubMatch[1]}...will" — temporal/conditional clauses use simple present, not future: "when X develops" not "when X will develop"`)
+    // Skip embedded questions: cognitive verb precedes the temporal conj in same sentence
+    if (COGNITIVE_VERB_RE.test(sent)) continue
+    if (futSubMatch[0].includes(',')) continue  // comma inside match = already a main-clause boundary
+    errors.push(`Tense error: "${futSubMatch[1]}...will" — temporal clauses use simple present, not future: "when X develops" not "when X will develop"`)
   }
 
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives

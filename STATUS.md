@@ -129,6 +129,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] development.js 逐段落证据完整性奖励 — paragraphCompletenessBonus()：body 段落全有 evidence signal → +0.10，≥50% → +0.05；email 跳过；argScore ceiling 仍有效；20/20 校准维持 (5d28ad0)
 - [100%] development.js P3/P4 — circularReasoningPenalty()（段落内句对 token 重叠 >60% → argScore ceiling 降低）+ numericEvidenceBonus()（百分比/年份/统计数字 → +0.04/+0.08）；20/20 校准维持 (8e3b44f)
 - [100%] tests/scorer-calibration.js — 低分段判别校准套件：Score 1-5 全段 8 组样本，3→4 gap=+0.70，4→5 gap=+0.50，8/8 通过 (1dfb8e8)
+- [100%] style.js nominalization density — Kyle 2018 TOEFL 研究：`\w{7,}(tion|ment|ness|ity|ance)` 每 100 词，≥5/8/12→+0.05/+0.10/+0.15；学术文 16/100w vs 口语文 0/100w；28/28 校准维持 (93d6191)
+- [100%] organization.js semi-formal email register — 7 条专业用语检测（I am writing to / I would appreciate / at your convenience）；+0.04/+0.08；28/28 校准维持 (b976fc6)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

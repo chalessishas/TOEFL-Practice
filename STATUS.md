@@ -142,6 +142,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] tests/scorer-calibration.js 邮件回归测试 — EMAIL_SALUTATION_REGRESSION（grammar extraCheck ≥0.99）+ SCORE5_EMAIL（≥4.2）；Runner 新增 extraCheck callback 支持；10/10 通过，gaps 3→4:+0.70 / 4→5:+0.50 (616ffde)
 - [100%] grammar.js 时态不一致检测 — 背景 Agent 实现（896621d）；保守阈值 0.35 + 时态锚词排除（in 20XX/last year/ago 等）；tensTotal ≥ 8 触发；FP=0/4 验证；10/10 校准维持
 - [100%] style.js 从属连词密度奖励 — ≥3/100w → +0.04，≥1.5/100w → +0.02；COMPLEX_PATTERNS 只检测存在性，density 补充深度区分；10/10 校准维持 (896621d)
+- [100%] Loop 10 — 4 个研究驱动改进 (b950c2e) — ① development.js 反驳加分（concession+rebuttal 双触发 +0.05）② grammar.js 动词-名词搭配错误 8 个中文 L1 高精度模式 ③ vocabulary.js 学术双词组 7 个去重短语 ④ style.js 被动语态过度使用惩罚（>40% -0.04）；校准：discussion ≥4.0 ✓，email ≥4.0 ✓，弱文 <3.0 ✓
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

@@ -1173,13 +1173,26 @@ export function score(text) {
     'proposal','plan','goal','step','option','aspect','principle','rule',
     'relationship','connection','link','comparison','contrast'
   ])
-  const SUCH_A_RE = /\bsuch\s+(?!as\b|that\b|a\b|an\b|no\b)(?:[a-z]+\s+)?([a-z]+)\b/gi
+  // Two-pass such+noun check: direct ("such problem") and adj-mediated ("such major problem").
+  // The single optional-group regex was buggy: greedy match consumed the noun as the "adjective",
+  // leaving only the following verb for capture, so SUCH_A_NOUNS.has() always missed.
+  const SUCH_DIRECT_RE = /\bsuch\s+(?!as\b|that\b|a\b|an\b|no\b)([a-z]+)\b/gi
+  const SUCH_ADJ_RE = /\bsuch\s+(?!as\b|that\b|a\b|an\b|no\b)[a-z]+\s+([a-z]+)\b/gi
   let saMatch
-  while ((saMatch = SUCH_A_RE.exec(text)) !== null) {
+  let foundSuchA = false
+  while ((saMatch = SUCH_DIRECT_RE.exec(text)) !== null) {
     const noun = saMatch[1].toLowerCase()
     if (!SUCH_A_NOUNS.has(noun)) continue
     errors.push(`Article error: "${saMatch[0]}" — singular countable nouns need "a" after "such": "such a ${noun}" not "such ${noun}". (Chinese 这样的 transfers directly without the article.)`)
-    break
+    foundSuchA = true; break
+  }
+  if (!foundSuchA) {
+    while ((saMatch = SUCH_ADJ_RE.exec(text)) !== null) {
+      const noun = saMatch[1].toLowerCase()
+      if (!SUCH_A_NOUNS.has(noun)) continue
+      errors.push(`Article error: "${saMatch[0]}" — put "a" after "such": "such a ${noun}" not "such ${noun}". (Chinese 这样的 transfers directly without the article.)`)
+      break
+    }
   }
 
   // "absent in" → "absent from" — Loop 30

@@ -121,6 +121,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] organization.js hedging 第 7 类话语标记 — perhaps/arguably/this suggests 等 11 个认识立场标记；e-rater 明确追踪学术写作中的观点修饰用词；同步补充 8 个各类别缺失标记（by contrast/likewise/it follows that/a case in point 等）(b629851)
 - [100%] grammar.js 数量词+不可数名词错误 — "many research/several evidence/numerous information" 等 11 个 TOEFL 高频不可数名词；负向前瞻排除定语用法（"several research papers" 不标）；与 QUANT_BARE_RE 合称「量词三件套」(e21801c)
 - [100%] organization.js 2026 peer engagement 扩展 — 新增 "as [Name] noted/mentioned/argued"（引语归属）+ "to expand on/expanding on/I would add to/responding to"（展开建构）；Score 4→5 区分度提升 (4752c8a)
+- [100%] development.js 隐式例证标记 — "take the case/consider the fact/far more than/this is evident" 等 11 条；Sample 5 分范文 dev 0.648→0.71；高分段不再因不写"for example"而被低估 (f605e83)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

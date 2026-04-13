@@ -81,6 +81,14 @@ export function score(text) {
     if (CLAUSE_OPENERS.has(firstWord)) return
     // Skip email salutations — "Dear Professor Chen, I am writing..." is correct.
     if (/^(dear|hello|hi|hey|greetings)\b/i.test(sentence.trim())) return
+    // Skip gerund/participial phrase openers — "Drawing on X, I contend..." / "Having
+    // completed X, she found..." are all valid English (participial phrase + main clause).
+    // Pattern: any word ending in -ing at the start of the sentence (capitalized or not).
+    // This avoids maintaining a whitelist of gerunds like "drawing/building/noting".
+    if (/^\w+ing\b/i.test(sentence.trim())) return
+    // Skip "due to" / "thanks to" / "owing to" prepositional phrase openers —
+    // "Due to X, I was unable..." cannot be detected by single-word firstWord lookup.
+    if (/^(?:due|thanks|owing)\s+to\b/i.test(sentence.trim())) return
 
     // [^\S\n]+ matches horizontal whitespace only — prevents matching across paragraph breaks
     const commaSpliceRegex = /,[^\S\n]+(I|he|she|they|we|it)\s+\w+/gi

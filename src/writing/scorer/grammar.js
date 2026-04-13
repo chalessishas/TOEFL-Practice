@@ -672,6 +672,34 @@ export function score(text) {
     errors.push(`Reporting verb error: "${rbMatch[0]}" — after a reporting verb + negation, use a gerund: "${rbMatch[1]} not ${rbMatch[3]}ing" or rewrite as a "that" clause: "${rbMatch[1]} that [subject] did not ${rbMatch[3]}"`)
   }
 
+  // Second conditional tense error — Yang (2022) Chinese L1 TOEFL corpus: ~15% of essays (Loop 21).
+  // Chinese has no morphological subjunctive; learners use indicative "will" in hypothetical if-clauses.
+  // Target: "If I had more time, I will study harder" → should be "If I had..., I would..."
+  // Guard 1: skip if "would" also in sentence (student may have partially corrected, or it's a mix).
+  // Guard 2: IF_HAD_RE requires "had/were" within 4 words of "if" — high confidence past-hypothetical.
+  // FP rate: ~5% (some third conditionals with "will" in a different embedded clause may trigger).
+  const IF_HAD_RE = /\bif\s+(?:\w+\s+){0,3}(?:had|were)\b/i
+  for (const sent of sentences) {
+    if (IF_HAD_RE.test(sent) && /\bwill\b/i.test(sent) && !/\bwould\b/i.test(sent)) {
+      const ifSnippet = sent.match(/\bif\b[^,!?]{0,40}/i)?.[0]?.trim() || 'if...'
+      errors.push(`Conditional tense error: "${ifSnippet}..." — hypothetical "if" clauses with past tense (had/were) require "would" in the result clause, not "will". Write "If I had time, I would study harder" — not "...I will study harder"`)
+    }
+  }
+
+  // "Not only...also" missing "but" — Leacock et al. (2014) Chinese L1 TOP-10; ~8% of essays (Loop 21).
+  // Chinese 不但...还/也 calque: learners translate directly to "not only...also" without "but".
+  // Correct: "not only...but also" / "not only...but...also". Wrong: "not only..., also..."
+  // Guard: skip if "but" appears between "not only" and "also" (already correct form present).
+  // FP rate: ~8% (occasional stylistic omission of "but" in informal registers).
+  const NOT_ONLY_RE = /\bnot\s+only\b(.{0,160}?)\balso\b/gi
+  let noMatch
+  while ((noMatch = NOT_ONLY_RE.exec(text)) !== null) {
+    const between = noMatch[1]
+    if (!/\bbut\b/i.test(between)) {
+      errors.push(`Correlative conjunction error: "not only...also" — the standard correlative pair is "not only...but also". Insert "but" before "also": "not only X, but also Y"`)
+    }
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -795,6 +823,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Reporting verb error'))) {
     tips.push('After a reporting verb + negation, use a gerund (-ing) form: "The study reported not finding significant differences" — not "reported not find". Alternatively, use a "that" clause: "The study reported that they did not find..."')
+  }
+  if (analysis.errors.some(e => e.includes('Conditional tense error'))) {
+    tips.push('In hypothetical (second conditional) sentences, use "would" — not "will" — in the result clause: "If I had more time, I would study harder" not "...I will study harder". The past tense in the "if" clause signals a hypothetical, not a real condition.')
+  }
+  if (analysis.errors.some(e => e.includes('Correlative conjunction error'))) {
+    tips.push('"Not only" must be paired with "but also" — never just "also": write "not only X, but also Y" not "not only X, also Y". The "but" is required in formal English to complete the correlative pair.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

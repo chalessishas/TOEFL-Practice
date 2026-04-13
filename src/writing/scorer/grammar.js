@@ -157,6 +157,19 @@ export function score(text) {
     errors.push(`Possible missing copula: "${copulaMatch[0].trim()}" — likely missing "is/was" (e.g., "${copulaMatch[1]} is ${copulaMatch[2]} ${copulaMatch[3]}")`)
   }
 
+  // Quantifier + bare noun — Chinese L1 transfer: Mandarin has no plural morpheme,
+  // so learners omit -s after quantifiers ("many student", "several factor").
+  // Whitelist of common TOEFL countable nouns keeps false-positive rate near zero.
+  const QUANT_BARE_RE = /\b(many|several|few|various|multiple|numerous)\s+(student|teacher|factor|reason|problem|benefit|challenge|method|approach|issue|aspect|argument|point|result|effect|example|solution|strategy)\b/gi
+  let qbMatch
+  while ((qbMatch = QUANT_BARE_RE.exec(text)) !== null) {
+    const [, quant, noun] = qbMatch
+    const plural = noun.endsWith('y') ? noun.slice(0, -1) + 'ies'
+      : /[sxz]$|[cs]h$/.test(noun) ? noun + 'es'
+      : noun + 's'
+    errors.push(`Plural error: "${quant} ${noun}" → "${quant} ${plural}"`)
+  }
+
   // SVA (subject-verb agreement) — #1 penalized feature for ESL writers in e-rater
   // High-precision patterns: the erroneous form is structurally distinctive enough
   // that false positives are very rare in normal academic prose.
@@ -214,5 +227,7 @@ export function suggest(analysis) {
     tips.push('Avoid using two conjunctions for one relationship: use "although X, Y" OR "X, but Y" — never both. Same for "because/so" — pick one.')
   if (analysis.errors.some(e => e.includes('missing copula')))
     tips.push('Add a linking verb: "He is very tall" not "He very tall". English adjective predicates require "is/was/are/were".')
+  if (analysis.errors.some(e => e.includes('Plural error')))
+    tips.push('Add plural -s after quantifiers: "many students" not "many student". English countable nouns need plural marking.')
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

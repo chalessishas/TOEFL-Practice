@@ -189,7 +189,9 @@ export function score(text) {
   // Exclude words also in commonWords: "research/data/factor/environment" are frequent enough
   // to not signal academic depth. Only words NOT in commonWords earn AWL basic credit.
   const basicCount    = contentTokens.filter(w => AWL_BASIC.has(w) && !commonWords.has(w)).length
-  const advancedCount = contentTokens.filter(w => AWL_ADVANCED.has(w)).length
+  // Same dedup as AWL_BASIC: exclude words also in commonWords (task/goal/ensure/obvious etc.
+  // are not "advanced academic" vocabulary and shouldn't earn the 0.04/word bonus).
+  const advancedCount = contentTokens.filter(w => AWL_ADVANCED.has(w) && !commonWords.has(w)).length
   const basicBonus    = Math.min(0.12, basicCount * 0.015)
   const advancedBonus = Math.min(0.08, advancedCount * 0.04)
   const awlBonus      = Math.min(0.20, basicBonus + advancedBonus)

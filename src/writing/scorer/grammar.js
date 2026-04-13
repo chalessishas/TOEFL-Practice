@@ -409,6 +409,30 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   })
 
+  // Pronoun case errors — Yang & Huang (2020): Chinese L1 writers use subject pronouns in
+  // object position (~8-11% of pronoun errors) due to Chinese lacking morphological case.
+  // Post-preposition context is 100% diagnostic: no English construction allows subject
+  // pronouns after prepositions ("between you and I" is always an error).
+  const PRONOUN_CASE_ERRORS = [
+    { re: /\bbetween\s+\w+\s+and\s+(I|he|she|we|they)\b/i,
+      msg: 'Pronoun case: use object pronoun after "between" — e.g. "between you and me" not "between you and I"' },
+    { re: /\b(?:with|from|of|at|by|on|in|for)\s+(I|he|she|we|they)\b(?!\s+(?:am|is|are|was|were|have|had|do|does|did|will|would|can|could|shall|should|may|might|must))/i,
+      msg: 'Pronoun case: use object pronoun after prepositions — e.g. "with me/him/her/us/them" not "with I/he/she/we/they"' },
+    { re: /\b(?:told?|asked?|helped?|taught|showed?|gave|given|sent)\s+(I|he|she|we|they)\b(?!\s+(?:am|is|are|was|were|have|had))/i,
+      msg: 'Pronoun case: use object pronoun after verbs — e.g. "told me/him/her" not "told I/he/she"' },
+  ]
+  PRONOUN_CASE_ERRORS.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
+  // Resumptive pronoun in relative clause — Macrothink (2018): Chinese L1 transfer causes
+  // double-marking of head noun inside relative clause (~9% of L2 essays at TOEFL level).
+  // "the teacher who she teaches" — the pronoun "she" is redundant after "who".
+  // Pattern: relative pronoun + short gap + subject pronoun + finite verb.
+  if (/\b(?:who|which|that)\s+(?:\w+\s+){0,3}(he|she|it|they)\s+(?:is|are|was|were|has|have|had|does|do|did)\b/i.test(text)) {
+    errors.push('Resumptive pronoun: in "the teacher who she teaches", the pronoun "she" is redundant — use "the teacher who teaches"')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length

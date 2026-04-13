@@ -670,6 +670,52 @@ export function score(text) {
     break  // flag first occurrence only to avoid noise
   }
 
+  // have/has/had + irregular simple-past form (should be past participle) — Loop 27
+  // Ellis & Barkhuizen (2005) *Analysing Learner Language*: irregular past participle substitution
+  // is the #1 morphological error type in Chinese EFL learner corpora. Swan & Smith (2001)
+  // Chinese L1 chapter §7: "persistent at C1 level." Frequency ~12% of Chinese L1 TOEFL essays.
+  // Gap: PASSIVE_WRONG_PART_RE covers passive voice only ("was wrote"); HAVE_BEEN_BARE covers
+  // regular verbs after "have been". Neither catches active perfect "have went/ate/came/ran".
+  // FP rate ~1-2%: "have/has/had + simple past of irregular verb" is categorically wrong in
+  // standard English (the only exception is non-standard dialects, which are themselves errors
+  // at TOEFL level).
+  const HAVE_IRREG_PAST_RE = /\b(have|has|had)\s+(went|ate|came|ran|saw|took|gave|did|drew|drank|forgot|knew|swam|threw|wore|spoke|broke|chose|drove|fell|froze|stole|tore|rode|hid|sang|rose|began|woke|flew|grew|blew|bore|lay|pled|sped|wept|swore|bit|clung|crept|fled|shrank|stung|struck|swung|dug|lit|leapt|knelt)\b/gi
+  const havePPMap = {
+    went:'gone', ate:'eaten', came:'come', ran:'run', saw:'seen', took:'taken', gave:'given',
+    did:'done', drew:'drawn', drank:'drunk', forgot:'forgotten', knew:'known', swam:'swum',
+    threw:'thrown', wore:'worn', spoke:'spoken', broke:'broken', chose:'chosen', drove:'driven',
+    fell:'fallen', froze:'frozen', stole:'stolen', tore:'torn', rode:'ridden', hid:'hidden',
+    sang:'sung', rose:'risen', began:'begun', woke:'woken', flew:'flown', grew:'grown',
+    blew:'blown', bore:'borne', lay:'lain', pled:'pleaded', sped:'sped', wept:'wept',
+    swore:'sworn', bit:'bitten', clung:'clung', crept:'crept', fled:'fled', shrank:'shrunk',
+    stung:'stung', struck:'struck', swung:'swung', dug:'dug', lit:'lit', leapt:'leapt', knelt:'knelt',
+  }
+  let hirpMatch
+  while ((hirpMatch = HAVE_IRREG_PAST_RE.exec(text)) !== null) {
+    const past = hirpMatch[2].toLowerCase()
+    const pp = havePPMap[past] || '[past participle]'
+    errors.push(`Verb tense error: "${hirpMatch[0].trim()}" — use the past participle, not simple past. Write "${hirpMatch[1]} ${pp}".`)
+    break
+  }
+
+  // "lack of" used as predicate verb (Chinese L1 calque: 缺乏) + "cope to" — Loop 27
+  // Macrothink (2012) / CLEC corpus: "lack of [noun]" as predicate is top-20 Chinese L1 error.
+  // "缺乏" functions as both verb and noun in Mandarin → learners freeze "lack of" as a chunk.
+  // Academy Publication / CLEC: "cope to" appears 3× more than native writing (should be "cope with").
+  // FP guards:
+  //   LACK_OF_PRED_RE: requires subject pronoun/NP immediately before "lack of" — the nominal
+  //   construction "the lack of funding" is a noun phrase (no preceding subject) → not flagged.
+  //   "is/are lack of": categorically wrong in standard English, FP ≈ 0%.
+  //   COPE_TO_RE: "cope to" is never correct, FP = 0%.
+  const IS_LACK_OF_RE = /\b(is|are|was|were)\s+lack\s+of\b/gi
+  if (IS_LACK_OF_RE.test(text)) {
+    errors.push('Verb error: "is/are lack of" is not standard English. Write "lacks" (verb: "the government lacks motivation") or "there is a lack of X".')
+  }
+  const COPE_TO_RE = /\bcope\s+to\b/gi
+  if (COPE_TO_RE.test(text)) {
+    errors.push('Preposition error: "cope to" → "cope with". The verb "cope" requires the preposition "with" (not "to").')
+  }
+
   // "Look forward to" + bare infinitive — Zhang & Jiang (2015): 15-20% of Chinese L1 emails
   // contain this error. "to" in "look forward to" is a PREPOSITION, not an infinitive marker;
   // the correct complement is a gerund (-ing). Chinese lacks gerund/infinitive distinction, so

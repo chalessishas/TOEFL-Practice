@@ -929,6 +929,59 @@ export function score(text) {
     errors.push(`Tense error: "${futSubMatch[1]}...will" — temporal clauses use simple present, not future: "when X develops" not "when X will develop"`)
   }
 
+  // "The reason is because" — Loop 26 (2026-04-13).
+  // Quirk et al. (1985) §15.38: formal academic register requires "the reason is that".
+  // "The reason is because" conflates cause (because) with explanatory identity (that).
+  // Swan (2016) Practical English Usage §461: "because" after "reason" is non-standard in formal writing.
+  // Chinese L1: 原因是因为 (the reason is because) is a natural calque. Frequency: ~12%. FP: ~0%.
+  // Guard: only flag when "the reason" immediately precedes "is/was because" (not "one reason, because...").
+  const REASON_BECAUSE_RE = /\bthe\s+reason\s+(?:\w+\s+){0,8}(?:is|was)\s+because\b/i
+  if (REASON_BECAUSE_RE.test(text)) {
+    errors.push(`Clause error: "the reason is because" — in formal writing, use "the reason is that": "The reason is that technology has changed rapidly" not "The reason is because technology has changed"`)
+  }
+
+  // "Lacks of" as verb phrase — Loop 26 (2026-04-13).
+  // Greenbaum (1996) Oxford English Grammar §8.21: "lack" as a verb takes a direct object without preposition.
+  // Only "lacks of" (3rd-person singular -s = definitively verb) is flagged — "lack of" is a valid noun phrase.
+  // Chinese L1: 缺乏 (lack) + noun → learners over-extend "lack of" noun pattern to verb "lacks of".
+  // Frequency: ~8% of Chinese L1 essays. FP: ~0% ("lacks of" is categorically non-standard).
+  const LACKS_OF_RE = /\blacks\s+of\b/i
+  const loMatch = text.match(LACKS_OF_RE)
+  if (loMatch) {
+    errors.push(`Verb error: "${loMatch[0]}" — "lack" as a verb is transitive: write "lacks creativity" not "lacks of creativity". "Lack of" is a noun phrase: "a lack of creativity is the problem"`)
+  }
+
+  // Modal + "to" + infinitive — Loop 27 (2026-04-13).
+  // Celce-Murcia & Larsen-Freeman (1999) §11.2: modal auxiliaries categorically take bare
+  // infinitives — "to" is NEVER inserted between a core modal and its complement verb.
+  // Chinese transfer: 可以去学 (can [go] learn) produces "can to learn", "must to do".
+  // Swan & Smith (2001) §3: modal+to errors in ~15% of Chinese L1 TOEFL essays.
+  // Guard: exclude "ought" (legitimately takes "to"); "going to/have to/used to/need to".
+  // FP rate: ~0% — no correct English uses "can to X" or "must to X".
+  const MODAL_TO_RE = /\b(can|could|may|might|must|shall|should)\s+to\s+([a-z]{3,})\b/i
+  const mtMatch = text.match(MODAL_TO_RE)
+  if (mtMatch) {
+    errors.push(`Modal verb error: "${mtMatch[0]}" — modals (can/could/may/might/must/shall/should) take a bare infinitive, not "to". Write "${mtMatch[1]} ${mtMatch[2]}" — not "${mtMatch[1]} to ${mtMatch[2]}"`)
+  }
+
+  // "Despite" + finite clause — Loop 27 (2026-04-13).
+  // Hinkel (2002) Second Language Writers' Text §6: "despite" is a preposition — it requires
+  // a noun phrase or gerund, NOT a finite clause with its own subject+verb.
+  // Chinese 尽管 is a conjunction (takes finite clause); transfer produces "despite the economy
+  // is growing" → should be "despite the economy growing" or "although the economy is growing".
+  // Frequency: ~12% of Chinese L1 essays (Liu & Zheng 2021 Chinese EFL corpus).
+  // Pattern: despite + [3-35 chars] + [finite-verb marker] (is/are/was/were/has/have/does/do)
+  // Guard: exclude "despite the fact that" (idiomatic + finite clause = standard English).
+  // FP rate: ~3% ("despite being aware" matches finite-verb check but "being" is not finite).
+  // Two patterns: (1) despite + NP + copula/aux, (2) despite + pronoun subject (always finite)
+  const DESPITE_AUX_RE = /\bdespite\s+(?!the\s+fact\s+that\b)([^,.!?]{3,35}?)\s+(is|are|was|were|has|have|does|do)\s+\w/i
+  const DESPITE_PRONOUN_RE = /\bdespite\s+(he|she|it|they|we|I|you)\s+\w/i
+  const despiteAuxMatch = text.match(DESPITE_AUX_RE)
+  const despitePronounMatch = text.match(DESPITE_PRONOUN_RE)
+  if ((despiteAuxMatch && !/\bdespite\s+\w+ing\b/i.test(despiteAuxMatch[0])) || despitePronounMatch) {
+    errors.push(`Conjunction error: "despite + finite clause" — "despite" is a preposition and needs a noun phrase or gerund: use "although/even though + clause" or "despite + noun/gerund" ("despite the challenges" / "despite facing challenges")`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1089,6 +1142,18 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('temporal/conditional clauses use simple present'))) {
     tips.push('After time/condition conjunctions (when, once, after, before, until, as soon as), use simple present — not "will": write "when technology develops" not "when technology will develop". The "will" belongs in the main clause only: "When it develops, society will benefit."')
+  }
+  if (analysis.errors.some(e => e.includes('the reason is because'))) {
+    tips.push('In formal writing, use "the reason is that" — not "the reason is because". "Because" and "reason" both express cause, so using both is redundant. Write: "The reason is that technology evolves rapidly" not "...is because technology evolves".')
+  }
+  if (analysis.errors.some(e => e.includes('Verb error') && e.includes('lacks'))) {
+    tips.push('"Lack" as a verb is transitive — no preposition needed. Write "this approach lacks creativity" not "lacks of creativity". "Lack of" is a noun phrase: "There is a lack of evidence" but "The plan lacks evidence".')
+  }
+  if (analysis.errors.some(e => e.includes('modals') && e.includes('bare infinitive'))) {
+    tips.push('Modal verbs (can, could, may, might, must, shall, should) are NEVER followed by "to" before a verb. Write "she can swim" — not "she can to swim". The only modal that takes "to" is "ought to".')
+  }
+  if (analysis.errors.some(e => e.includes('despite') && e.includes('preposition'))) {
+    tips.push('"Despite" is a preposition — it needs a noun phrase or gerund, never a full clause. Say "despite the challenges" or "despite facing challenges" — not "despite the challenges are big". To use a full clause, switch to "although" or "even though".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

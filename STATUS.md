@@ -126,7 +126,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] Email 范文校准 — 批量测试 10 条 email sample responses：Sample 1（3.7）和 Sample 4（3.9）因缺 Dear/Best regards 被 taskScore 惩罚；修复：在范文数据加入问候/结尾语；10/10 达到 4.0+/5（范围 4.1–4.6）(3e947cf)
 - [100%] vocabulary.js AWL sublists 7-10 完整扩展 — AWL_CORE 从 sublist 1-6（~200词）扩至全部 10 个 sublist（~290词）；探测命中 6→67；E2E 测试 3 场景全通过 (ca938ae)
 - [100%] grammar.js 逗号粘连误报彻底修复 — 根因：检测以 line（\n 分割）为单位，邮件正文无换行因此整个邮件是一行，SENTENCE_STARTERS 首词检查永远不触发；修复：① 改为 sentence（[.!?;] 分割）为单位；② 逗号粘连 regex 改为 [^\S\n]+（不跨段落）；③ 双否定 span 收窄到 .{0,20}；④ CLAUSE_OPENERS 扩展（during/despite/done/given 等）；结果：20/20 范文 grammar=1.00，"While X, I believe Y"/"If X, I would Y"/"During X, I had Y" 全部正确跳过 (8f466ff) — Discussion 10/10（含 Sample 9 3.9→4.1），Email 10/10
-- [100%] development.js 逐段落证据完整性奖励 — paragraphCompletenessBonus()：body 段落全有 evidence signal → +0.10，≥50% → +0.05；email 跳过；argScore ceiling 仍有效；20/20 校准维持 (今日)
+- [100%] development.js 逐段落证据完整性奖励 — paragraphCompletenessBonus()：body 段落全有 evidence signal → +0.10，≥50% → +0.05；email 跳过；argScore ceiling 仍有效；20/20 校准维持 (5d28ad0)
+- [100%] development.js P3/P4 — circularReasoningPenalty()（段落内句对 token 重叠 >60% → argScore ceiling 降低）+ numericEvidenceBonus()（百分比/年份/统计数字 → +0.04/+0.08）；20/20 校准维持 (8e3b44f)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

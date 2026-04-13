@@ -92,7 +92,7 @@ export function score(text) {
   // Proxy: count long words with academic nominalization suffixes per 100 tokens.
   // Length filter (≥7 chars) excludes noise like "city" (-ity) and "moment" (-ment).
   // Score-5 TOEFL: ~8–15 nominalizations/100w; Score-2: ~2–4/100w.
-  const NOMINALIZATION_RE = /\b\w{7,}(tion|ment|ness|ity|ance|ence|ism|ity)\b/gi
+  const NOMINALIZATION_RE = /\b\w{7,}(tion|ment|ness|ity|ance|ence|ism)\b/gi
   const nomCount = (text.match(NOMINALIZATION_RE) || []).length
   const nomDensity = tokens.length > 0 ? (nomCount / tokens.length) * 100 : 0
   // Map density to 0–0.15 bonus (additive, safe to add without recalibrating)

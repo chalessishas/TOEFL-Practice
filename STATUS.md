@@ -119,6 +119,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] grammar.js 中文 L1 迁移错误检测 — 双连词错误（although...but / because...so，中文虽然/但是/因为/所以配对迁移）+ 系动词脱落（he/she very ADJ，中文谓语形容词无需 be 动词）；12/12 测试通过，0 误报 (d46b0c0)
 - [100%] grammar.js 量词+单数名词复数脱落 — 17 条常用可数名词白名单（"many student"→错，"several factor"→错），中文无复数词缀迁移；含正确复数变形（approach→approaches, strategy→strategies）；6/6 错误命中，0 误报 (6a14a93)
 - [100%] organization.js hedging 第 7 类话语标记 — perhaps/arguably/this suggests 等 11 个认识立场标记；e-rater 明确追踪学术写作中的观点修饰用词；同步补充 8 个各类别缺失标记（by contrast/likewise/it follows that/a case in point 等）(b629851)
+- [100%] grammar.js 数量词+不可数名词错误 — "many research/several evidence/numerous information" 等 11 个 TOEFL 高频不可数名词；负向前瞻排除定语用法（"several research papers" 不标）；与 QUANT_BARE_RE 合称「量词三件套」(e21801c)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

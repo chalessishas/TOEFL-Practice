@@ -304,7 +304,7 @@ export function score(text) {
   // Research: Tsai (2023) — tense/aspect shift is #2 Chinese ESL error. Academic Discussion
   // is primarily present tense; past tense > 35% of clause verbs without temporal anchors
   // indicates L1 interference. Threshold 0.35 (conservative: 0.30 had too many FPs per research).
-  const PRESENT_VERB_RE = /\b(is|are|has|have|do|does|seems?|shows?|suggests?|indicates?|means?|affects?|helps?|works?|requires?|provides?|allows?|makes?|gives?|takes?|shows?|becomes?|remains?|exists?|matters?)\b/gi
+  const PRESENT_VERB_RE = /\b(is|are|has|have|do|does|seems?|shows?|suggests?|indicates?|means?|affects?|helps?|works?|requires?|provides?|allows?|makes?|gives?|takes?|becomes?|remains?|exists?|matters?)\b/gi
   const PAST_VERB_RE    = /\b(was|were|had|did|seemed|showed|suggested|indicated|meant|affected|helped|worked|required|provided|allowed|made|gave|took|became|remained|existed)\b/gi
   const TEMPORAL_ANCHOR_RE = /\b(yesterday|last\s+(year|month|week|semester|decade)|in\s+(19|20)\d{2}|\d+\s+years?\s+ago|ago|previously|historically|back\s+in|at\s+that\s+time)\b/i
   const presentCount = (text.match(PRESENT_VERB_RE) || []).length

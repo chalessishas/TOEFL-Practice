@@ -170,6 +170,19 @@ export function score(text) {
     errors.push(`Plural error: "${quant} ${noun}" → "${quant} ${plural}"`)
   }
 
+  // Count quantifier + uncountable noun — companion to QUANT_BARE_RE above.
+  // "many research", "several evidence", "few information" are wrong because these nouns
+  // are mass/uncountable and require different quantifiers (much/some/a great deal of).
+  // Exclude "few" to avoid "a few more research papers"; exclude attributive use via
+  // negative lookahead — "several research papers" is fine, "several research is" is not.
+  // "pollution" removed: too often attributive ("pollution levels/problems").
+  const QUANT_UNCOUNTABLE_RE = /\b(many|several|numerous)\s+(evidence|information|knowledge|advice|feedback|progress|education|equipment|unemployment|violence|research)\s+(?!paper|article|study|studies|method|question|finding|topic|area|center|institute|project|group)/gi
+  let quMatch
+  while ((quMatch = QUANT_UNCOUNTABLE_RE.exec(text)) !== null) {
+    const noun = quMatch[2], quant = quMatch[1]
+    errors.push(`Quantifier error: "${quant} ${noun}" — "${noun}" is uncountable; use "much/some/a great deal of ${noun}"`)
+  }
+
   // SVA (subject-verb agreement) — #1 penalized feature for ESL writers in e-rater
   // High-precision patterns: the erroneous form is structurally distinctive enough
   // that false positives are very rare in normal academic prose.
@@ -229,5 +242,7 @@ export function suggest(analysis) {
     tips.push('Add a linking verb: "He is very tall" not "He very tall". English adjective predicates require "is/was/are/were".')
   if (analysis.errors.some(e => e.includes('Plural error')))
     tips.push('Add plural -s after quantifiers: "many students" not "many student". English countable nouns need plural marking.')
+  if (analysis.errors.some(e => e.includes('Quantifier error')))
+    tips.push('Use "much/some/a great deal of" with uncountable nouns: "much research" not "many research", "some evidence" not "several evidence".')
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

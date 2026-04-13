@@ -138,6 +138,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] grammar.js 中文 L1 Pattern B 补充 — "demanded/demanding for" + "requested/requesting for"（动词时态形式，近零误报）；8/8 sanity，8/8 校准维持
 - [100%] vocabulary.js AWL 深度分级 — AWL_BASIC (sublists 1-3, 0.015/词, cap 0.12) + AWL_ADVANCED (sublists 4-10, 0.04/词, cap 0.08)；总上限仍 0.20；仅用高阶词的 Score-5 可突破 Score-4 平台；Loop 8 驱动
 - [100%] organization.js 认识立场 tier-2 hedging bonus — HEDGING_TIER2 7 个模式（I would argue / one might / it could be argued 等）；discussion 专属；+0.06 (1 hit) / +0.10 (2+ hits)；tier-1 hedging 列表重构避免双重计分；8/8 校准维持
+- [100%] grammar.js 邮件称呼逗号粘连误报修复 — "Dear Professor Chen, I am writing..." 被误标为逗号粘连；在逗号粘连检测前添加 salutationPattern 守卫（Dear/Hello/Hi/Hey/Greetings 开头跳过）；E2E 实测发现，4/4 测试通过，8/8 校准维持
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

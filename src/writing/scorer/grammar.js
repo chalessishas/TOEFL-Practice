@@ -79,6 +79,8 @@ export function score(text) {
     // opener — "Dep/Prep clause, Main clause" is valid comma usage.
     const firstWord = sentence.trim().split(/\s+/)[0]?.toLowerCase() ?? ''
     if (CLAUSE_OPENERS.has(firstWord)) return
+    // Skip email salutations — "Dear Professor Chen, I am writing..." is correct.
+    if (/^(dear|hello|hi|hey|greetings)\b/i.test(sentence.trim())) return
 
     // [^\S\n]+ matches horizontal whitespace only — prevents matching across paragraph breaks
     const commaSpliceRegex = /,[^\S\n]+(I|he|she|they|we|it)\s+\w+/gi

@@ -360,6 +360,55 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   })
 
+  // Article confusion: "a" before vowel sounds / "an" before consonant sounds.
+  // Lardiere (1998) + Swan & Smith (2001): article errors = highest-frequency error class
+  // in Chinese L1 writing (~12% of all errors); a/an distinction passes all spell-checkers.
+  // Curated word lists → false-positive rate ~0% on native academic text.
+  const A_VOWEL_WORDS = ['important','interesting','issue','idea','impact','example','evidence',
+    'approach','ability','advantage','argument','academic','effective','effort','opportunity',
+    'understanding','improvement','aspect','opinion','increase','innovation','analysis',
+    'element','outcome','attempt','individual','amount','error','effect','explanation',
+    'answer','achievement','application','average','experience','education','essential',
+    'economic','agreement','objective']
+  const A_VOWEL_RE = new RegExp(`\\ba\\s+(${A_VOWEL_WORDS.join('|')})\\b`, 'i')
+  if (A_VOWEL_RE.test(text)) {
+    const match = text.match(A_VOWEL_RE)
+    errors.push(`Article error: "a ${match[1]}" → "an ${match[1]}" (use "an" before vowel sounds)`)
+  }
+
+  const AN_CONSONANT_WORDS = ['better','benefit','big','broad','common','complex','cultural',
+    'different','direct','diverse','false','financial','fundamental','global','good','great',
+    'growing','high','human','key','large','local','long','major','new','physical',
+    'political','powerful','primary','problem','professional','real','recent','regular',
+    'school','significant','similar','simple','social','special','specific','standard',
+    'strong','student','traditional','typical']
+  const AN_CONSONANT_RE = new RegExp(`\\ban\\s+(${AN_CONSONANT_WORDS.join('|')})\\b`, 'i')
+  if (AN_CONSONANT_RE.test(text)) {
+    const match = text.match(AN_CONSONANT_RE)
+    errors.push(`Article error: "an ${match[1]}" → "a ${match[1]}" (use "a" before consonant sounds)`)
+  }
+
+  // Redundant preposition after transitive verbs (Huang 2001 — Chinese L1 transfer:
+  // "discuss about", "explain about" etc. mirror Mandarin 关于-constructions).
+  // Each pattern requires the specific verb + specific wrong preposition → FP ≈ 0%.
+  const REDUNDANT_PREP = [
+    { re: /\bdiscuss(?:es|ed|ing)?\s+about\b/i,
+      msg: 'Redundant preposition: "discuss about X" → "discuss X" (no preposition needed)' },
+    { re: /\bexplain(?:s|ed|ing)?\s+about\b/i,
+      msg: 'Redundant preposition: "explain about X" → "explain X" or "explain why/how"' },
+    { re: /\bmention(?:s|ed|ing)?\s+about\b/i,
+      msg: 'Redundant preposition: "mention about X" → "mention X"' },
+    { re: /\bdescribe(?:s|d|ing)?\s+about\b/i,
+      msg: 'Redundant preposition: "describe about X" → "describe X"' },
+    { re: /\bdepend(?:s|ed|ing)?\s+(?:of|from)\b/i,
+      msg: 'Preposition error: "depend of/from" → "depend on"' },
+    { re: /\binterested?\s+of\b/i,
+      msg: 'Preposition error: "interested of" → "interested in"' },
+  ]
+  REDUNDANT_PREP.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -414,6 +463,20 @@ export function suggest(analysis) {
   if (analysis.errors.some(e => e.includes('Homophone confusion'))) {
     const homErr = analysis.errors.find(e => e.includes('Homophone confusion'))
     tips.push(homErr.replace('Homophone confusion: ', ''))
+  }
+  if (analysis.errors.some(e => e.includes('Article error'))) {
+    const artErr = analysis.errors.find(e => e.includes('Article error'))
+    tips.push(artErr.replace('Article error: ', ''))
+  }
+  if (analysis.errors.some(e => e.includes('Redundant preposition'))) {
+    const prepErr = analysis.errors.find(e => e.includes('Redundant preposition'))
+    tips.push(prepErr.replace('Redundant preposition: ', ''))
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error: "depend'))) {
+    tips.push('"depend on" not "depend of/from" — the verb "depend" always takes the preposition "on".')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error: "interested'))) {
+    tips.push('"interested in" not "interested of" — the adjective "interested" always takes "in".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

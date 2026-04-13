@@ -137,12 +137,42 @@ export function score(text, taskType = 'general') {
     emailRegisterBonus = (hasFormalOpener && hasFormalClosing) ? 0.04 : (hasFormalOpener || hasFormalClosing) ? 0.02 : 0
   }
 
+  // Wordy phrase penalty (Williams 2014 "Style: Clarity and Grace"; ETS Score-4 rubric:
+  // "occasional redundancy" is a Score-4 marker). Phrases universally replaceable with
+  // shorter equivalents — no meaning loss. "in order to" excluded (formal purposive clause).
+  const WORDY_PHRASES = [
+    /\bdue to the fact that\b/i,
+    /\bin spite of the fact that\b/i,
+    /\bfor the reason that\b/i,
+    /\bat this point in time\b/i,
+    /\bin the event that\b/i,
+    /\bthe reason (?:why|is) because\b/i,
+    /\bhas the ability to\b/i,
+  ]
+  const wordyHits = WORDY_PHRASES.filter(re => re.test(text)).length
+  const wordyPhrasePenalty = wordyHits >= 2 ? 0.04 : wordyHits === 1 ? 0.02 : 0
+
+  // Formulaic 4-gram repetition penalty (arxiv:2504.08537, April 2025: lexical bundle
+  // diversity predicts AES score; repeating the same 4-gram 3+ times signals rote production
+  // rather than genuine language command). Requires ≥40 content words to avoid penalizing
+  // short emails. Native writers virtually never hit this threshold in 120-200 word essays.
+  let formulaicPenalty = 0
+  if (tokens.length >= 40) {
+    const fourgramCounts = new Map()
+    for (let i = 0; i <= tokens.length - 4; i++) {
+      const gram = tokens.slice(i, i + 4).join(' ')
+      fourgramCounts.set(gram, (fourgramCounts.get(gram) || 0) + 1)
+    }
+    const repeatedGrams = [...fourgramCounts.values()].filter(c => c >= 3).length
+    formulaicPenalty = repeatedGrams >= 2 ? 0.04 : repeatedGrams === 1 ? 0.02 : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${emailRegisterBonus > 0 ? `, email register bonus: +${emailRegisterBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition penalty` : ''}${emailRegisterBonus > 0 ? `, email register bonus: +${emailRegisterBonus.toFixed(2)}` : ''}`,
   }
 }
 

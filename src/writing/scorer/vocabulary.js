@@ -42,6 +42,25 @@ const AWL_CORE = new Set([
   'objective','orient','outcome','persist','phenomenon','proportion','pursue',
   'rational','recover','reveal','specify','substitute','symbol','thesis','topic',
   'transmit','ultimate',
+  // Sublist 7 — Coxhead 2000
+  'adapt','adult','advocate','channel','classic','comprise','confirm','contrary',
+  'convert','couple','deny','differentiate','dominant','facilitate','found',
+  'grant','hence','interact','maintain','negate','parameter','project','scope',
+  'secure','theme','tense','trace','trend','voluntary',
+  // Sublist 8 — Coxhead 2000
+  'accommodate','accumulate','ambiguity','analogy','anticipate','approximate',
+  'attain','capable','cease','collapse','compile','concurrent','confine',
+  'controversy','duration','enable','equilibrium','exceed','facilitate',
+  'implicate','insight','integral','intermediate','manifest','modify','monitor',
+  'negate','offset','overlap','passive','reluctant','selective','successive',
+  // Sublist 9 — Coxhead 2000
+  'adjacent','albeit','coherent','commence','compatible','discriminate',
+  'endorse','evolve','external','guideline','incompatible','inhibit',
+  'input','integrity','preliminary','submit','trace','uniform',
+  // Sublist 10 — Coxhead 2000
+  'adjacent','assemble','bias','comprise','convert','decade','depict',
+  'displace','innovation','input','intermediate','passive','preliminary',
+  'reluctant','successive','supplement','terminate','thesis',
 ])
 
 // Function words to exclude from content-word analysis

@@ -191,19 +191,35 @@ export function score(text, taskType = 'general', promptText = '') {
   // Email tasks: structure (paragraphs + greeting/closing) dominates over academic markers.
   // Academic essays need discourse markers; emails use transactional phrasing not in our list.
   const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
-  const value = Math.min(
+  const rawValue = Math.min(
     1,
     Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus + hedgingTierBonus + paraInitBonus),
   )
 
-  const zonePart        = zoneBonus        > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`              : ''
-  const ratioPart       = ratioBonus       > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}`      : ''
-  const semiFormalPart  = semiFormalBonus  > 0 ? `, semiFormal=+${semiFormalBonus.toFixed(2)}`       : ''
-  const hedgingTierPart = hedgingTierBonus > 0 ? `, hedgingTier=+${hedgingTierBonus.toFixed(2)}`    : ''
-  const paraInitPart    = paraInitBonus    > 0 ? `, paraInit=+${paraInitBonus.toFixed(2)}`           : ''
+  // Connector misuse penalty — Granger & Tyson (1996): Chinese L1 writers use "however"
+  // as a generic paragraph opener 38% of the time without a preceding contrast, vs 7% for natives.
+  // Only flag paragraph-initial "however" when the preceding paragraph has no contrastive content.
+  // Discussion-only (emails don't use this pattern); capped at -0.03 (1 misuse max).
+  let connectorMisusePenalty = 0
+  if (taskType !== 'email') {
+    const paras = text.split(/\n\n+/).filter(p => p.trim().length > 20)
+    for (let i = 1; i < paras.length; i++) {
+      if (!/^however[,\s]/i.test(paras[i].trim())) continue
+      const prevHasContrast = /\b(but|yet|although|though|despite|while|whereas|however|nevertheless|on the other hand|in contrast)\b/i.test(paras[i - 1])
+      if (!prevHasContrast) { connectorMisusePenalty = 0.03; break }  // cap at 1 misuse
+    }
+  }
+  const value = Math.max(0, rawValue - connectorMisusePenalty)
+
+  const zonePart           = zoneBonus           > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`                          : ''
+  const ratioPart          = ratioBonus          > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}`                  : ''
+  const semiFormalPart     = semiFormalBonus     > 0 ? `, semiFormal=+${semiFormalBonus.toFixed(2)}`                   : ''
+  const hedgingTierPart    = hedgingTierBonus    > 0 ? `, hedgingTier=+${hedgingTierBonus.toFixed(2)}`                : ''
+  const paraInitPart       = paraInitBonus       > 0 ? `, paraInit=+${paraInitBonus.toFixed(2)}`                      : ''
+  const connectorMisusePart = connectorMisusePenalty > 0 ? `, connectorMisuse=-${connectorMisusePenalty.toFixed(2)}`  : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}`,
   }
 }
 

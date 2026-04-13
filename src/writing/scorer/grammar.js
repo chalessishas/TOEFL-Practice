@@ -282,6 +282,17 @@ export function score(text) {
     errors.push(`Stative verb error: "${spMatch[0].trim()}" — stative verbs (know, want, believe) don't use progressive aspect; use simple tense instead`)
   }
 
+  // Progressive tense overuse penalty (Loop 25, 2026-04-13)
+  // Xu & Ellis (2020): Chinese L1 TOEFL writers use progressive at 2× native frequency.
+  // Academic writing (Biber et al. 1999): progressive aspect rare in generalizations/argumentation.
+  // Rate >4/100w signals overuse; stative progressive (above) catches specific verb errors.
+  // Guard: short texts (<60 tokens) excluded to avoid penalizing emails with 1 progressive form.
+  const progMatches = (text.match(/\b(?:am|is|are|was|were)\s+\w+ing\b/gi) || []).length
+  const progRate = tokens.length >= 60 ? (progMatches / tokens.length) * 100 : 0
+  if (progRate > 4) {
+    errors.push(`Progressive overuse: ${progMatches} progressive forms in this essay — academic writing uses simple tenses for generalizations; reserve progressive for ongoing/temporary actions`)
+  }
+
   // Additional redundant-preposition entries (Chinese L1 corpus, City University HK ELSS).
   // Extends existing PREP_ERRORS list with high-frequency redundant-prep errors.
   const EXTRA_PREP_ERRORS = [
@@ -869,6 +880,29 @@ export function score(text) {
     }
   }
 
+  // "Have difficulty/trouble + to-infinitive" — Loop 25 (2026-04-13).
+  // Celce-Murcia & Larsen-Freeman (1999) §14.8: "have difficulty/trouble" takes a gerund complement.
+  // Chinese 难以 (difficult to) + bare verb → "have difficulty to understand" is a direct calque.
+  // Native English: "have difficulty understanding" / "have trouble writing". FP rate: ~0%.
+  const HAVE_DIFF_RE = /\b(?:have|has)\s+(?:difficulty|trouble|a\s+hard\s+time|a\s+difficult\s+time|a\s+problem)\s+to\s+(\w+)\b/i
+  const hdMatch = text.match(HAVE_DIFF_RE)
+  if (hdMatch) {
+    errors.push(`Gerund error: "have difficulty to ${hdMatch[1]}" — "have difficulty/trouble" requires a gerund (-ing), not a "to" infinitive. Write "have difficulty ${hdMatch[1]}ing"`)
+  }
+
+  // "Prefer X than Y" — Loop 25 (2026-04-13).
+  // Quirk et al. (1985) §9.62: "prefer" uses preposition "to" for comparison, not "than".
+  // Chinese L1: 喜欢X比Y (prefer X compared-to Y, 比=than) → "prefer X than Y" calque.
+  // Guard: skip "rather than" — "prefer X rather than Y" is standard correct English.
+  // Frequency: ~6%, FP rate: ~5% (hedged by "rather" guard).
+  const PREFER_THAN_RE = /\bprefer\b[^.!?]{0,60}?\bthan\b/gi
+  let ptMatch
+  while ((ptMatch = PREFER_THAN_RE.exec(text)) !== null) {
+    if (!/\brather\s+than\b/i.test(ptMatch[0])) {
+      errors.push(`Preposition error: "prefer...than" — use "prefer X to Y" not "prefer X than Y": "I prefer coffee to tea"`)
+    }
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1020,6 +1054,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('be accustomed'))) {
     tips.push('"Be used to" (= be accustomed to) takes a gerund (-ing): "I am used to studying" not "I am used to study". This is different from "used to + base verb" for habitual past: "I used to study" (= I did this in the past).')
+  }
+  if (analysis.errors.some(e => e.includes('have difficulty to'))) {
+    tips.push('"Have difficulty/trouble" takes a gerund (-ing), not a "to" infinitive: write "have difficulty understanding" or "have trouble writing" — not "have difficulty to understand" or "have trouble to write".')
+  }
+  if (analysis.errors.some(e => e.includes('prefer...than'))) {
+    tips.push('"Prefer" uses "to" for comparison, not "than": write "I prefer coffee to tea" — not "I prefer coffee than tea". Exception: "prefer X rather than Y" is correct because "rather than" is a conjunction, not a simple comparison.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

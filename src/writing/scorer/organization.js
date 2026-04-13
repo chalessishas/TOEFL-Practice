@@ -1,8 +1,8 @@
 // Categorised by connector function — reward diversity across categories,
 // not just quantity within one category (e.g. 5 contrast markers ≠ high score).
 const MARKER_CATEGORIES = {
-  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','conversely','despite','although','while','on the contrary','in spite of','even though','yet','notwithstanding','that said','admittedly','granted'],
-  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly','also','what is more','likewise','in the same way','by the same token'],
+  contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','conversely','despite','although','while','on the contrary','in spite of','even though','yet','notwithstanding','that said','admittedly','granted','rather than','instead of','as opposed to'],
+  addition:        ['moreover','furthermore','additionally','in addition','besides','similarly','also','what is more','likewise','in the same way','by the same token','not only','not merely','beyond that'],
   conclusion:      ['in conclusion','in summary','to summarize','to sum up','in short','overall','therefore','thus','hence','consequently','as a result','finally','it follows that','in light of this'],
   exemplification: ['for instance','for example','such as','in particular','notably','specifically','namely','to illustrate','that is','in other words','a case in point','this is evident in'],
   sequence:        ['firstly','secondly','thirdly','to begin with','first of all','subsequently','previously','then','next','meanwhile','last but not least','last','finally'],

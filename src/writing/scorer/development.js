@@ -28,7 +28,7 @@ const THESIS_MARKERS = [
 const REASON_MARKERS = [
   'one reason','another reason','first','second','third','firstly','secondly',
   'thirdly','furthermore','moreover','in addition','additionally',
-  'however','on the other hand','in contrast','by contrast','whereas','although',
+  'however','but','on the other hand','in contrast','by contrast','whereas','although',
   'nevertheless','nonetheless','despite','while','yet',
   // Counter-argument acknowledgment — AESPA 2025: essays with concessive rebuttal
   // score 0.3–0.5 pts higher in human rubrics vs. equivalent essays without it

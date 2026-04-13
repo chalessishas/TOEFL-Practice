@@ -55,14 +55,19 @@ export function score(text, taskType = 'general') {
     varianceScore = Math.min(1, 0.2 + stddev / 10)
   }
 
-  // Repetition penalty: content words >4 chars used ≥3 times
+  // Repetition penalty: content words >4 chars used ≥N times (N scales with essay length).
+  // Loop 19 (2026-04-13): threshold normalized to avoid penalizing longer essays for naturally
+  // using topic-relevant words more often. Biber et al. (1999): academic writing averages
+  // 2-3 high-frequency content words per 100 tokens — short emails hit 3 easily, long essays need ≥5.
+  // Formula: max(3, ceil(tokens/60)) → 120w: 3, 180w: 3, 200w: 4, 300w: 5.
+  const repThreshold = Math.max(3, Math.ceil(tokens.length / 60))
   const freq = {}
   tokens.forEach(w => {
     if (w.length > 4 && !FUNCTION_WORDS.has(w)) {
       freq[w] = (freq[w] || 0) + 1
     }
   })
-  const repeatedWords = Object.values(freq).filter(count => count >= 3).length
+  const repeatedWords = Object.values(freq).filter(count => count >= repThreshold).length
   const repetitionPenalty = Math.min(0.3, repeatedWords * 0.05)
 
   // Syntactic variety — ETS rewards "variety of syntactic structures" (relative clauses, conditionals, passives, etc.)
@@ -121,6 +126,35 @@ export function score(text, taskType = 'general') {
   const weakIntHits = (text.match(WEAK_INTENSIFIER_RE) || []).length
   const weakIntPenalty = weakIntHits >= 3 ? 0.04 : weakIntHits >= 2 ? 0.02 : 0
 
+  // I-opener monotony penalty (Loop 20, 2026-04-13)
+  // Biber et al. (1999) Longman Grammar: academic writing favors non-subject sentence openers
+  // (adverbials, subordinate clauses). McNamara et al. (2010) Coh-Metrix: sentence-initial
+  // first-person pronoun frequency negatively correlated with writing sophistication (r = -0.31).
+  // ETS Score-5 rubric: "variety in sentence structure." Score-3/4 writers frequently begin 4+
+  // sentences with "I think/I believe/I feel/I also" throughout the essay.
+  // Guard: email tasks use first-person naturally ("I am writing to...") — exempted.
+  let iOpenerPenalty = 0
+  if (taskType !== 'email') {
+    const sentenceList = text.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 5)
+    const I_OPENER_RE = /^I\s+(?:think|believe|feel|know|want|would|also|agree|disagree|consider|argue|suggest|maintain|contend|am|was)\b/i
+    const iOpenerCount = sentenceList.filter(s => I_OPENER_RE.test(s)).length
+    iOpenerPenalty = iOpenerCount >= 5 ? 0.04 : iOpenerCount >= 4 ? 0.02 : 0
+  }
+
+  // Subordination clause diversity bonus (Loop 20, 2026-04-13)
+  // Crossley et al. (2014) Language Learning: distinct subordinating clause types are the
+  // strongest syntactic predictor of L2 essay quality (β = 0.34, p < 0.001). Lu (2011)
+  // JSLW: Chinese L1 subordination deficit explains 18% of TOEFL score variance.
+  // Complements subDensityBonus (density) by rewarding TYPE diversity.
+  // Guard: ≥100 tokens to avoid penalizing short emails that legitimately lack subordination.
+  const SUBORDINATOR_TYPES = [
+    /\balthough\b/i, /\bwhile\b/i, /\bwhereas\b/i, /\bsince\b/i,
+    /\bbecause\b/i, /\beven\s+though\b/i, /\bunless\b/i, /\bwhenever\b/i,
+    /\bprovided\s+that\b/i, /\bgiven\s+that\b/i, /\bso\s+that\b/i,
+  ]
+  const distinctSubords = tokens.length >= 100 ? SUBORDINATOR_TYPES.filter(re => re.test(text)).length : 0
+  const subordDiversityBonus = distinctSubords >= 3 ? 0.04 : distinctSubords >= 2 ? 0.02 : 0
+
   // Nominalization density (Kyle 2018 on TOEFL data: CN/T explains 18.9% of score variance).
   // Proxy: count long words with academic nominalization suffixes per 100 tokens.
   // Length filter (≥7 chars) excludes noise like "city" (-ity) and "moment" (-ment).
@@ -175,11 +209,11 @@ export function score(text, taskType = 'general') {
   }
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}`,
   }
 }
 
@@ -203,5 +237,7 @@ export function suggest(analysis) {
   const nomMatch = analysis.details.match(/nom density: ([\d.]+)\/100w/)
   if (nomMatch && parseFloat(nomMatch[1]) < 5)
     tips.push('Use more academic nouns: instead of "the government decided to help", try "the government\'s decision to provide assistance". Nominalized forms (improvement, evidence, achievement) raise your style score.')
+  if (analysis.details.includes('i-opener monotony'))
+    tips.push('Too many sentences start with "I think/I believe/I feel." Vary your sentence openers: start some sentences with an adverb ("Additionally,"), a subordinate clause ("Although many people believe..."), or a noun phrase ("The key issue is...").')
   return tips.length > 0 ? tips : ['Improve your writing style by using varied vocabulary and sentence structures.']
 }

@@ -4,7 +4,9 @@ const MARKER_CATEGORIES = {
   contrast:        ['however','on the other hand','in contrast','by contrast','nevertheless','whereas','conversely','despite','although','while','on the contrary','in spite of','even though','yet','notwithstanding','that said','admittedly','granted','rather than','instead of','as opposed to'],
   addition:        ['moreover','furthermore','additionally','in addition','besides','similarly','also','what is more','likewise','in the same way','by the same token','not only','not merely','beyond that'],
   conclusion:      ['in conclusion','in summary','to summarize','to sum up','in short','overall','therefore','thus','hence','consequently','as a result','finally','it follows that','in light of this'],
-  exemplification: ['for instance','for example','such as','in particular','notably','specifically','namely','to illustrate','that is','in other words','a case in point','this is evident in'],
+  exemplification: ['for instance','for example','such as','in particular','notably','specifically','namely','to illustrate','that is','in other words','a case in point','this is evident in',
+    // Academic evidence framing — Score 5 writers cite research without always using "for example"
+    'according to','drawing on','as shown by','as evidenced by','as demonstrated by','research shows','studies show','research suggests'],
   sequence:        ['firstly','secondly','thirdly','to begin with','first of all','subsequently','previously','then','next','meanwhile','last but not least','last','finally'],
   elaboration:     ['indeed','in fact','after all','at the same time','above all','in particular','more importantly','to be sure','it is true that'],
   // Hedging — epistemic stance markers. ETS e-rater explicitly scores hedging as a
@@ -14,7 +16,9 @@ const MARKER_CATEGORIES = {
   // Tier-2 (arguably, presumably, it could be argued, one might argue, etc.) are
   // handled separately by HEDGING_TIER2 for the score-5 discrimination bonus — not
   // counted here to avoid double-crediting the same token (Loop 8, 2026-04-12).
-  hedging:         ['perhaps','possibly','it seems','it appears','this suggests','this may indicate','it is possible','potentially','generally speaking'],
+  hedging:         ['perhaps','possibly','it seems','it appears','this suggests','this may indicate','it is possible','potentially','generally speaking',
+    // Academic stance framing — Score 5 signals: perspective-marking phrases
+    'from a','in this regard','in this context','to some extent','in many respects','it is worth noting','it should be noted'],
 }
 
 // Markers classified as "inferential" or "concessive" — proficient writers use these

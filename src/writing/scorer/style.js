@@ -268,6 +268,32 @@ export function score(text, taskType = 'general') {
     besidespenalty = besidesCount >= 2 ? 0.02 : 0
   }
 
+  // Additive/temporal sentence-opener monotony — 2026-04-13.
+  // ScienceDirect (2011) Chinese EFL cohesion study: sentence-initial additive/temporal connectors
+  // at 45.4% of total conjunction uses in L1-Chinese vs 17.0% in native essays.
+  // Template essays using First/Second/In addition/Furthermore/Finally as openers for EVERY body
+  // sentence signal paragraph-template writing, not developed argumentation.
+  // Guard: only penalize when high-count AND low-variety (≤2 distinct types among ≥4 hits) —
+  // a diverse set of connectors (First, Furthermore, However, By contrast) is legitimate; repeating
+  // "In addition" for every sentence is not. Email exempt.
+  // Additive/temporal sentence-opener monotony — 2026-04-13.
+  // Template essays using First/Second/Third/In addition/Furthermore/Finally as openers for every
+  // body sentence signal paragraph-template writing. Condition: ≥60% of sentences start with a
+  // transitional connector (NOT just low-variety — even a diverse set like First/Second/Third/Finally
+  // signals template writing if that's ALL the openers in the essay).
+  // Guard: email exempt; essay must have ≥5 sentences; ≥3 transitional openers needed.
+  let transitionalMonotonyPenalty = 0
+  if (taskType !== 'email' && sentences.length >= 5) {
+    const SENT_OPENER_RE = /(?:^|[.!?]\s+)(First(?:ly)?[,\s]|Second(?:ly)?[,\s]|Third(?:ly)?[,\s]|Fourth(?:ly)?[,\s]|In addition[,\s]|Furthermore[,\s]|Moreover[,\s]|Additionally[,\s]|Lastly[,\s]|Finally[,\s])/gim
+    const openerMatches = [...text.matchAll(SENT_OPENER_RE)]
+    const totalOpeners = openerMatches.length
+    const coverageRatio = totalOpeners / sentences.length
+    // Fire when ≥60% of sentences use template openers AND there are ≥3 of them
+    if (totalOpeners >= 3 && coverageRatio >= 0.60) {
+      transitionalMonotonyPenalty = 0.03
+    }
+  }
+
   // Impersonal it-passive overuse — Loop 33 (2026-04-13).
   // Frontiers 2021 (PMC hedging study): Chinese L1 writers use "it is said/believed/reported that" at 3.4×
   // native rate in argumentative essays. ETS rubric flags "formulaic expressions substituting for genuine
@@ -279,11 +305,11 @@ export function score(text, taskType = 'general') {
     ? Math.min(0.12, (impersonalCount - 1) * 0.06) : 0
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty - impersonalPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty - impersonalPenalty - transitionalMonotonyPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${impersonalPenalty > 0 ? `, impersonal-it overuse: -${impersonalPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${impersonalPenalty > 0 ? `, impersonal-it overuse: -${impersonalPenalty.toFixed(2)}` : ''}${transitionalMonotonyPenalty > 0 ? `, transitional monotony: -${transitionalMonotonyPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
   }
 }
 

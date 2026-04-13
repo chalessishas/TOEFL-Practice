@@ -237,16 +237,12 @@ export function score(text) {
   const bigramHits = ACADEMIC_BIGRAMS.filter(b => lower.includes(b)).length
   const bigramBonus = bigramHits >= 3 ? 0.03 : bigramHits >= 2 ? 0.02 : bigramHits >= 1 ? 0.01 : 0
 
-  // Formulaic bundle overuse penalty — Loop 27
+  // Formulaic bundle overuse penalty — Loop 27 (hedging/belief frames).
   // Arxiv 2504.08537 (2025): lower-proficiency TOEFL essays use MORE lexical bundles, concentrated
   // in a narrow set of low-register "stating-belief" frames. QWK improvement +2-5% from LB features.
-  // Wei & Lei (2011, SAGE); Li & Lei (2025, SAGE): Chinese L1 writers use 40% more lexical bundles
-  // than proficient native writers, overusing exactly these 8 frames. Native Score-5 writers rarely
-  // use any of them more than once. Penalty triggers only at ≥3 single-bundle or ≥5 total (FP < 0.5%).
-  // Extended (2026-04-13): added high-frequency TOEFL clichés from Chinese L1 writers.
-  // None overlap with organization.js rewarded markers (checked against MARKER_CATEGORIES).
-  // "in today's society/world" and "as we all know" are flagged in ETS rater training as low-band signals.
-  // "in a word" is a 总而言之 calque — non-academic in English. "needless to say" is informal hedging.
+  // Wei & Lei (2011, SAGE); Li & Lei (2025, SAGE): Chinese L1 writers use 40% more lexical bundles.
+  // Penalty: ≥3 single-bundle OR ≥5 total. "as we all know"/"needless to say"/"in a word" added 2026-04-13.
+  // NOTE: "it should be noted"/"it is worth noting" are EXCLUDED — rewarded by organization.js already.
   const FORMULAIC_BUNDLES = [
     /\bit is important to\b/gi,
     /\bit is necessary to\b/gi,
@@ -256,22 +252,42 @@ export function score(text) {
     /\bit can be seen that\b/gi,
     /\bit is obvious that\b/gi,
     /\bit goes without saying\b/gi,
-    /\bin today's society\b/gi,
-    /\bin today's world\b/gi,
     /\bas we all know\b/gi,
-    /\bwith the development of\b/gi,
     /\bneedless to say\b/gi,
     /\bin a word[,\s]/gi,
+    // Academic noting frames (Frontiers AI 2023: 2.8× overuse in low-proficiency L2 essays).
+    // NOT "it should be noted" / "it is worth noting" — those are rewarded by organization.js.
+    /\bit is important to note\b/gi,
+    /\bit is essential to\b/gi,
   ]
   const bundleHits = FORMULAIC_BUNDLES.map(re => (text.match(re) || []).length)
   const maxSingleBundle = Math.max(...bundleHits)
   const totalBundleHits = bundleHits.reduce((a, b) => a + b, 0)
   const formulaicBundlePenalty = maxSingleBundle >= 3 ? 0.04 : totalBundleHits >= 5 ? 0.02 : 0
 
-  const value = Math.min(1, Math.max(0, (avgLenScore + diversityScore) / 2 + awlBonus + phrasalBonus + bigramBonus - formulaicBundlePenalty))
+  // Background-opening formula penalty — 2026-04-13 (CCSENet ELT 2022).
+  // "with the development of" appeared at 12.4× native rate in Chinese L1 TOEFL essays.
+  // "in today's society/world" at 7–9× native rate. These calques from 随着…的发展 signal
+  // shallow background-setting and are distinct from hedging frames above.
+  // Separate list with LOWER threshold (≥2 same-phrase OR ≥3 total) because even 1–2 uses
+  // in a short essay signal the pattern. Native writers virtually never use "with the development of".
+  const BG_OPENING_FORMULAS = [
+    /\bwith the development of\b/gi,
+    /\bwith the rapid development of\b/gi,
+    /\bwith the advancement of\b/gi,
+    /\bin today's society\b/gi,
+    /\bin today's world\b/gi,
+    /\bin the modern world\b/gi,
+  ]
+  const bgHits = BG_OPENING_FORMULAS.map(re => (text.match(re) || []).length)
+  const maxBgSingle = Math.max(...bgHits)
+  const totalBgHits = bgHits.reduce((a, b) => a + b, 0)
+  const bgOpeningPenalty = maxBgSingle >= 2 ? 0.04 : totalBgHits >= 3 ? 0.02 : totalBgHits >= 1 ? 0.01 : 0
+
+  const value = Math.min(1, Math.max(0, (avgLenScore + diversityScore) / 2 + awlBonus + phrasalBonus + bigramBonus - formulaicBundlePenalty - bgOpeningPenalty))
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}${bigramHits > 0 ? `, acadBigrams: ${bigramHits}` : ''}${formulaicBundlePenalty > 0 ? `, formulaicBundles:-${formulaicBundlePenalty.toFixed(2)}` : ''}`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}${bigramHits > 0 ? `, acadBigrams: ${bigramHits}` : ''}${formulaicBundlePenalty > 0 ? `, formulaicBundles:-${formulaicBundlePenalty.toFixed(2)}` : ''}${bgOpeningPenalty > 0 ? `, bgOpening:-${bgOpeningPenalty.toFixed(2)}` : ''}`,
   }
 }
 

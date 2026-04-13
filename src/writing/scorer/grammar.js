@@ -262,6 +262,10 @@ export function score(text) {
     { re: /\bmarr(?:y|ies|ied|ying)\s+with\b/i,   msg: 'Preposition error: "marry with" → "marry" (takes direct object: "she married him")' },
     { re: /\benter\s+into\s+(?!a\s+(?:contract|agreement|partnership|relationship|negotiation|discussion|dialogue))/i,
       msg: 'Preposition error: "enter into [place]" → "enter [place]" (physical entry takes no preposition)' },
+    // "demanded/demanding for" and "requested/requesting for" — clearly verbal forms, near-zero FP.
+    // Bare "demand for" / "request for" are excluded (ambiguous with valid noun phrases).
+    { re: /\bdemand(?:ed|ing)\s+for\b/i,          msg: 'Preposition error: "demand for [X]" → "demand [X]" (transitive verb — no preposition: "she demanded an explanation")' },
+    { re: /\brequest(?:ed|ing)\s+for\b/i,          msg: 'Preposition error: "request for [X]" → "request [X]" (transitive verb — no preposition: "they requested more time")' },
   ]
   EXTRA_PREP_ERRORS.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)

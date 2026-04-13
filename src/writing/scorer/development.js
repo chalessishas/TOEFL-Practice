@@ -8,6 +8,11 @@ const DETAIL_MARKERS = [
   'studies have shown','research has shown','data shows','data suggests',
   'as evidenced by','as illustrated by','in the case of','to demonstrate',
   'as seen in','based on','evidence shows','evidence suggests',
+  // Implicit example signals — sophisticated writers embed examples without "for example".
+  // "take the case of", "consider the fact", "one example is", comparative exemplification.
+  'take the case','consider the fact','one example','a clear example','take for example',
+  'this can be seen','this is evident','far more than','far less than',
+  'a good example','a prime example','a notable example',
 ]
 
 // Opinion/thesis markers — signals the essay has a stated position

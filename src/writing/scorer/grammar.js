@@ -1224,6 +1224,31 @@ export function score(text) {
     errors.push(`Gerund error: "for the purpose of ${v}" → "for the purpose of ${v}ing". The preposition "of" requires a gerund, not a bare infinitive. (Chinese 为了 + bare verb transfers directly but English needs -ing.)`)
   }
 
+  // "Despite of" — spurious "of" after "despite" — Loop 31 (2026-04-13).
+  // Swan & Smith (2001) §3: Chinese learners conflate "despite" (preposition, no "of") with "in spite of"
+  // (prepositional phrase requiring "of"). The error form "despite of X" appears in ~5-8% of Chinese L1 essays.
+  // "Despite the fact that" is correct — "despite of the fact" is the error.
+  // FP rate: ~0% — "despite of" is categorically non-standard in any native English.
+  if (/\bdespite\s+of\b/i.test(text)) {
+    errors.push('Preposition error: "despite of" → "despite". "Despite" is a preposition that takes a noun phrase directly — no "of" needed. Write "despite the challenges" not "despite of the challenges". (If you need "of", use "in spite of" instead.)')
+  }
+
+  // "By + bare infinitive" → "by + gerund" — Loop 31 (2026-04-13).
+  // Already checked in COLLOCATION/GERUND section (Candidate 2 in grammar-loop-29.md).
+  // Quick guard: "by" + a known action verb NOT in -ing form signals the calque.
+  // Chinese: 通过学习 → "by study" instead of "by studying".
+  // FP guard: verb must be followed by a content word or sentence boundary (not "by him/them/the").
+  // FP rate: ~2% (e.g., "judge by sight/touch" where sight/touch are nouns but match verb list).
+  // Already covered by BY_BARE_RE in Loop 29 — skip if present.
+  const BY_BARE_ALREADY = /\bby\s+(?:studying|working|learning|doing|making|taking|using|reading|writing|practicing)\b/i
+  if (!BY_BARE_ALREADY.test(text)) {
+    const BY_BARE_RE2 = /\bby\s+(study|work(?!er|ers|force|place|shop|load)|learn|do|make|take|use(?!r|rs|d\s)|read|write|practice|train|develop|implement|conduct|apply)\b(?!\w)/i
+    const bbMatch = text.match(BY_BARE_RE2)
+    if (bbMatch && !/\bby\s+(the|a|an|this|these|those|my|your|his|her|its|their|our)\b/i.test(text.substring(Math.max(0, text.indexOf(bbMatch[0]) - 5), text.indexOf(bbMatch[0]) + 20))) {
+      errors.push(`Gerund error: "by ${bbMatch[1]}" → "by ${bbMatch[1]}ing". Prepositions (including "by") always require a gerund (-ing) in English, not a bare infinitive. Write "by ${bbMatch[1]}ing" not "by ${bbMatch[1]}". (Chinese 通过 + bare verb transfers directly but English needs -ing.)`)
+    }
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length

@@ -186,7 +186,9 @@ export function score(text) {
   // Basic (sublists 1-3): 0.015/word, cap 0.12.
   // Advanced (sublists 4-10): 0.04/word, can push above basic cap up to total 0.20.
   // Discriminates Score-4 (basic AWL) vs Score-5 ("precise/idiomatic" ETS criterion).
-  const basicCount    = contentTokens.filter(w => AWL_BASIC.has(w)).length
+  // Exclude words also in commonWords: "research/data/factor/environment" are frequent enough
+  // to not signal academic depth. Only words NOT in commonWords earn AWL basic credit.
+  const basicCount    = contentTokens.filter(w => AWL_BASIC.has(w) && !commonWords.has(w)).length
   const advancedCount = contentTokens.filter(w => AWL_ADVANCED.has(w)).length
   const basicBonus    = Math.min(0.12, basicCount * 0.015)
   const advancedBonus = Math.min(0.08, advancedCount * 0.04)

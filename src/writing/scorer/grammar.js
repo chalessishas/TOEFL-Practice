@@ -918,6 +918,14 @@ export function score(text) {
     errors.push(`Preposition error: "according to ${atpMatch[1]}" — "according to" requires a noun/source, not a personal pronoun. Write "${alt}" or "I believe/argue that..."`)
   }
 
+  // "in my personally opinion" — Loop 33 (2026-04-13).
+  // "personally" is an adverb and cannot modify the noun "opinion". A direct morphological error.
+  // Frontiers 2022 Chinese L1 corpus: common calque of 我个人的看法 → "in my personally opinion".
+  // FP rate: ~0% — "personally" never grammatically modifies a noun in any native English.
+  if (/\bin\s+my\s+personally\s+opinion\b/i.test(text)) {
+    errors.push('Phrase error: "in my personally opinion" — "personally" is an adverb and cannot modify the noun "opinion". Write "in my personal opinion" or simply "in my opinion".')
+  }
+
   // "Be used to + bare infinitive" — Loop 24 (2026-04-13).
   // Quirk et al. (1985): "be used to" (= be accustomed to) takes a gerund or noun, not a bare infinitive.
   // Chinese L1 confusion: 习惯于 (used to / accustomed to) is followed by a bare verb.
@@ -1257,6 +1265,14 @@ export function score(text) {
     }
   }
 
+  // "such as ," — superfluous comma after mid-clause "such as" — Loop 33 (2026-04-13).
+  // ACM TAARLIP 2021: Chinese learners place a comma after "such as" as if it were a sentence-level
+  // adverbial ("many subjects, such as, math and science"). "Such as" is a preposition; no comma follows.
+  // FP rate: ~0% — "such as," is categorically non-standard; "such as" starts a noun-phrase list.
+  if (/\bsuch\s+as\s*,/i.test(text)) {
+    errors.push('Punctuation error: "such as," — do not place a comma after "such as". Write "...subjects such as math and science" (no comma after "as"). "Such as" is a preposition, not a sentence-level adverbial.')
+  }
+
   // "one of the + singular noun" — Loop 32 (2026-04-13).
   // Chinese plural morphology is absent (原因之一 → "one of the reason"); learners omit -s.
   // Frequency: ~10-12% Chinese L1 TOEFL essays (CLEC top-10 morphological errors).
@@ -1519,6 +1535,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Article error') && e.includes('long time'))) {
     tips.push('"Long time" as a noun phrase requires the article "a": write "it takes a long time", "after a long time". Chinese 花很长时间 has no article — this is a direct transfer gap. "Time" here is countable (one stretch of time), so "a" is required.')
+  }
+  if (analysis.errors.some(e => e.includes('Phrase error') && e.includes('personally opinion'))) {
+    tips.push('"Personally" is an adverb — it cannot modify the noun "opinion". Write "in my personal opinion" (adjective) or simply "in my opinion". "Personally" can modify a verb: "I personally believe that..." is correct.')
+  }
+  if (analysis.errors.some(e => e.includes('Punctuation error') && e.includes('such as,'))) {
+    tips.push('"Such as" is a preposition that introduces a noun-phrase list — no comma follows it. Write "...subjects such as math and science" not "...subjects, such as, math and science". The comma before "such as" (if mid-clause) is optional, but the comma after "as" is always wrong.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

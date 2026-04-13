@@ -161,20 +161,37 @@ export function score(text, taskType = 'general', promptText = '') {
     else if (hits === 1) semiFormalBonus = 0.04
   }
 
+  // Epistemic hedging tier bonus (Loop 8, 2026-04-12).
+  // ETS Score-5 criterion: "precise, idiomatic word choice" — tier-2 hedging (conditional-would,
+  // one-might, passive evidential) distinguishes Score-5 essays from Score-4 in corpus analysis.
+  // Only applies to discussion task; email uses different register conventions.
+  const HEDGING_TIER2 = [
+    /\bi would (argue|suggest|contend|propose|submit)\b/i,
+    /\bone might (argue|consider|suggest|note|observe)\b/i,
+    /\bit (could|might|may|would) be (argued|said|noted|suggested|claimed|observed)\b/i,
+    /\bthis (may|might|could|would) (suggest|indicate|imply|reflect|represent)\b/i,
+    /\bit is worth (noting|considering|mentioning|highlighting)\b/i,
+    /\bto some extent\b/i,
+    /\b(arguably|presumably|evidently)\b/i,
+  ]
+  const tier2Hits      = taskType === 'discussion' ? HEDGING_TIER2.filter(re => re.test(lower)).length : 0
+  const hedgingTierBonus = tier2Hits >= 2 ? 0.10 : tier2Hits === 1 ? 0.06 : 0
+
   // Email tasks: structure (paragraphs + greeting/closing) dominates over academic markers.
   // Academic essays need discourse markers; emails use transactional phrasing not in our list.
   const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
   const value = Math.min(
     1,
-    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus),
+    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus + hedgingTierBonus),
   )
 
-  const zonePart       = zoneBonus       > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`             : ''
-  const ratioPart      = ratioBonus      > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}`     : ''
-  const semiFormalPart = semiFormalBonus > 0 ? `, semiFormal=+${semiFormalBonus.toFixed(2)}`      : ''
+  const zonePart        = zoneBonus        > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`              : ''
+  const ratioPart       = ratioBonus       > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}`      : ''
+  const semiFormalPart  = semiFormalBonus  > 0 ? `, semiFormal=+${semiFormalBonus.toFixed(2)}`       : ''
+  const hedgingTierPart = hedgingTierBonus > 0 ? `, hedgingTier=+${hedgingTierBonus.toFixed(2)}`    : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}`,
   }
 }
 

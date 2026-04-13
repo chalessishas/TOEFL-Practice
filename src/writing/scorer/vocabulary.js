@@ -2,7 +2,11 @@ import { commonWords } from './wordlist.js'
 
 // Core Academic Word List (AWL) — high-frequency academic vocabulary ETS rewards.
 // Based on Coxhead (2000) AWL sublist 1-3 (most frequent academic headwords).
-const AWL_CORE = new Set([
+// AWL_BASIC = sublists 1-3; AWL_ADVANCED = sublists 4-10.
+// Advanced words earn more (0.04/word) than basic (0.015/word) to discriminate Score-4 vs Score-5.
+// Basic cap: 0.12; total cap: 0.20 (Loop 8, 2026-04-12).
+const AWL_BASIC = new Set([
+  // Sublists 1-3 (most frequent academic headwords — Coxhead 2000)
   'analyze','analysis','approach','area','assessment','assume','assumption',
   'authority','available','benefit','concept','consistent','context','contract',
   'contribute','create','data','define','demonstrate','distribute','economic',
@@ -14,12 +18,17 @@ const AWL_CORE = new Set([
   'vary','achieve','acquire','administrate','affect','appropriate','aspect',
   'assist','category','chapter','commission','community','complex','compute',
   'conclude','conduct','consequent','constitute','consume','credit','culture',
-  'design','distinct','element','evaluate','evident','export','final','focus',
+  'design','distinct','element','evaluate','evident','final','focus',
   'impact','implement','imply','initial','integrate','interact','justify',
   'layer','link','locate','maximize','mechanism','minimize','norm','obtain',
   'participate','perceive','positive','potential','previous','primary','promote',
   'propose','range','regulate','relevant','reside','restrict','select','shift',
   'sustain','target','transfer','unique','utilize','valid','volume','welfare',
+])
+
+// AWL sublists 4-10: less-common academic vocabulary — Score-5 signal.
+// Earns 0.04/word vs 0.015/word for basic list (Loop 8, 2026-04-12).
+const AWL_ADVANCED = new Set([
   // Sublist 4
   'access','adequate','annual','apparent','attitude','commitment','communicate',
   'concentrate','contrast','cycle','debate','dimension','domestic','emerge',
@@ -33,7 +42,7 @@ const AWL_CORE = new Set([
   'manipulate','network','portion','prospect','radical','reinforce','restore',
   'revise','scheme','sphere','supplement','temporary','terminate','theme',
   'uniform','visible','voluntary',
-  // Sublist 6+
+  // Sublist 6
   'abstract','accurate','acknowledge','aggregate','allocate','ambiguous',
   'appreciate','arbitrary','bias','clarify','complement','contradict','crucial',
   'decade','deduce','detect','dynamic','eliminate','empirical','equate','exhibit',
@@ -42,25 +51,23 @@ const AWL_CORE = new Set([
   'objective','orient','outcome','persist','phenomenon','proportion','pursue',
   'rational','recover','reveal','specify','substitute','symbol','thesis','topic',
   'transmit','ultimate',
-  // Sublist 7 — Coxhead 2000
+  // Sublist 7
   'adapt','adult','advocate','channel','classic','comprise','confirm','contrary',
   'convert','couple','deny','differentiate','dominant','facilitate','found',
-  'grant','hence','interact','maintain','negate','parameter','project','scope',
-  'secure','theme','tense','trace','trend','voluntary',
-  // Sublist 8 — Coxhead 2000
+  'grant','hence','maintain','negate','parameter','project','scope',
+  'secure','tense','trace','trend',
+  // Sublist 8
   'accommodate','accumulate','ambiguity','analogy','anticipate','approximate',
   'attain','capable','cease','collapse','compile','concurrent','confine',
-  'controversy','duration','enable','equilibrium','exceed','facilitate',
+  'controversy','duration','equilibrium','exceed',
   'implicate','insight','integral','intermediate','manifest','modify','monitor',
-  'negate','offset','overlap','passive','reluctant','selective','successive',
-  // Sublist 9 — Coxhead 2000
+  'offset','overlap','passive','reluctant','selective','successive',
+  // Sublist 9
   'adjacent','albeit','coherent','commence','compatible','discriminate',
   'endorse','evolve','external','guideline','incompatible','inhibit',
-  'input','integrity','preliminary','submit','trace','uniform',
-  // Sublist 10 — Coxhead 2000
-  'adjacent','assemble','bias','comprise','convert','decade','depict',
-  'displace','innovation','input','intermediate','passive','preliminary',
-  'reluctant','successive','supplement','terminate','thesis',
+  'input','integrity','preliminary','submit',
+  // Sublist 10
+  'assemble','depict','displace','innovation',
 ])
 
 // Function words to exclude from content-word analysis
@@ -164,14 +171,21 @@ export function score(text) {
     diversityLabel = `rare word ratio: ${(rareRatio * 100).toFixed(1)}%`
   }
 
-  // AWL bonus: reward use of academic vocabulary (capped at +0.2)
-  const awlCount = contentTokens.filter(w => AWL_CORE.has(w)).length
-  const awlBonus = Math.min(0.2, awlCount * 0.025)
+  // AWL depth tier bonus (Loop 8, 2026-04-12).
+  // Basic (sublists 1-3): 0.015/word, cap 0.12.
+  // Advanced (sublists 4-10): 0.04/word, can push above basic cap up to total 0.20.
+  // Discriminates Score-4 (basic AWL) vs Score-5 ("precise/idiomatic" ETS criterion).
+  const basicCount    = contentTokens.filter(w => AWL_BASIC.has(w)).length
+  const advancedCount = contentTokens.filter(w => AWL_ADVANCED.has(w)).length
+  const basicBonus    = Math.min(0.12, basicCount * 0.015)
+  const advancedBonus = Math.min(0.08, advancedCount * 0.04)
+  const awlBonus      = Math.min(0.20, basicBonus + advancedBonus)
+  const awlCount      = basicCount + advancedCount
 
   const value = Math.min(1, (avgLenScore + diversityScore) / 2 + awlBonus)
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL words: ${awlCount}`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}`,
   }
 }
 

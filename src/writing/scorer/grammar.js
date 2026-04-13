@@ -117,6 +117,23 @@ export function score(text) {
     }
   }
 
+  // Preposition collocation errors — #3 ESL error type (Source L4-2: Cambridge/SSLA 2016)
+  // Only anchor to specific verb+preposition pairs with ~80% precision to keep false positives low.
+  // "discuss about" is included as it's uniquely diagnostic — "discuss" is a transitive verb.
+  const PREP_ERRORS = [
+    { re: /\bdepend\s+of\b/i,       msg: 'Preposition error: "depend of" → "depend on"' },
+    { re: /\binterested\s+on\b/i,   msg: 'Preposition error: "interested on" → "interested in"' },
+    { re: /\bresponsible\s+of\b/i,  msg: 'Preposition error: "responsible of" → "responsible for"' },
+    { re: /\bsuffer\s+of\b/i,       msg: 'Preposition error: "suffer of" → "suffer from"' },
+    { re: /\bconsist\s+on\b/i,      msg: 'Preposition error: "consist on" → "consist of"' },
+    { re: /\bparticipate\s+on\b/i,  msg: 'Preposition error: "participate on" → "participate in"' },
+    { re: /\bagree\s+of\b/i,        msg: 'Preposition error: "agree of" → "agree with" or "agree on"' },
+    { re: /\bdiscuss\s+about\b/i,   msg: 'Preposition error: "discuss about" → "discuss" (takes direct object, no preposition)' },
+  ]
+  PREP_ERRORS.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
   // SVA (subject-verb agreement) — #1 penalized feature for ESL writers in e-rater
   // High-precision patterns: the erroneous form is structurally distinctive enough
   // that false positives are very rare in normal academic prose.
@@ -166,5 +183,9 @@ export function suggest(analysis) {
     tips.push('Check subject-verb agreement: "everyone/nobody/each" takes a singular verb, and uncountable nouns (information, advice, news) always use "is" not "are".')
   if (analysis.errors.some(e => e.includes('article error')))
     tips.push('Use "an" before words that begin with a vowel sound (an important point, an example, an idea).')
+  if (analysis.errors.some(e => e.includes('Preposition error'))) {
+    const prepErrs = analysis.errors.filter(e => e.includes('Preposition error'))
+    tips.push(prepErrs[0].replace('Preposition error: ', ''))
+  }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

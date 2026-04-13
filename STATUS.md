@@ -116,6 +116,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] style.js COMPLEX_PATTERNS — 5→10 模式，修复大写首字母大小写 bug（Despite/Whether 等句首词原本不命中），高级文章 6/10 vs 简单文章 1/10，区分度显著提升 (020b338)
 - [100%] E2E 实测通过 — Discussion 4.3/5、Email 4.9/5，7 维 breakdown 正常，On-Topic 维度展示正确
 - [100%] text_insertion 题型标注 "Pre-2026" — Research Loop 3 确认该题型已于 2026-01-21 从 TOEFL 移除，typeLabels 添加 ✦ Pre-2026 提示
+- [100%] grammar.js 中文 L1 迁移错误检测 — 双连词错误（although...but / because...so，中文虽然/但是/因为/所以配对迁移）+ 系动词脱落（he/she very ADJ，中文谓语形容词无需 be 动词）；12/12 测试通过，0 误报 (d46b0c0)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

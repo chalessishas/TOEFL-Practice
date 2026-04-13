@@ -122,6 +122,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] grammar.js 数量词+不可数名词错误 — "many research/several evidence/numerous information" 等 11 个 TOEFL 高频不可数名词；负向前瞻排除定语用法（"several research papers" 不标）；与 QUANT_BARE_RE 合称「量词三件套」(e21801c)
 - [100%] organization.js 2026 peer engagement 扩展 — 新增 "as [Name] noted/mentioned/argued"（引语归属）+ "to expand on/expanding on/I would add to/responding to"（展开建构）；Score 4→5 区分度提升 (4752c8a)
 - [100%] development.js 隐式例证标记 — "take the case/consider the fact/far more than/this is evident" 等 11 条；Sample 5 分范文 dev 0.648→0.71；高分段不再因不写"for example"而被低估 (f605e83)
+- [100%] 5 分范文系统校准 — 批量测试 10 条 discussion sample responses：9/10 达到 4.0+/5；organization 补入 rather than/not only 等；development REASON_MARKERS 补入 "but"（argumentative contrast signal）；Sample 7: 3.4→4.0，Sample 9: 3.8→3.9 (94988c3)
+- [100%] Email 范文校准 — 批量测试 10 条 email sample responses：Sample 1（3.7）和 Sample 4（3.9）因缺 Dear/Best regards 被 taskScore 惩罚；修复：在范文数据加入问候/结尾语；10/10 达到 4.0+/5（范围 4.1–4.6）(3e947cf)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

@@ -5,6 +5,12 @@ const CASUAL_TERMS = [
   'kinda','gonna','wanna','gotta','dunno','cuz','cause','cmon',
   'lol','btw','omg','stuff','thing','things','you know',
   'pretty much','sort of','kind of',
+  // Contractions — inappropriate in formal TOEFL writing (all tasks are formal/semi-formal)
+  // Using escaped apostrophe so regex matches the literal character
+  "it's","isn't","aren't","wasn't","weren't","can't","couldn't",
+  "shouldn't","wouldn't","don't","doesn't","didn't","won't","haven't",
+  "hasn't","hadn't","i'm","i've","i'd","i'll","you're","they're",
+  "we're","that's","there's","what's",
 ]
 // Pre-build word-boundary regexes for single-word terms to avoid substring false positives
 const CASUAL_TERM_REGEXES = CASUAL_TERMS.map(t => ({
@@ -107,6 +113,6 @@ export function suggest(analysis) {
   if (synMatch && parseInt(synMatch[1]) / parseInt(synMatch[2]) < 0.5)
     tips.push('Use more complex sentence structures: relative clauses (who/which), conditionals (if/unless), or passive constructions to add syntactic variety.')
   if (analysis.details.includes('informal term'))
-    tips.push('Avoid informal language (e.g., "kinda", "gonna", "stuff") — TOEFL writing requires formal academic register.')
+    tips.push('Write in formal register: avoid contractions (it\'s → it is, can\'t → cannot) and informal words (kinda, gonna, stuff) — TOEFL writing is always formal.')
   return tips.length > 0 ? tips : ['Improve your writing style by using varied vocabulary and sentence structures.']
 }

@@ -201,10 +201,21 @@ export function score(text) {
   const phrasalHits = PHRASAL_VERBS.filter(re => re.test(text)).length
   const phrasalBonus = phrasalHits >= 3 ? 0.05 : phrasalHits >= 2 ? 0.03 : 0
 
-  const value = Math.min(1, (avgLenScore + diversityScore) / 2 + awlBonus + phrasalBonus)
+  // Academic bigrams (Loop 10, 2026-04-12) — deduplicated against MARKER_CATEGORIES.
+  // 7 bigrams not captured by organization.js or phrasal verbs — zero double-counting risk.
+  // Research Loop 23:04: confirms these are unique to vocabulary dimension.
+  const ACADEMIC_BIGRAMS = [
+    'in terms of', 'with regard to', 'in light of', 'in line with',
+    'play a role', 'give rise to', 'take into consideration',
+  ]
+  const lower = text.toLowerCase()
+  const bigramHits = ACADEMIC_BIGRAMS.filter(b => lower.includes(b)).length
+  const bigramBonus = bigramHits >= 3 ? 0.03 : bigramHits >= 2 ? 0.02 : bigramHits >= 1 ? 0.01 : 0
+
+  const value = Math.min(1, (avgLenScore + diversityScore) / 2 + awlBonus + phrasalBonus + bigramBonus)
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}${bigramHits > 0 ? `, acadBigrams: ${bigramHits}` : ''}`,
   }
 }
 

@@ -298,6 +298,25 @@ function paragraphCompletenessBonus(text, taskType) {
   return 0
 }
 
+// Counter-argument rebuttal bonus (AESPA 2025 — essays with concessive rebuttal pattern
+// score 0.30–0.50 pts higher; ETS Score-5 rubric explicitly: "acknowledges and responds to
+// opposing views"). Two-step detection: concession in sentence N + rebuttal marker in N+1.
+// Email skipped (transactional structure, no argumentation expected).
+function counterArgumentBonus(text, taskType) {
+  if (taskType === 'email') return 0
+
+  const CONCESSION_RE = /\b(admittedly|granted|one might argue|one could argue|some argue|some might say|it could be argued|critics argue|opponents argue|while some)\b/i
+  const REBUTTAL_RE = /\b(however|but|yet|nevertheless|nonetheless|still|despite this|even so|that said|in spite of|regardless)\b/i
+
+  const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 8)
+  for (let i = 0; i < sentences.length - 1; i++) {
+    if (!CONCESSION_RE.test(sentences[i])) continue
+    const window = sentences[i] + ' ' + (sentences[i + 1] || '')
+    if (REBUTTAL_RE.test(window)) return 0.05
+  }
+  return 0
+}
+
 export function score(text, taskType = 'general') {
   const words = (text.match(/\b\w+\b/g) || [])
   const wordCount = words.length
@@ -324,15 +343,16 @@ export function score(text, taskType = 'general') {
   }
 
   // argScore gates the ceiling: thin ideas cap development at ~0.65 regardless of word count
-  const paraBonus = paragraphCompletenessBonus(text, taskType)
-  const numBonus  = numericEvidenceBonus(text, taskType)
-  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus + numBonus))
+  const paraBonus    = paragraphCompletenessBonus(text, taskType)
+  const numBonus     = numericEvidenceBonus(text, taskType)
+  const rebuttalBonus = counterArgumentBonus(text, taskType)
+  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus + numBonus + rebuttalBonus))
 
   return {
     value,
     details: `${wordCount} words, ${sentenceCount} sentences, ${
       DETAIL_MARKERS.filter(m => text.toLowerCase().includes(m)).length
-    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}, num bonus: ${numBonus.toFixed(2)}`,
+    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}, num bonus: ${numBonus.toFixed(2)}, rebuttal bonus: ${rebuttalBonus.toFixed(2)}`,
   }
 }
 

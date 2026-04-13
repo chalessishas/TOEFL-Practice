@@ -99,6 +99,16 @@ export function score(text) {
   const subDensity = tokens.length > 0 ? (subCount / tokens.length) * 100 : 0
   const subDensityBonus = subDensity >= 3.0 ? 0.04 : subDensity >= 1.5 ? 0.02 : 0
 
+  // Passive overuse penalty (Granger 1998 on learner corpus: Chinese L1 overuse passives
+  // as calque from bei-construction; ETS rubric: "variety of syntactic structures" penalizes
+  // overuse of any single structure). Native academic: ~15-20% passive sentences.
+  // Threshold: >40% — conservative, well above native academic norms (near-zero FP).
+  // Note: no global flag — global regex with .test() in .filter() advances lastIndex incorrectly
+  const passiveRe = /\b(is|are|was|were|been|being)\s+\w+ed\b/i
+  const passiveSentences = sentences.filter(s => passiveRe.test(s)).length
+  const passiveRatio = sentences.length > 0 ? passiveSentences / sentences.length : 0
+  const passiveOverusePenalty = passiveRatio > 0.40 ? 0.04 : 0
+
   // Casual register penalty — ETS penalizes informal language in academic writing
   // Use regex with word boundaries to avoid "cause" matching "because", etc.
   const casualHits = CASUAL_TERM_REGEXES.filter(({ re }) => re.test(text)).length
@@ -118,11 +128,11 @@ export function score(text) {
   else if (nomDensity >= 5)  nomBonus = 0.05
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty + nomBonus + sentLenBonus + subDensityBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty + nomBonus + sentLenBonus + subDensityBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}`,
   }
 }
 

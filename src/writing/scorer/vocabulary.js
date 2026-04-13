@@ -201,6 +201,9 @@ export function score(text) {
   // ETS Score-5 criterion: "precise, idiomatic word choice." Research (Nesselhauf 2003):
   // proficient L2 writers use phrasal verbs naturally; Chinese L1 writers often avoid them.
   // Only 10 high-confidence patterns to keep false-positive rate near zero.
+  // Extended (2026-04-13): +4 high-confidence phrasal verbs (Nesselhauf 2003 confirmed).
+  // "come up with" (devise), "make up for" (compensate), "draw on" (utilize experience/resources),
+  // "give way to" (be replaced by) — all productive in TOEFL argumentation; Chinese L1 writers avoid them.
   const PHRASAL_VERBS = [
     /\bpoint(s|ed|ing)? out\b/i,
     /\baccount(s|ed|ing)? for\b/i,
@@ -212,6 +215,10 @@ export function score(text) {
     /\bled? to\b|\blead(s|ing)? to\b/i,
     /\bbuild(s|t|ing)? (on|upon)\b|\bbuilt (on|upon)\b/i,
     /\bset(ting)? aside\b|\bsets aside\b/i,
+    /\bcome(s|ing)? up with\b|\bcame up with\b/i,
+    /\bmake(s|ing)? up for\b|\bmade up for\b/i,
+    /\bdraw(s|ing)? on\b|\bdrew on\b/i,
+    /\bgive(s|ing)? way to\b|\bgave way to\b/i,
   ]
   const phrasalHits = PHRASAL_VERBS.filter(re => re.test(text)).length
   const phrasalBonus = phrasalHits >= 3 ? 0.05 : phrasalHits >= 2 ? 0.03 : 0
@@ -219,9 +226,12 @@ export function score(text) {
   // Academic bigrams (Loop 10, 2026-04-12) — deduplicated against MARKER_CATEGORIES.
   // 7 bigrams not captured by organization.js or phrasal verbs — zero double-counting risk.
   // Research Loop 23:04: confirms these are unique to vocabulary dimension.
+  // Extended (2026-04-13): +4 bigrams confirmed not in organization.js MARKER_CATEGORIES.
+  // These are formal academic prepositional phrases that Signal-5 essays use naturally.
   const ACADEMIC_BIGRAMS = [
     'in terms of', 'with regard to', 'in light of', 'in line with',
     'play a role', 'give rise to', 'take into consideration',
+    'as a result of', 'in the context of', 'with respect to', 'on the basis of',
   ]
   const lower = text.toLowerCase()
   const bigramHits = ACADEMIC_BIGRAMS.filter(b => lower.includes(b)).length
@@ -233,6 +243,10 @@ export function score(text) {
   // Wei & Lei (2011, SAGE); Li & Lei (2025, SAGE): Chinese L1 writers use 40% more lexical bundles
   // than proficient native writers, overusing exactly these 8 frames. Native Score-5 writers rarely
   // use any of them more than once. Penalty triggers only at ≥3 single-bundle or ≥5 total (FP < 0.5%).
+  // Extended (2026-04-13): added high-frequency TOEFL clichés from Chinese L1 writers.
+  // None overlap with organization.js rewarded markers (checked against MARKER_CATEGORIES).
+  // "in today's society/world" and "as we all know" are flagged in ETS rater training as low-band signals.
+  // "in a word" is a 总而言之 calque — non-academic in English. "needless to say" is informal hedging.
   const FORMULAIC_BUNDLES = [
     /\bit is important to\b/gi,
     /\bit is necessary to\b/gi,
@@ -242,6 +256,12 @@ export function score(text) {
     /\bit can be seen that\b/gi,
     /\bit is obvious that\b/gi,
     /\bit goes without saying\b/gi,
+    /\bin today's society\b/gi,
+    /\bin today's world\b/gi,
+    /\bas we all know\b/gi,
+    /\bwith the development of\b/gi,
+    /\bneedless to say\b/gi,
+    /\bin a word[,\s]/gi,
   ]
   const bundleHits = FORMULAIC_BUNDLES.map(re => (text.match(re) || []).length)
   const maxSingleBundle = Math.max(...bundleHits)

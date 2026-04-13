@@ -1357,6 +1357,41 @@ export function score(text) {
     errors.push(`Gerund error: "devote to ${devoteMatch[1]}" → "devote to ${devoteMatch[1]}ing". The "to" in "devote to" is a preposition — it requires a gerund, not a bare verb: "devote to improving", "devote to solving". (Chinese 致力于 + bare verb transfers directly.)`)
   }
 
+  // Adjective + wrong preposition cluster — Loop 36 (2026-04-13).
+  // CLEC / City University HK ELSS: Chinese L1 learners over-apply "to" for adjectives that
+  // require "of/on" (capable of, aware of, proud of) — Chinese 有能力做/意识到/以...为荣 all
+  // use bare-verb or zero-preposition structures that transfer as "to + verb/noun".
+  // FP rate: ~0% for each — no native English uses "capable to", "aware to", or "proud on".
+
+  // "capable to + verb" → "capable of + gerund" (~3-5% CLEC, Xia 2012)
+  if (/\bcapable\s+to\b/i.test(text)) {
+    errors.push('Preposition error: "capable to" → "capable of". The adjective "capable" always takes "of" + gerund: "capable of solving", "capable of handling". Chinese 有能力做 transfers directly as "capable to do" — but English requires "capable of doing".')
+  }
+
+  // "aware to" → "aware of" (~2-4% CLEC)
+  if (/\baware\s+to\b/i.test(text)) {
+    errors.push('Preposition error: "aware to" → "aware of". The adjective "aware" always takes "of": "aware of the risks", "aware of the problem". Write "be aware of" not "be aware to".')
+  }
+
+  // "proud on" → "proud of" (~2-3% CLEC)
+  if (/\bproud\s+on\b/i.test(text)) {
+    errors.push('Preposition error: "proud on" → "proud of". The adjective "proud" always takes "of": "proud of their achievements", "proud of herself". Chinese 为...感到骄傲 may transfer as "proud on" — but English always uses "proud of".')
+  }
+
+  // "prevent [person] to + verb" → "prevent [person] from + gerund" (~3-5% CLEC)
+  // Guard: only fire when a human referent (pronoun or person noun) precedes "to".
+  // "prevent him to drive" → error; "prevent access to harmful" → no match (access ≠ person).
+  const PREVENT_PERSON_RE = /\bprevent(?:s|ed|ing)?\s+(?:him|her|them|us|you|me|it|people|students|children|citizens|individuals|others|anyone|someone|everyone)\s+to\s+(?!the\b|a\b|an\b)([a-z]+)\b(?!ing\b)/i
+  const preventMatch = text.match(PREVENT_PERSON_RE)
+  if (preventMatch && !preventMatch[1].endsWith('ing')) {
+    errors.push(`Preposition error: "prevent ... to ${preventMatch[1]}" → "prevent ... from ${preventMatch[1]}ing". "Prevent" takes "from" + gerund: "prevent people from driving", "prevent students from cheating". Chinese 阻止...做 transfers as "prevent ... to do".`)
+  }
+
+  // "congratulate [obj] to" → "congratulate [obj] on" (~1-2% CLEC)
+  if (/\bcongratulat(?:e|es|ed|ing)\s+\w+\s+to\b/i.test(text)) {
+    errors.push('Preposition error: "congratulate [person] to" → "congratulate [person] on". Write "congratulate her on winning", "congratulate them on their success". Chinese 祝贺某人做某事 transfers as "congratulate ... to" — but English always uses "on".')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1595,6 +1630,21 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('devote to'))) {
     tips.push('"Devote to" requires a gerund (-ing) because "to" here is a preposition, not an infinitive marker: write "devote to improving", "devote to solving", "devoted to helping". Compare: "used to doing" / "look forward to seeing" — all follow the same pattern.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('capable to'))) {
+    tips.push('"Capable" takes "of" + gerund — not "to": write "capable of solving", "capable of handling the situation". Chinese 有能力做 transfers as "capable to do" — but English requires "capable of doing".')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('aware to'))) {
+    tips.push('"Aware" takes "of" — not "to": write "aware of the risks", "aware of the consequences". "Be aware of X" is the fixed collocation. "To" is a common substitution error from Chinese 意识到.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('proud on'))) {
+    tips.push('"Proud" always takes "of" — not "on": write "proud of their work", "proud of her achievements". The collocation is "be proud of [noun/gerund]". Chinese 以...为荣 may lead to "proud on" — always use "proud of" in English.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('prevent'))) {
+    tips.push('"Prevent" takes "from" + gerund: write "prevent people from driving", "prevent students from cheating", "prevent the problem from worsening". Chinese 阻止做 transfers as "prevent to do" — but English always uses "prevent from doing".')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('congratulate'))) {
+    tips.push('"Congratulate" takes "on" — not "to": write "congratulate her on winning", "congratulate the team on their success". The structure is "congratulate [person] on [achievement/gerund]".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

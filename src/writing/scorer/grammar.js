@@ -267,6 +267,32 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   })
 
+  // Topic-comment / resumptive pronoun (Chinese L1 Rank 5).
+  // Chinese is topic-prominent: topic is fronted and re-referenced with a pronoun.
+  // Error form: "This problem, it is serious." / "The environment, it needs protection."
+  // Guard tier 1: exclude single-word discourse/temporal adverbs ("Yesterday, it rained").
+  // Guard tier 2: exclude prepositional phrase fronting ("In Paris, it is cold.").
+  const TOPIC_COMMENT_EXCLUSIONS = new Set([
+    'yesterday','today','tomorrow','recently','currently','previously','ultimately',
+    'finally','initially','generally','typically','ideally','interestingly',
+    'importantly','naturally','certainly','clearly','obviously','apparently',
+    'frankly','honestly','admittedly','overall','indeed','actually','conversely',
+    'alternatively','similarly','notably','unfortunately','fortunately',
+    'surprisingly','consequently','hence','thus','therefore','however','moreover',
+    'furthermore','additionally','meanwhile','nevertheless','otherwise','instead',
+    'historically','traditionally','economically','politically','socially',
+  ])
+  const TOPIC_COMMENT_RE = /\b(\w+(?:\s+\w+){0,3}),\s+(it|he|she|they)\s+(is|are|was|were|has|have|needs|requires|should|must|can|will|would)\b/gi
+  let tcMatch
+  while ((tcMatch = TOPIC_COMMENT_RE.exec(text)) !== null) {
+    const topic = tcMatch[1].trim().toLowerCase()
+    const firstWord = topic.split(/\s+/)[0]
+    if (TOPIC_COMMENT_EXCLUSIONS.has(firstWord)) continue
+    // Skip prepositional/subordinate clause fronting (correct English construction)
+    if (/^(in|at|on|by|for|as|when|if|although|since|after|before|during|despite|without|regarding|concerning|given|according|based|with|from|through|across|among|between|under|over|along|around|beyond|within)\b/i.test(topic)) continue
+    errors.push(`Topic-comment error: "${tcMatch[0].trim()}" — avoid resumptive pronouns; state the subject once: use "This problem needs attention" not "This problem, it needs"`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -296,6 +322,8 @@ export function suggest(analysis) {
     tips.push('After "have/has/had been", use the past participle: "has been finished" not "has been finish", "had been completed" not "had been complete".')
   if (analysis.errors.some(e => e.includes('Stative verb error')))
     tips.push('Stative verbs (know, want, believe, understand, prefer) cannot be used in progressive form — use simple tense: "I know" not "I am knowing", "she wants" not "she is wanting".')
+  if (analysis.errors.some(e => e.includes('Topic-comment error')))
+    tips.push('State the subject only once: write "This issue needs attention" not "This issue, it needs attention". Repeating the topic as a pronoun is an error in English.')
   if (analysis.errors.some(e => e.includes('article error')))
     tips.push('Use "an" before words that begin with a vowel sound (an important point, an example, an idea).')
   if (analysis.errors.some(e => e.includes('Preposition error'))) {

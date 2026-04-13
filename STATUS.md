@@ -117,6 +117,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] E2E 实测通过 — Discussion 4.3/5、Email 4.9/5，7 维 breakdown 正常，On-Topic 维度展示正确
 - [100%] text_insertion 题型标注 "Pre-2026" — Research Loop 3 确认该题型已于 2026-01-21 从 TOEFL 移除，typeLabels 添加 ✦ Pre-2026 提示
 - [100%] grammar.js 中文 L1 迁移错误检测 — 双连词错误（although...but / because...so，中文虽然/但是/因为/所以配对迁移）+ 系动词脱落（he/she very ADJ，中文谓语形容词无需 be 动词）；12/12 测试通过，0 误报 (d46b0c0)
+- [100%] grammar.js 量词+单数名词复数脱落 — 17 条常用可数名词白名单（"many student"→错，"several factor"→错），中文无复数词缀迁移；含正确复数变形（approach→approaches, strategy→strategies）；6/6 错误命中，0 误报 (6a14a93)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

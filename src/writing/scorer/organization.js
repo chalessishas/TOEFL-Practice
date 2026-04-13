@@ -167,8 +167,9 @@ export function suggest(analysis) {
   if (analysis.details.includes('1 paragraph'))
     tips.push('Divide your response into multiple paragraphs for clarity.')
 
-  const lowTaskScore = analysis.details.includes('taskScore=0.00') || analysis.details.includes('taskScore=0.10') || analysis.details.includes('taskScore=0.30')
-  if (lowTaskScore) {
+  const taskScoreMatch = analysis.details.match(/taskScore=([\d.]+)/)
+  const taskScoreVal = taskScoreMatch ? parseFloat(taskScoreMatch[1]) : 1.0
+  if (taskScoreVal < 0.75) {
     if (taskType === 'discussion')
       tips.push('Explicitly reference a classmate\'s idea — mention what they said and build on or contrast it.')
     else if (taskType === 'email')

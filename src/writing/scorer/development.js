@@ -302,5 +302,13 @@ export function suggest(analysis) {
   const sentMatch = analysis.details.match(/(\d+) sentences/)
   if (sentMatch && parseInt(sentMatch[1]) < 5)
     tips.push('Add more sentences to fully develop each idea.')
+  // P2: per-paragraph completeness — tip if bonus is 0 and essay is multi-sentence
+  const paraMatch = analysis.details.match(/para bonus: ([\d.]+)/)
+  if (paraMatch && parseFloat(paraMatch[1]) === 0 && sentMatch && parseInt(sentMatch[1]) >= 5)
+    tips.push('Distribute your evidence across all body paragraphs — each paragraph should include at least one supporting example, reason, or piece of data.')
+  // P4: numeric evidence — tip if no bonus and essay is substantial
+  const numMatch = analysis.details.match(/num bonus: ([\d.]+)/)
+  if (numMatch && parseFloat(numMatch[1]) === 0 && wordMatch && parseInt(wordMatch[1]) >= 80)
+    tips.push('Strengthen your arguments with specific data: statistics, percentages, years, or named studies add credibility and raise your development score.')
   return tips.length > 0 ? tips : ['Develop your ideas further with concrete examples and evidence.']
 }

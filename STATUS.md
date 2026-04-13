@@ -143,6 +143,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] grammar.js 时态不一致检测 — 背景 Agent 实现（896621d）；保守阈值 0.35 + 时态锚词排除（in 20XX/last year/ago 等）；tensTotal ≥ 8 触发；FP=0/4 验证；10/10 校准维持
 - [100%] style.js 从属连词密度奖励 — ≥3/100w → +0.04，≥1.5/100w → +0.02；COMPLEX_PATTERNS 只检测存在性，density 补充深度区分；10/10 校准维持 (896621d)
 - [100%] Loop 10 — 4 个研究驱动改进 (b950c2e) — ① development.js 反驳加分（concession+rebuttal 双触发 +0.05）② grammar.js 动词-名词搭配错误 8 个中文 L1 高精度模式 ③ vocabulary.js 学术双词组 7 个去重短语 ④ style.js 被动语态过度使用惩罚（>40% -0.04）；校准：discussion ≥4.0 ✓，email ≥4.0 ✓，弱文 <3.0 ✓
+- [100%] vocabulary.js 稀有词比率修复 (6d12a72 + e2e55c2) — ① type-based 而非 token-based（"technology"×3 = 1 类型而非 3）② 内容词 <8 个时用线性斜坡替代比率（Score-1 三词文 0.63→0.16，避免 1/1=100% 误报）
+- [100%] development.js gaming 漏洞修复 (fd8bfd9 + cf3a0cf) — ① argMinWords 任务特定化（discussion=80 取代统一的 120）② detailCount=0 讨论文 base 从 1.0→0.65（连接词堆砌但无具体例子不得满分）③ circularReasoningPenalty 门控与 argMinWords 对齐；gaming essay 4.5→4.3；10/10 校准维持
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

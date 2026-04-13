@@ -433,6 +433,31 @@ export function score(text) {
     errors.push('Resumptive pronoun: in "the teacher who she teaches", the pronoun "she" is redundant — use "the teacher who teaches"')
   }
 
+  // Uncountable noun + indefinite article — Celce-Murcia & Larsen-Freeman 1999: category 4
+  // Chinese L1 article error (after a/an phonology, the/zero generic, the/zero specific).
+  // Swan & Smith 2001: appears in >20% of Chinese L2 essays at B2 level.
+  // Orthogonal to phonological a/an check — "an advice" passes phonology but fails countability.
+  // Negative lookahead excludes compound modifiers: "an information center" / "a research team".
+  const UNCOUNTABLE_ART_RE = /\b(a|an)\s+(information|advice|knowledge|feedback|equipment|furniture|progress|homework|vocabulary|luggage|baggage|traffic|research)\b(?!\s+(?:center|office|system|session|sheet|desk|technology|management|room|department|team|class|course|area|page|paper|work|study|lab))/i
+  if (UNCOUNTABLE_ART_RE.test(text)) {
+    const m = text.match(UNCOUNTABLE_ART_RE)
+    errors.push(`Uncountable noun error: "${m[0]}" — "${m[2]}" is uncountable and cannot take "a/an". Write "some ${m[2]}" or just "${m[2]}"`)
+  }
+
+  // Gerund vs infinitive after specific verbs — Laufer & Waldman (2011): Chinese EFL writers
+  // show ~18% error rate; they default to "to + verb" after all verbs (Chinese 去 pattern).
+  // These 8 verbs take gerunds only — "avoid to / enjoy to / finish to" are always errors.
+  const GERUND_VERB_RE = /\b(avoid|enjoy|finish|keep|mind|practice|quit|risk)\s+to\s+([a-z]+)\b/i
+  if (GERUND_VERB_RE.test(text)) {
+    const m = text.match(GERUND_VERB_RE)
+    errors.push(`Gerund error: "${m[0]}" — "${m[1]}" takes a gerund (-ing), not an infinitive. Write "${m[1]} ${m[2]}ing"`)
+  }
+  // "suggest to do X" — "suggest" takes gerund or that-clause, never bare infinitive
+  if (/\bsuggest(?:s|ed|ing)?\s+to\s+[a-z]+\b/i.test(text) &&
+      !/\bsuggest(?:s|ed|ing)?\s+to\s+(?:the|a|an|my|his|her|our|their|this|that)\b/i.test(text)) {
+    errors.push('Gerund error: "suggest to do" → "suggest doing" or "suggest that someone do"')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length

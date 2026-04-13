@@ -137,10 +137,14 @@ function semanticSpecificityBonus(responseText, promptKeywords) {
   ]
   let hits = 0
   for (const kw of promptKeywords.slice(0, 8)) {
-    const idx = tokens.indexOf(kw)
-    if (idx === -1) continue
-    const window = tokens.slice(Math.max(0, idx - 15), Math.min(tokens.length, idx + 15))
-    if (EVIDENCE_MARKERS.some(em => window.includes(em))) hits++
+    // Check ALL occurrences (not just first) — body-paragraph evidence counts even if
+    // the keyword's first mention is in the introduction without nearby evidence markers.
+    const anyHit = tokens.some((t, i) => {
+      if (t !== kw) return false
+      const window = tokens.slice(Math.max(0, i - 15), Math.min(tokens.length, i + 15))
+      return EVIDENCE_MARKERS.some(em => window.includes(em))
+    })
+    if (anyHit) hits++
   }
   return hits >= 3 ? 0.06 : hits >= 1 ? 0.03 : 0
 }

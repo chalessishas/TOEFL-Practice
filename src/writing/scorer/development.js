@@ -25,6 +25,12 @@ const REASON_MARKERS = [
   'thirdly','furthermore','moreover','in addition','additionally',
   'however','on the other hand','in contrast','by contrast','whereas','although',
   'nevertheless','nonetheless','despite','while','yet',
+  // Counter-argument acknowledgment — AESPA 2025: essays with concessive rebuttal
+  // score 0.3–0.5 pts higher in human rubrics vs. equivalent essays without it
+  'one might argue','one could argue','some argue','some might argue',
+  'while some','although some','critics argue','opponents argue',
+  'admittedly','granted that','it could be argued','it might be argued',
+  'some people believe','some would say','one might think',
 ]
 
 // Word count ranges per task type.

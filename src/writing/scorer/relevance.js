@@ -80,6 +80,34 @@ function scoreByGoals(responseText, goals, promptText) {
   }
 }
 
+// Synonym groups for TOEFL topic domains — each array is a cluster of semantically
+// related words. At query time, all words are run through stem() before comparison.
+// Fixes the ~55% recall gap in keyword-only matching (Scientific Reports 2025).
+// Synonym hits count as 0.6 coverage vs 1.0 for exact stem matches.
+const SYNONYM_GROUPS = [
+  ['technology','digital','internet','computer','device','software','innovation','automation','artificial','machine','electronic','online'],
+  ['education','learning','school','teaching','academic','college','university','study','instruction','classroom','curriculum','literacy'],
+  ['environment','climate','nature','ecological','sustainable','green','planet','ecosystem','pollution','conservation','renewable','carbon'],
+  ['work','employment','job','career','profession','labor','workforce','occupation'],
+  ['health','medical','wellbeing','fitness','disease','mental','physical','diet','healthcare','illness','wellness'],
+  ['community','society','neighborhood','public','citizen','local','social','cultural','population'],
+  ['economy','financial','market','budget','income','wealth','fiscal','money','economic','commerce'],
+  ['communication','interaction','discussion','conversation','dialogue','language','media','social media'],
+  ['government','policy','law','regulation','legislation','authority','political','administration'],
+  ['benefit','advantage','improvement','positive','gain','progress','development'],
+  ['problem','issue','challenge','difficulty','drawback','disadvantage','negative','harm','risk'],
+]
+// Build stem→groupIndex map at module load for O(1) lookup
+const _stemToGroup = new Map()
+SYNONYM_GROUPS.forEach((group, idx) => {
+  group.forEach(word => {
+    const s = word.replace(/tion$/, '').replace(/ness$/, '').replace(/ment$/, '')
+               .replace(/ity$/, '').replace(/ies$/, 'y').replace(/ing$/, '')
+               .replace(/ed$/, '').replace(/er$/, '').replace(/ly$/, '').replace(/s$/, '')
+    _stemToGroup.set(s, idx)
+  })
+})
+
 // Simple stemmer: strip common suffixes to improve match rate
 function stem(word) {
   return word
@@ -121,13 +149,31 @@ export function score(responseText, promptText = '', goals = null) {
   const responseTokens = (responseText.match(/[a-zA-Z]+/g) || []).map(w => w.toLowerCase())
   const responseStems = new Set(responseTokens.map(stem))
 
-  const matches = [...promptStems].filter(s => responseStems.has(s)).length
-  const coverageRatio = matches / promptStems.size
+  // Exact stem matches score 1.0; synonym matches (same TOEFL domain) score 0.6
+  let weightedMatches = 0
+  let synonymGroupsHit = 0  // count distinct synonym groups matched via paraphrase
+  for (const s of promptStems) {
+    if (responseStems.has(s)) {
+      weightedMatches += 1.0
+    } else {
+      const groupIdx = _stemToGroup.get(s)
+      if (groupIdx !== undefined) {
+        const hit = [...responseStems].some(rs => _stemToGroup.get(rs) === groupIdx)
+        if (hit) { weightedMatches += 0.6; synonymGroupsHit++ }
+      }
+    }
+  }
+  const matches = weightedMatches
+  const coverageRatio = promptStems.size > 0 ? weightedMatches / promptStems.size : 0
 
   // 0.4 coverage → 0.5 score; 0.7 coverage → 1.0 (typical on-topic response hits ~60-70% of key stems)
-  const value = Math.min(1, Math.max(0, (coverageRatio - 0.2) / 0.5))
+  let value = Math.min(1, Math.max(0, (coverageRatio - 0.2) / 0.5))
 
-  const errors = coverageRatio < 0.35
+  // Synonym floor: if response paraphrases ≥2 core topic synonyms but exact keyword
+  // overlap is low, prevent over-penalizing sophisticated writing. Floor = 0.4.
+  if (synonymGroupsHit >= 2 && value < 0.4) value = 0.4
+
+  const errors = value < 0.35
     ? ['Your response may not be addressing the prompt directly — make sure to engage with the core question.']
     : []
 

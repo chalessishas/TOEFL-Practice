@@ -555,6 +555,10 @@ export function score(text) {
     { re: /\bfeedbacks\b/i,    msg: 'Plural error: "feedbacks" — "feedback" is uncountable; write "pieces of feedback" or "feedback"' },
     { re: /\btraffics\b/i,     msg: 'Plural error: "traffics" — "traffic" is uncountable; write "traffic conditions" or "traffic"' },
     { re: /\bluggages\b/i,     msg: 'Plural error: "luggages" — "luggage" is uncountable; write "bags/suitcases" or "luggage"' },
+    // Academic domain uncountables — Loop 26 (Liu & Jiang 2020 System 85: top Chinese L1 noun errors)
+    { re: /\bevidences\b/i,    msg: 'Plural error: "evidences" — "evidence" is uncountable as a mass noun; write "pieces of evidence" or "evidence" (or use "data/findings/results" if you mean multiple items)' },
+    { re: /\bprogresses\b/i,   msg: 'Plural error: "progresses" (noun) — "progress" is uncountable; write "improvements" or "progress" (no plural)' },
+    { re: /\bweathers\b/i,     msg: 'Plural error: "weathers" — "weather" is uncountable; write "weather conditions" or "weather"' },
   ]
   PLURAL_UNCOUNTABLE.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)

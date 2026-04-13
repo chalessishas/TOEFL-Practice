@@ -147,6 +147,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] development.js gaming 漏洞修复 (fd8bfd9 + cf3a0cf) — ① argMinWords 任务特定化（discussion=80 取代统一的 120）② detailCount=0 讨论文 base 从 1.0→0.65（连接词堆砌但无具体例子不得满分）③ circularReasoningPenalty 门控与 argMinWords 对齐；gaming essay 4.5→4.3；10/10 校准维持
 - [100%] Loop 11 P2 — grammar.js 所有格+冠词冲突检测 (8dd5e58) — 所有格（my/his/her/our/their/its）与冠词（a/an/the）同为限定词，英语 NP 只允许一个；FP≈0%；Zeng & Takatsuka 2009 中文 L1 四号错误类型
 - [100%] Loop 11 P1 — relevance.js 证据邻近奖励 (30b32cf) — semanticSpecificityBonus()：证据标记词（research/data/percent/shows 等）出现在提示词关键词 15 词窗口内 → +0.03（1次命中）/ +0.06（3次+）；Kyle & Crossley 2015 邻近相关 r=+0.34；10/10 校准维持，gaps 3→4:+0.70 / 4→5:+0.50
+- [100%] Loop 11 P3+P4 — grammar.js 同音字混淆 + style.js 邮件正式语域奖励 (8dd5e58) — 4 个同音字模式（your/you're, its/it's, there/their, then/than，均需上下文确认，FP <1%）；邮件 formal opener+closing → +0.04；10/10 校准维持
+- [100%] Loop 11 质量修复 — wordlist.js 扩展 120+ TOEFL 主题词 (b658084) — 教育/社会/经济/技术/环境/健康 6 大主题域词汇不再被误标为"稀有词"；calibration 中性，无评分改变
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

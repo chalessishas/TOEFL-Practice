@@ -986,6 +986,15 @@ export function score(text) {
     errors.push(`Clause error: "the reason is because" — in formal writing, use "the reason is that": "The reason is that technology has changed rapidly" not "The reason is because technology has changed"`)
   }
 
+  // "As far as I/we concern" — Loop 28 (2026-04-13).
+  // Swan & Smith (2001): frozen idiom mislearning — omits "am/are" from the fixed phrase.
+  // Correct: "As far as I am concerned" / "as far as I'm concerned".
+  // Chinese L1: 就我而言 lacks a copula equivalent, so learners omit "am".
+  // FP rate: ~0% — "as far as I concern" never occurs in native writing.
+  if (/\bas\s+far\s+as\s+(I|we)\s+concern\b/i.test(text)) {
+    errors.push('Idiom error: "as far as I concern" — the correct phrase is "as far as I am concerned" (or "as far as I\'m concerned"). The verb "concerned" requires the copula "am".')
+  }
+
   // "Lacks of" as verb phrase — Loop 26 (2026-04-13).
   // Greenbaum (1996) Oxford English Grammar §8.21: "lack" as a verb takes a direct object without preposition.
   // Only "lacks of" (3rd-person singular -s = definitively verb) is flagged — "lack of" is a valid noun phrase.
@@ -1200,6 +1209,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('despite') && e.includes('preposition'))) {
     tips.push('"Despite" is a preposition — it needs a noun phrase or gerund, never a full clause. Say "despite the challenges" or "despite facing challenges" — not "despite the challenges are big". To use a full clause, switch to "although" or "even though".')
+  }
+  if (analysis.errors.some(e => e.includes('as far as I concern'))) {
+    tips.push('The correct frozen phrase is "as far as I am concerned" — not "as far as I concern". The adjective "concerned" always needs the copula "am": "As far as I\'m concerned, this is the best approach."')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

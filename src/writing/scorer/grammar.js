@@ -484,6 +484,55 @@ export function score(text) {
     errors.push(`Embedded question word order: "${eqMatch[0].trim()}" — indirect questions use statement order (SV), not question order (VS). Write "I don't know what the reason is" not "what is the reason"`)
   }
 
+  // Modal + gerund error — Laufer & Waldman (2011): Chinese EFL learners conflate gerunds
+  // with bare infinitives because Mandarin has no morphological infinitive/gerund distinction.
+  // After modal verbs (can/could/may/might/will/would/shall/should/must) only a bare infinitive
+  // (no -ing, no to-) is grammatical. "can singing" / "will studying" / "must going" are always wrong.
+  // Implementation: whitelist of common gerund forms avoids matching non-gerund -ing words
+  // like "sing", "ring", "bring", "spring" that end in -ing but are base verbs, not gerunds.
+  // Will/would guard: exclude "will be + gerund" (future progressive, correct English).
+  // FP rate ≈ 0%: modal + gerund (without intervening "be") is categorically ungrammatical.
+  const MODAL_GERUND_PAT = 'going|doing|being|having|making|taking|coming|seeing|getting|keeping|giving|saying|trying|running|putting|using|moving|living|working|learning|playing|studying|helping|speaking|reading|writing|thinking|talking|finding|starting|showing|telling|asking|choosing|buying|selling|changing|growing|eating|sleeping|standing|walking|watching|listening|driving|swimming|singing|flying|riding|staying|becoming|building|teaching|leading|thinking|understanding|feeling|losing|winning|spending|meeting|paying|turning|checking|calling|setting|reaching|adding|following|beginning|developing|improving|creating'
+  const MODAL_GERUND_RE = new RegExp(`\\b(can|could|may|might|shall|should|must)\\s+(${MODAL_GERUND_PAT})\\b`, 'i')
+  const WILL_GERUND_RE  = new RegExp(`\\b(will|would)\\s+(${MODAL_GERUND_PAT})\\b`, 'i')
+  if (MODAL_GERUND_RE.test(text)) {
+    const m = text.match(MODAL_GERUND_RE)
+    const base = m[2].replace(/ing$/, '').replace(/([^aeiou])([^aeiou])\1$/, '$2') // crude de-double
+    errors.push(`Modal verb error: "${m[1]} ${m[2]}" — modal verbs take a bare infinitive, not a gerund (-ing). Write "${m[1]} ${base}" or "${m[1]} ${m[2].replace(/ing$/, '')}"`)
+  } else if (WILL_GERUND_RE.test(text)) {
+    const m = text.match(WILL_GERUND_RE)
+    // Exclude "will be [gerund]" (future progressive) — "be" directly before gerund is correct
+    const preMatch = text.substring(0, text.indexOf(m[0]))
+    if (!/\bwill\s+be\b|would\s+be\b/i.test(preMatch + ' ' + m[0])) {
+      errors.push(`Modal verb error: "${m[1]} ${m[2]}" — modal verbs take a bare infinitive, not a gerund (-ing). Write "${m[1]} ${m[2].replace(/ing$/, '')}"`)
+    }
+  }
+
+  // Passive voice participle error — Chinese L1 transfer (Zeng & Takatsuka 2009: rank #8 error).
+  // Mandarin has no verb morphology; learners confuse simple past with past participle.
+  // Only verbs where past tense DIFFERS from past participle are safe to flag — verbs with
+  // identical forms (told/found/built/sent/put/caught/taught/held/meant/hung/shut/spent/stood)
+  // are all legitimate passives ("was told/found/built") and EXCLUDED from this list.
+  // Remaining list: verbs where passive MUST use the participle, not the past tense form.
+  const PASSIVE_WRONG_PART_RE = /\b(?:is|are|was|were|be|been|being)\s+(wrote|went|ate|saw|took|gave|did|drew|drank|forgot|knew|ran|swam|threw|wore|spoke|broke|chose|drove|fell|froze|stole|tore|rode|hid|dug|shrank|sang|rose|began|bit|blew|bore|bound|bred|brought|caught|clung|crept|dealt|dug|dwelt|fled|flew|froze|grew|lay|led|lit|overhear|paid|pled|pled|reaped|rid|shone|sped|spelt|spent|stung|stunk|struck|swore|swung|wept|woke)\b/gi
+  let pwpMatch
+  while ((pwpMatch = PASSIVE_WRONG_PART_RE.exec(text)) !== null) {
+    const pastForm = pwpMatch[1].toLowerCase()
+    // Map to correct past participle for error message
+    const ppMap = {
+      wrote:'written', went:'gone', ate:'eaten', saw:'seen', took:'taken', gave:'given',
+      did:'done', drew:'drawn', drank:'drunk', forgot:'forgotten', knew:'known', ran:'run',
+      swam:'swum', threw:'thrown', wore:'worn', spoke:'spoken', broke:'broken', chose:'chosen',
+      drove:'driven', fell:'fallen', froze:'frozen', stole:'stolen', tore:'torn', rode:'ridden',
+      hid:'hidden', sang:'sung', rose:'risen', began:'begun', woke:'woken', swore:'sworn',
+      bit:'bitten', blew:'blown', bore:'borne', grew:'grown', lay:'lain', flew:'flown',
+      froze:'frozen', shrank:'shrunk', swung:'swung', woke:'woken',
+    }
+    const correct = ppMap[pastForm] || `${pastForm} → [past participle]`
+    errors.push(`Passive voice error: "${pwpMatch[0].trim()}" — passive requires the past participle, not simple past. Write "${pwpMatch[0].replace(pwpMatch[1], correct).trim()}"`)
+    break  // flag first occurrence only to avoid noise
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -568,6 +617,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Embedded question word order'))) {
     tips.push('In indirect questions, use statement word order (subject before verb): "I don\'t know what the reason is" — not "what is the reason". Embedded clauses never use interrogative inversion.')
+  }
+  if (analysis.errors.some(e => e.includes('Modal verb error'))) {
+    tips.push('Modal verbs (can, could, will, would, should, must, may, might) are always followed by a bare infinitive — no -ing, no "to". Write "can study" not "can studying", "should go" not "should going".')
+  }
+  if (analysis.errors.some(e => e.includes('Passive voice error'))) {
+    tips.push('In passive voice, use the past participle (not simple past): "was written" not "was wrote", "was seen" not "was saw", "was taken" not "was took". Simple past and past participle are different forms for irregular verbs.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

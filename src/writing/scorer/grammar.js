@@ -282,7 +282,8 @@ export function score(text) {
     'furthermore','additionally','meanwhile','nevertheless','otherwise','instead',
     'historically','traditionally','economically','politically','socially',
   ])
-  const TOPIC_COMMENT_RE = /\b(\w+(?:\s+\w+){0,3}),\s+(it|he|she|they)\s+(is|are|was|were|has|have|needs|requires|should|must|can|will|would)\b/gi
+  // Verb alternation: copula/modals + common 3P-sg action verbs that commonly appear in topic-comment errors
+  const TOPIC_COMMENT_RE = /\b(\w+(?:\s+\w+){0,3}),\s+(it|he|she|they)\s+(is|are|was|were|has|have|needs|requires|should|must|can|will|would|affects|helps|shows|makes|causes|allows|enables|involves|represents|demonstrates|illustrates|provides|offers|suggests|indicates|plays|serves|works|depends|relies|exists|matters|remains|stands)\b/gi
   let tcMatch
   while ((tcMatch = TOPIC_COMMENT_RE.exec(text)) !== null) {
     const topic = tcMatch[1].trim().toLowerCase()

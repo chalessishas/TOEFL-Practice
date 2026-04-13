@@ -24,6 +24,16 @@ const THESIS_MARKERS = [
   'i am convinced','i strongly believe','it is clear that','it seems to me',
 ]
 
+// Evidence signals for per-paragraph completeness check (Stab & Gurevych 2017 baseline).
+// Simpler than DETAIL_MARKERS — just the cleanest premise signals.
+const EVIDENCE_SIGNALS = [
+  'because','since','for example','for instance','such as',
+  'therefore','thus','consequently','as a result',
+  'research shows','studies show','data shows','according to',
+  'evidence','example','instance','case','fact','show','suggest',
+  '%','percent','million','billion','thousand',
+]
+
 // Reason/elaboration markers — signals the essay has developed supporting points
 const REASON_MARKERS = [
   'one reason','another reason','first','second','third','firstly','secondly',
@@ -132,6 +142,37 @@ function argumentStructureScore(text, wordCount, taskType) {
   return Math.max(0, base - repetitionPenalty)
 }
 
+// Per-paragraph completeness bonus (Research Loop 6, P2).
+// Rewards essays where EACH body paragraph has at least one evidence signal,
+// vs. essays that front-load all evidence in one paragraph.
+// Returns 0–0.10 additive bonus; does not penalize — safe to add without recalibrating.
+function paragraphCompletenessBonus(text, taskType) {
+  // Email: transactional structure, skip
+  if (taskType === 'email') return 0
+
+  // Split into paragraphs — double newline first, fall back to single
+  let paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 20)
+  if (paragraphs.length <= 1) {
+    paragraphs = text.split(/\n/).map(p => p.trim()).filter(p => p.length > 20)
+  }
+  // Need at least 2 paragraphs for the check to be meaningful
+  if (paragraphs.length < 2) return 0
+
+  // Skip intro/conclusion (first and last) — they often lack explicit evidence
+  const bodyParagraphs = paragraphs.length > 2 ? paragraphs.slice(1, -1) : paragraphs
+
+  const coveredCount = bodyParagraphs.filter(para => {
+    const lower = para.toLowerCase()
+    return EVIDENCE_SIGNALS.some(sig => lower.includes(sig))
+  }).length
+
+  const coverageRatio = coveredCount / bodyParagraphs.length
+  // Full bonus if all body paragraphs have evidence; partial if most do
+  if (coverageRatio >= 1.0) return 0.10
+  if (coverageRatio >= 0.5) return 0.05
+  return 0
+}
+
 export function score(text, taskType = 'general') {
   const words = (text.match(/\b\w+\b/g) || [])
   const wordCount = words.length
@@ -158,13 +199,14 @@ export function score(text, taskType = 'general') {
   }
 
   // argScore gates the ceiling: thin ideas cap development at ~0.65 regardless of word count
-  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW))
+  const paraBonus = paragraphCompletenessBonus(text, taskType)
+  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus))
 
   return {
     value,
     details: `${wordCount} words, ${sentenceCount} sentences, ${
       DETAIL_MARKERS.filter(m => text.toLowerCase().includes(m)).length
-    } detail marker(s)`,
+    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}`,
   }
 }
 

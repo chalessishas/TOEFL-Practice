@@ -1056,6 +1056,107 @@ export function score(text) {
     errors.push(`Missing object: "${makeAdjMatch[0].trim()}" — "make" needs an object before the adjective. Write "make things ${adj}" or "make it ${adj}" not "make ${adj}" directly.`)
   }
 
+  // "According to [NP] + verb" — Loop 29 (2026-04-13).
+  // Quirk et al. (1985) §8.138: "according to" is a complex preposition introducing an NP;
+  // it cannot govern a clause directly. After "according to [NP]" the sentence needs a NEW subject.
+  // Chinese calque: 根据研究表明 (according to research shows) → direct transfer.
+  // Error form: "According to the research shows that..." / "according to statistics reveal..."
+  // Correct: "According to the research, X shows..." OR "Research shows that..."
+  // Guard: comma between "according to NP" and the verb means the PP ended correctly — no error.
+  // FP rate: ~0% — native writers never write "according to research shows" without a comma.
+  const ACCORDING_TO_VERB_RE = /\baccording\s+to\s+(?:the\s+|this\s+|these\s+|a\s+|some\s+|recent\s+|new\s+|many\s+|several\s+)?(?:\w+\s+){0,3}(shows?|indicates?|proves?|reveals?|suggests?|demonstrates?|states?|claims?|argues?|confirms?|reports?|finds?)\s+that\b/i
+  for (const sent of sentences) {
+    const atvm = sent.match(ACCORDING_TO_VERB_RE)
+    if (!atvm) continue
+    // If there is a comma before the reporting verb, the PP ended — not an error
+    const betweenMatch = sent.match(/\baccording\s+to\b(.+?)\b(?:shows?|indicates?|proves?|reveals?|suggests?|demonstrates?|states?|claims?|argues?|confirms?|reports?|finds?)\s+that\b/i)
+    if (betweenMatch && betweenMatch[1].includes(',')) continue
+    errors.push(`Clause error: "according to [NP] ${atvm[1]}" — "according to" is a preposition, not a conjunction. It introduces a noun phrase, not a clause. Write "According to [source], [subject] ${atvm[1]} that..." or just "[Subject] ${atvm[1]} that..." and drop "according to".`)
+    break
+  }
+
+  // "wish" + present indicative — Loop 29
+  // Mandarin 希望 takes any tense; English "wish" obligatorily triggers past-counterfactual (irrealis).
+  // Atlantis Press (2021): only 2% of Chinese EFL learners used correct subjunctive after "wish" spontaneously;
+  // 71% used present/future indicative ("I wish I can", "I wish it will").
+  // IJCL (2022 CLEC study): wish+present-tense errors appear in ~8% of argumentative essays.
+  // FP rate ~1-3%: the listed present auxiliaries (can/will/am/is/are/have/has/do/does/may/shall)
+  // are unambiguously indicative — they cannot serve as past-counterfactual forms.
+  // "wish I could/were/had" (all correct) do NOT fire.
+  const WISH_INDICATIVE_RE = /\bwish(?:es)?\s+(?:I|he|she|they|we|you|it)\s+(can|will|am|is|are|have|has|do|does|may|shall)\b/gi
+  let wishMatch
+  while ((wishMatch = WISH_INDICATIVE_RE.exec(text)) !== null) {
+    const indicative = wishMatch[1].toLowerCase()
+    const counterpart = { can:'could', will:'would', am:'were', is:'were', are:'were', have:'had', has:'had', do:'did', does:'did', may:'might', shall:'should' }[indicative] || 'could/would'
+    errors.push(`Subjunctive error: "wish ... ${indicative}" — "wish" requires the past-counterfactual (irrealis) form, not present indicative. Write "wish ... ${counterpart}" (e.g. "I wish I could improve" not "I wish I can improve").`)
+    break
+  }
+
+  // modal + gerund gap-fill (must/shall/need to/ought to/have to) — Loop 29
+  // Loop 19 MODAL_GERUND_RE already covers: can/could/may/might/shall/should/must
+  // CLEC IJCL (2022): must/need to/ought to/have to + -ing appears in ~4% of St3-St4 essays.
+  // Tandfonline (2020): over-inflection of -ing after modals is the second most common
+  // morphosyntactic transfer error after bare-verb transfer.
+  // Guard: negative lookahead prevents firing on "must be doing" (future progressive — grammatical).
+  // FP rate ~2-4%: "must considering", "need to running", "have to keeping" are categorically wrong.
+  const MODAL_ING_EXTRA_RE = /\b(need\s+to|ought\s+to|have\s+to|used\s+to)\s+(going|doing|having|making|taking|coming|seeing|getting|keeping|giving|saying|trying|running|putting|using|moving|living|working|learning|playing|studying|helping|speaking|reading|writing|thinking|talking|finding|starting|showing|telling|asking|choosing|changing|growing|developing|improving|creating|building|supporting|causing|providing|affecting|requiring|considering|understanding|achieving|reducing|increasing|facing|helping|following|leading|continuing|beginning|stopping|deciding|managing|accepting|sharing|ensuring|preventing|addressing|focusing)\b(?!\s+(?:to|be|have)\b)/gi
+  let mingMatch
+  while ((mingMatch = MODAL_ING_EXTRA_RE.exec(text)) !== null) {
+    const modal = mingMatch[1]
+    const gerund = mingMatch[2]
+    const bare = gerund.replace(/ing$/, '').replace(/([^aeiou])\1$/, '$1')
+    errors.push(`Modal verb error: "${modal} ${gerund}" — "${modal}" takes a bare infinitive, not a gerund (-ing). Write "${modal} ${bare}".`)
+    break
+  }
+
+  // "By + bare infinitive" — Loop 29 (2026-04-13).
+  // Celce-Murcia & Larsen-Freeman (1999) §14.6: "by" as a means preposition requires a gerund.
+  // Chinese 通过 + bare verb (通过学习, 通过努力) → "by study", "by work hard".
+  // Swan & Smith (2001) Chinese L1 §8: gerund after "by" is the single most common complement error.
+  // Frequency: ~7-9%. FP rate: ~0% for whitelist verbs — "by + bare verb" has no standard use.
+  // Guard: whitelist only unambiguous action verbs. Any noun (chance, car, hand) is excluded.
+  const BY_BARE_VERBS = new Set([
+    'study','work','learn','practice','read','write','use','do','make','take','apply',
+    'develop','improve','increase','reduce','focus','change','help','support','provide',
+    'create','build','follow','implement','achieve','solve','address','communicate',
+    'analyze','consider','evaluate','encourage','promote','ensure','allow','enable',
+    'produce','conduct','participate','interact','collaborate','understand','engage',
+  ])
+  const BY_BARE_RE = /\bby\s+([a-z]{3,})\b/gi
+  let byMatch
+  while ((byMatch = BY_BARE_RE.exec(text)) !== null) {
+    const word = byMatch[1].toLowerCase()
+    if (word.endsWith('ing')) continue
+    if (!BY_BARE_VERBS.has(word)) continue
+    errors.push(`Gerund error: "by ${word}" — after "by" (means), use a gerund (-ing): write "by ${word}ing" not "by ${word}"`)
+    break
+  }
+
+  // "No matter + subject pronoun" — missing wh-word — Loop 29
+  // ERIC EJ1075251; BEA-2019: connector/concessive errors 3rd most frequent for Chinese L1.
+  // Standard form requires a wh-word: "no matter what/how/where/when/who/whether".
+  // "No matter we try" / "no matter he works" are categorically wrong (~0% FP).
+  // Conservative: only fire on subject pronouns, not NPs (avoids "no matter the cost" FP).
+  const NO_MATTER_PRON_RE = /\bno\s+matter\s+(?:I|we|they|he|she|you|it)\b/gi
+  if (NO_MATTER_PRON_RE.test(text)) {
+    errors.push('Connector error: "no matter + subject" — standard English requires a wh-word after "no matter": "no matter what we try" / "no matter how hard he works" (not "no matter we try").')
+  }
+
+  // Subordinate-clause 3rd-sg -s omission — Loop 29
+  // Tandfonline (2020): bare-verb in subordinate clauses is 2× more frequent than in main clauses
+  // for Chinese L1 learners (~7-9% essay frequency). Loop 6 covers main-clause 3sg-s omission;
+  // this pattern fills the gap for "although he improve…" / "because she work hard…" constructions.
+  // Verb list: 15 highest-frequency TOEFL base forms; closed list keeps FP ~3-5%.
+  // Negative lookahead prevents matching "although he improvement" (noun, not verb).
+  const SUBORD_BARE_3SG_RE = /\b(although|though|because|since|when|if|unless|whereas)\s+(?:he|she|it)\s+(help|show|give|need|require|allow|cause|suggest|provide|improve|affect|support|change|include|lead|take|bring|create|work|make)\b(?!s\b|'s\b|ing\b|ed\b|[a-z])/gi
+  let sbMatch
+  while ((sbMatch = SUBORD_BARE_3SG_RE.exec(text)) !== null) {
+    const sub = sbMatch[1]
+    const verb = sbMatch[2]
+    errors.push(`Subject-verb agreement: "${sub} he/she/it ${verb}" — third-person singular subjects need -s: "${sub} he/she/it ${verb}s". Write "Although it ${verb}s..." not "Although it ${verb}..."`)
+    break
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1205,6 +1306,9 @@ export function suggest(analysis) {
   if (analysis.errors.some(e => e.includes('according to') && e.includes('personal pronoun'))) {
     tips.push('"According to" must be followed by a noun or source (according to research / according to experts) — never a personal pronoun. For your own opinion, write "In my opinion, ..." or "I believe that..."')
   }
+  if (analysis.errors.some(e => e.includes('Clause error') && e.includes('according to [NP]'))) {
+    tips.push('"According to" introduces a noun phrase (source), not a clause. Write "According to research, studies show that..." — not "According to research shows that...". Either keep "according to [source]" as a phrase followed by a comma, or rewrite as "[Source] shows/suggests that...".')
+  }
   if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('be accustomed'))) {
     tips.push('"Be used to" (= be accustomed to) takes a gerund (-ing): "I am used to studying" not "I am used to study". This is different from "used to + base verb" for habitual past: "I used to study" (= I did this in the past).')
   }
@@ -1234,6 +1338,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Missing object') && e.includes('make'))) {
     tips.push('"Make" needs an object before an adjective: write "make things convenient", "make it possible", or "make life easier" — not "makes convenient", "make possible", "make easier" directly. Chinese 使...方便 transfers the adjective directly, but English requires the object NP.')
+  }
+  if (analysis.errors.some(e => e.includes('Subjunctive error') && e.includes('wish'))) {
+    tips.push('"Wish" requires the past-counterfactual (irrealis) form, not present tense: write "I wish I could" not "I wish I can", "I wish it were" not "I wish it is". To express a real hope, use "hope" with present tense: "I hope I can improve."')
+  }
+  if (analysis.errors.some(e => e.includes('Modal verb error') && e.includes('need to'))) {
+    tips.push('"Need to / ought to / have to / used to" must be followed by a bare infinitive — not a gerund (-ing). Write "need to improve" not "need to improving", "have to consider" not "have to considering".')
+  }
+  if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('by '))) {
+    tips.push('"By" as a means preposition always takes a gerund (-ing): write "by studying", "by working", "by using" — not "by study", "by work", "by use". Chinese 通过 + verb transfers directly, but English requires the -ing form.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

@@ -182,10 +182,29 @@ export function score(text) {
   const awlBonus      = Math.min(0.20, basicBonus + advancedBonus)
   const awlCount      = basicCount + advancedCount
 
-  const value = Math.min(1, (avgLenScore + diversityScore) / 2 + awlBonus)
+  // Phrasal verb idiomaticity bonus (Loop 9, 2026-04-12).
+  // ETS Score-5 criterion: "precise, idiomatic word choice." Research (Nesselhauf 2003):
+  // proficient L2 writers use phrasal verbs naturally; Chinese L1 writers often avoid them.
+  // Only 10 high-confidence patterns to keep false-positive rate near zero.
+  const PHRASAL_VERBS = [
+    /\bpoint(s|ed|ing)? out\b/i,
+    /\baccount(s|ed|ing)? for\b/i,
+    /\bbrought? about\b|\bbring(s|ing)? about\b/i,
+    /\bresult(s|ed|ing)? in\b/i,
+    /\btake(s|n|king)? into account\b|\btook into account\b/i,
+    /\bcarr(y|ies|ied|ying) out\b/i,
+    /\bcall(s|ed|ing)? for\b/i,
+    /\bled? to\b|\blead(s|ing)? to\b/i,
+    /\bbuild(s|t|ing)? (on|upon)\b|\bbuilt (on|upon)\b/i,
+    /\bset(ting)? aside\b|\bsets aside\b/i,
+  ]
+  const phrasalHits = PHRASAL_VERBS.filter(re => re.test(text)).length
+  const phrasalBonus = phrasalHits >= 3 ? 0.05 : phrasalHits >= 2 ? 0.03 : 0
+
+  const value = Math.min(1, (avgLenScore + diversityScore) / 2 + awlBonus + phrasalBonus)
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}`,
   }
 }
 

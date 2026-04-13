@@ -83,6 +83,12 @@ export function score(text) {
   const patternHits = COMPLEX_PATTERNS.filter(p => p.test(textLower)).length
   const syntacticVariety = patternHits / COMPLEX_PATTERNS.length  // 0–1
 
+  // Mean sentence length sweet-spot bonus (Loop 9, 2026-04-12).
+  // SCA research (Lu 2010): Score-5 TOEFL averages 14-20 words/sentence.
+  // Too short (<10): choppy. Too long (>25): run-on risk (already caught by grammar.js).
+  const meanSentLen = sentences.length > 0 ? tokens.length / sentences.length : 0
+  const sentLenBonus = (meanSentLen >= 14 && meanSentLen <= 22) ? 0.04 : (meanSentLen >= 12) ? 0.02 : 0
+
   // Casual register penalty — ETS penalizes informal language in academic writing
   // Use regex with word boundaries to avoid "cause" matching "because", etc.
   const casualHits = CASUAL_TERM_REGEXES.filter(({ re }) => re.test(text)).length
@@ -102,11 +108,11 @@ export function score(text) {
   else if (nomDensity >= 5)  nomBonus = 0.05
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty + nomBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty + nomBonus + sentLenBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}`,
   }
 }
 

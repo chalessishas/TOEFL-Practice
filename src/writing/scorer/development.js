@@ -168,9 +168,12 @@ function argumentStructureScore(text, wordCount, taskType) {
 // Detects intra-paragraph repetition: if two sentences in the same paragraph
 // share >60% of their non-stopword content tokens, it's likely the writer is
 // restating the claim rather than developing it (Stab & Gurevych 2017 proxy).
-// Returns 0–0.15 penalty. Only applies to discussion essays ≥120 words.
+// Returns 0–0.15 penalty. Only applies to non-email essays above task minimum.
+// Aligned with argMinWords (discussion=80) — was hardcoded 120, now consistent.
 function circularReasoningPenalty(text, wordCount, taskType) {
-  if (taskType === 'email' || wordCount < 120) return 0
+  if (taskType === 'email') return 0
+  const minW = taskType === 'discussion' ? 80 : 100
+  if (wordCount < minW) return 0
 
   const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 30)
   let maxOverlap = 0

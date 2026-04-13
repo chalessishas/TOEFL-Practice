@@ -225,12 +225,26 @@ export function score(text, taskType = 'general') {
     phrasalEmbeddingBonus = phrasalRate >= 4 ? Math.min(0.05, (phrasalRate - 2) * 0.015) : phrasalRate >= 2 ? 0.02 : 0
   }
 
+  // Booster overuse penalty (Loop 21, 2026-04-13)
+  // Corpus-Based Study of Amplifiers in Chinese EFL Academic Writing (ResearchGate 375909274):
+  // learners use certainty boosters at 3.2×/100w vs 0.5×/100w in expert academic prose.
+  // Threshold >2/100w means one or two instances never fire — only dense overuse is penalised.
+  // Email task exempt (boosters are less marked in informal register).
+  // "certainly" and "surely" excluded — too common in native writing to penalise safely.
+  let boosterPenalty = 0
+  if (taskType !== 'email') {
+    const BOOSTERS = /\b(definitely|absolutely|undoubtedly|without\s+(?:any\s+)?doubt|needless\s+to\s+say|without\s+question)\b/gi
+    const boosterHits = (text.match(BOOSTERS) || []).length
+    const boosterRate = (boosterHits / Math.max(tokens.length, 1)) * 100
+    boosterPenalty = boosterRate > 2 ? Math.min(0.04, (boosterRate - 2) * 0.015) : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
   }
 }
 
@@ -256,5 +270,7 @@ export function suggest(analysis) {
     tips.push('Use more academic nouns: instead of "the government decided to help", try "the government\'s decision to provide assistance". Nominalized forms (improvement, evidence, achievement) raise your style score.')
   if (analysis.details.includes('i-opener monotony'))
     tips.push('Too many sentences start with "I think/I believe/I feel." Vary your sentence openers: start some sentences with an adverb ("Additionally,"), a subordinate clause ("Although many people believe..."), or a noun phrase ("The key issue is...").')
+  if (analysis.details.includes('booster overuse'))
+    tips.push('Overuse of certainty adverbs ("definitely", "absolutely", "undoubtedly") weakens your academic register. Replace with hedged language: "evidence suggests that", "this indicates", "it is likely that".')
   return tips.length > 0 ? tips : ['Improve your writing style by using varied vocabulary and sentence structures.']
 }

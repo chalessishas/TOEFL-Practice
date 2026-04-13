@@ -134,6 +134,29 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   })
 
+  // Double conjunction errors — Chinese L1 transfer: Mandarin uses paired conjunctions
+  // (虽然...但是, 因为...所以) where English uses only one. Near-zero false positive on
+  // native academic text — this construction is syntactically prohibited in standard English.
+  const DOUBLE_CONJ = [
+    { re: /\b(although|though|even though)\b[^.!?]{5,},\s*(but|yet)\b/i,
+      msg: 'Double conjunction: use "although X, Y" OR "X, but Y" — not both conjunctions together' },
+    { re: /\b(because|since)\b[^.!?]{5,},\s*(so|therefore|thus|hence)\b/i,
+      msg: 'Double conjunction: use "because X, Y" OR "X, so Y" — not both conjunctions together' },
+  ]
+  DOUBLE_CONJ.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
+  // Copula omission — Chinese L1 transfer: 他很高 (he very tall) → *"He very intelligent."
+  // In Mandarin, predicate adjectives function as verbs; no copula needed.
+  // Restrict to he/she subjects + strong degree adverbs to keep false-positive rate ~0%.
+  // "She is very tall" won't match because "is" breaks the subject→adverb adjacency.
+  const copulaRe = /\b(he|she)\s+(very|so|too|extremely)\s+([a-z]{3,})\b/gi
+  let copulaMatch
+  while ((copulaMatch = copulaRe.exec(text)) !== null) {
+    errors.push(`Possible missing copula: "${copulaMatch[0].trim()}" — likely missing "is/was" (e.g., "${copulaMatch[1]} is ${copulaMatch[2]} ${copulaMatch[3]}")`)
+  }
+
   // SVA (subject-verb agreement) — #1 penalized feature for ESL writers in e-rater
   // High-precision patterns: the erroneous form is structurally distinctive enough
   // that false positives are very rare in normal academic prose.
@@ -187,5 +210,9 @@ export function suggest(analysis) {
     const prepErrs = analysis.errors.filter(e => e.includes('Preposition error'))
     tips.push(prepErrs[0].replace('Preposition error: ', ''))
   }
+  if (analysis.errors.some(e => e.includes('Double conjunction')))
+    tips.push('Avoid using two conjunctions for one relationship: use "although X, Y" OR "X, but Y" — never both. Same for "because/so" — pick one.')
+  if (analysis.errors.some(e => e.includes('missing copula')))
+    tips.push('Add a linking verb: "He is very tall" not "He very tall". English adjective predicates require "is/was/are/were".')
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

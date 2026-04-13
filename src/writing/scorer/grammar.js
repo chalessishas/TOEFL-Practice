@@ -219,6 +219,54 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   })
 
+  // 3rd-person singular -s omission (Chinese L1 transfer, Rank 3 frequency).
+  // Chinese has no verb morphology; learners omit -s in obligatory 3P-SG contexts.
+  // Pronoun-anchored only to minimize false positives. Excludes modals and "have/be".
+  // Distinct from existing SVA: those catch "he have/are"; these catch "he go/want".
+  const THIRD_PERSON_BARE = /\b(he|she|it)\s+(go|want|seem|think|work|know|need|show|mean|feel|look|help|keep|make|come|give|take|play|live|move|start|try|believe|support|suggest|provide|require|include|allow|appear|become|remain|explain|indicate|involve|represent|determine)\b/gi
+  let tpMatch
+  while ((tpMatch = THIRD_PERSON_BARE.exec(text)) !== null) {
+    const [, pronoun, verb] = tpMatch
+    const plural = verb.endsWith('y') ? verb.slice(0, -1) + 'ies'
+      : /[sxz]$|[cs]h$/.test(verb) ? verb + 'es'
+      : verb + 's'
+    errors.push(`SVA: "${pronoun} ${verb}" → "${pronoun} ${plural}" (3rd-person singular requires -s)`)
+  }
+
+  // `have been` + bare (non-past-participle) verb — Chinese L1 transfer (Rank 6).
+  // "have been finish" → "have been finished"; "has been complete" → "has been completed".
+  // Only high-frequency verbs where bare form is visually distinct from past participle.
+  const HAVE_BEEN_BARE = /(have|has|had)\s+been\s+(finish|complete|decide|accept|cancel|confirm|establish|implement|launch|prepare|publish|reduce|remove|replace|submit|update|approve|assign|deliver|expand|install|release|resolve|revise|schedule|solve)\b/gi
+  let hbMatch
+  while ((hbMatch = HAVE_BEEN_BARE.exec(text)) !== null) {
+    const verb = hbMatch[2]
+    const pp = verb.endsWith('e') ? verb + 'd' : verb + 'ed'
+    errors.push(`Aspect error: "${hbMatch[0].trim()}" → "${hbMatch[1]} been ${pp}" (passive/perfect requires past participle)`)
+  }
+
+  // Stative progressive — Chinese L1 transfer (Rank 6 sub-pattern).
+  // Stative verbs (know, want, believe) cannot appear in progressive aspect in standard English.
+  // Closed list keeps false-positive rate near zero.
+  const STATIVE_PROG = /\b(am|is|are|was|were)\s+(knowing|wanting|believing|understanding|preferring|loving|hating|owning|belonging|containing|including|seeming|meaning|mattering|costing)\b/gi
+  let spMatch
+  while ((spMatch = STATIVE_PROG.exec(text)) !== null) {
+    const base = spMatch[2].replace(/ing$/, '').replace(/n?n$/, '')  // crude de-gerundification for message
+    errors.push(`Stative verb error: "${spMatch[0].trim()}" — stative verbs (know, want, believe) don't use progressive aspect; use simple tense instead`)
+  }
+
+  // Additional redundant-preposition entries (Chinese L1 corpus, City University HK ELSS).
+  // Extends existing PREP_ERRORS list with high-frequency redundant-prep errors.
+  const EXTRA_PREP_ERRORS = [
+    { re: /\bemphasiz(?:e|es|ed|ing)\s+on\b/i,   msg: 'Preposition error: "emphasize on" → "emphasize" (takes direct object, no preposition)' },
+    { re: /\bstress(?:es|ed|ing)?\s+on\b/i,       msg: 'Preposition error: "stress on [X]" → "stress [X]" (transitive, no preposition needed)' },
+    { re: /\bmarr(?:y|ies|ied|ying)\s+with\b/i,   msg: 'Preposition error: "marry with" → "marry" (takes direct object: "she married him")' },
+    { re: /\benter\s+into\s+(?!a\s+(?:contract|agreement|partnership|relationship|negotiation|discussion|dialogue))/i,
+      msg: 'Preposition error: "enter into [place]" → "enter [place]" (physical entry takes no preposition)' },
+  ]
+  EXTRA_PREP_ERRORS.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -240,8 +288,14 @@ export function suggest(analysis) {
     tips.push('Use a conjunction (and, but, so) or period instead of a comma between independent clauses.')
   if (analysis.errors.some(e => e.includes('double negative')))
     tips.push('Avoid using two negatives in the same clause.')
-  if (analysis.errors.some(e => e.includes('SVA')))
+  if (analysis.errors.some(e => e.includes('SVA') && e.includes('3rd-person singular')))
+    tips.push('Add -s to verbs with "he/she/it" subjects: "he goes", "she wants", "it seems" — third-person singular always requires the -s ending.')
+  if (analysis.errors.some(e => e.includes('SVA') && !e.includes('3rd-person singular')))
     tips.push('Check subject-verb agreement: "everyone/nobody/each" takes a singular verb, and uncountable nouns (information, advice, news) always use "is" not "are".')
+  if (analysis.errors.some(e => e.includes('Aspect error')))
+    tips.push('After "have/has/had been", use the past participle: "has been finished" not "has been finish", "had been completed" not "had been complete".')
+  if (analysis.errors.some(e => e.includes('Stative verb error')))
+    tips.push('Stative verbs (know, want, believe, understand, prefer) cannot be used in progressive form — use simple tense: "I know" not "I am knowing", "she wants" not "she is wanting".')
   if (analysis.errors.some(e => e.includes('article error')))
     tips.push('Use "an" before words that begin with a vowel sound (an important point, an example, an idea).')
   if (analysis.errors.some(e => e.includes('Preposition error'))) {

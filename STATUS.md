@@ -149,6 +149,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] Loop 11 P1 — relevance.js 证据邻近奖励 (30b32cf) — semanticSpecificityBonus()：证据标记词（research/data/percent/shows 等）出现在提示词关键词 15 词窗口内 → +0.03（1次命中）/ +0.06（3次+）；Kyle & Crossley 2015 邻近相关 r=+0.34；10/10 校准维持，gaps 3→4:+0.70 / 4→5:+0.50
 - [100%] Loop 11 P3+P4 — grammar.js 同音字混淆 + style.js 邮件正式语域奖励 (8dd5e58) — 4 个同音字模式（your/you're, its/it's, there/their, then/than，均需上下文确认，FP <1%）；邮件 formal opener+closing → +0.04；10/10 校准维持
 - [100%] Loop 11 质量修复 — wordlist.js 扩展 120+ TOEFL 主题词 (b658084) — 教育/社会/经济/技术/环境/健康 6 大主题域词汇不再被误标为"稀有词"；calibration 中性，无评分改变
+- [100%] Loop 11 P4 — organization.js 连接词误用检测 (c6daf67) — 段落开头 "However" 无前文对比内容时惩罚 -0.03（上限 1 次）；Granger & Tyson 1996 中文 L1 误用率 38% vs 母语者 7%；邮件任务不触发；10/10 校准维持
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

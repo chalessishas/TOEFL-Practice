@@ -282,17 +282,6 @@ export function score(text) {
     errors.push(`Stative verb error: "${spMatch[0].trim()}" — stative verbs (know, want, believe) don't use progressive aspect; use simple tense instead`)
   }
 
-  // Progressive tense overuse penalty (Loop 25, 2026-04-13)
-  // Xu & Ellis (2020): Chinese L1 TOEFL writers use progressive at 2× native frequency.
-  // Academic writing (Biber et al. 1999): progressive aspect rare in generalizations/argumentation.
-  // Rate >4/100w signals overuse; stative progressive (above) catches specific verb errors.
-  // Guard: short texts (<60 tokens) excluded to avoid penalizing emails with 1 progressive form.
-  const progMatches = (text.match(/\b(?:am|is|are|was|were)\s+\w+ing\b/gi) || []).length
-  const progRate = tokens.length >= 60 ? (progMatches / tokens.length) * 100 : 0
-  if (progRate > 4) {
-    errors.push(`Progressive overuse: ${progMatches} progressive forms in this essay — academic writing uses simple tenses for generalizations; reserve progressive for ongoing/temporary actions`)
-  }
-
   // Additional redundant-preposition entries (Chinese L1 corpus, City University HK ELSS).
   // Extends existing PREP_ERRORS list with high-frequency redundant-prep errors.
   const EXTRA_PREP_ERRORS = [

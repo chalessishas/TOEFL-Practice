@@ -245,12 +245,25 @@ export function score(text, taskType = 'general') {
     boosterPenalty = boosterRate > 2 ? Math.min(0.04, (boosterRate - 2) * 0.015) : 0
   }
 
+  // Progressive aspect overuse penalty (Loop 25, 2026-04-13)
+  // Xu & Ellis (2020): Chinese L1 TOEFL writers use progressive ~2× native frequency.
+  // Academic writing norm ≤3/100w; >5/100w signals learner overuse not caught by grammar.js.
+  // Grammar.js catches stative progressives (know/want/believe); this catches lexical verb overuse.
+  // Email exempt: progressive is more natural in informal register.
+  let progressiveOverusePenalty = 0
+  if (taskType !== 'email') {
+    const PROG_RE = /\b(is|are|was|were|am|be|been|being)\s+\w+ing\b/gi
+    const progHits = (text.match(PROG_RE) || []).length
+    const progRate = (progHits / Math.max(tokens.length, 1)) * 100
+    progressiveOverusePenalty = progRate > 5 ? Math.min(0.04, (progRate - 5) * 0.012) : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
   }
 }
 
@@ -278,5 +291,7 @@ export function suggest(analysis) {
     tips.push('Too many sentences start with "I think/I believe/I feel." Vary your sentence openers: start some sentences with an adverb ("Additionally,"), a subordinate clause ("Although many people believe..."), or a noun phrase ("The key issue is...").')
   if (analysis.details.includes('booster overuse'))
     tips.push('Overuse of certainty adverbs ("definitely", "absolutely", "undoubtedly") weakens your academic register. Replace with hedged language: "evidence suggests that", "this indicates", "it is likely that".')
+  if (analysis.details.includes('progressive overuse'))
+    tips.push('Academic writing favors simple tenses over continuous forms. Use "studies show" not "studies are showing", "researchers argue" not "researchers are arguing". Reserve progressive aspect for genuinely ongoing or temporary actions.')
   return tips.length > 0 ? tips : ['Improve your writing style by using varied vocabulary and sentence structures.']
 }

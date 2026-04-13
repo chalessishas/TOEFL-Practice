@@ -1122,7 +1122,7 @@ export function score(text) {
     'analyze','consider','evaluate','encourage','promote','ensure','allow','enable',
     'produce','conduct','participate','interact','collaborate','understand','engage',
   ])
-  const BY_BARE_RE = /\bby\s+([a-z]{3,})\b/gi
+  const BY_BARE_RE = /\bby\s+([a-z]{2,})\b/gi
   let byMatch
   while ((byMatch = BY_BARE_RE.exec(text)) !== null) {
     const word = byMatch[1].toLowerCase()
@@ -1347,6 +1347,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('by '))) {
     tips.push('"By" as a means preposition always takes a gerund (-ing): write "by studying", "by working", "by using" — not "by study", "by work", "by use". Chinese 通过 + verb transfers directly, but English requires the -ing form.')
+  }
+  if (analysis.errors.some(e => e.includes('Connector error') && e.includes('no matter'))) {
+    tips.push('"No matter" must be followed by a wh-word: "no matter what", "no matter how", "no matter where", "no matter when". "No matter we try" → "no matter what we try". "No matter he works" → "no matter how hard he works".')
+  }
+  if (analysis.errors.some(e => e.includes('Subject-verb agreement') && e.includes('although'))) {
+    tips.push('In subordinate clauses, third-person singular subjects (he/she/it) still require the -s verb ending: "Although it improves...", "Because she works...", "When he suggests..." — the subordinating conjunction does not change the agreement rule.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

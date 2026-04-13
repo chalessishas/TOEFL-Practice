@@ -25,16 +25,24 @@ const SPLICE_SAFE_PHRASES = [
   'in general', 'to be honest', 'to be fair', 'in my opinion',
   'in other words', 'that said', 'having said that',
 ]
-// Subordinating conjunctions that start a dependent clause — if a sentence
-// begins with one of these, the pattern "Dep clause, I/he/..." is valid grammar.
-const SENTENCE_STARTERS = new Set([
+// Clause openers — if a sentence begins with one of these, the pattern
+// "Dep/Prep clause, I/he/..." is valid grammar, NOT a comma splice.
+// Includes subordinating conjunctions + common preposition phrase openers.
+const CLAUSE_OPENERS = new Set([
   'while','although','though','even though','whereas','when','whenever',
   'since','because','if','unless','until','after','before','as',
   'once','wherever','whether','provided','given','assuming',
+  // Prepositional phrase openers common in formal writing
+  'during','despite','unlike','upon','regarding','throughout',
+  'within','considering','following','concerning','beyond',
+  // Past participle / absolute phrase openers
+  'done','given','placed','viewed','seen','taken','compared','used',
 ])
 
 export function score(text) {
-  const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0)
+  // Split on . ! ? and also ; — semicolons end independent clauses and must not
+  // carry over into comma-splice checks (e.g. "X; done as Y, it is Z" → two clauses)
+  const sentences = text.split(/[.!?;]+/).map(s => s.trim()).filter(s => s.length > 0)
   if (sentences.length === 0) return { value: 0, details: 'No sentences found', errors: [] }
 
   const errors = []
@@ -63,19 +71,21 @@ export function score(text) {
     }
   })
 
-  // Comma splice detection
-  const lines = text.split('\n')
-  lines.forEach(line => {
-    // Skip lines that begin with a subordinating conjunction — these use the valid
-    // "Dependent clause, Main clause" structure (e.g. "While X is true, I believe Y")
-    const firstWord = line.trim().split(/\s+/)[0]?.toLowerCase() ?? ''
-    if (SENTENCE_STARTERS.has(firstWord)) return
+  // Comma splice detection — iterate sentences (not lines) so that
+  // "While X, I believe Y" and "If X, I would Y" are correctly skipped even
+  // when the entire paragraph is a single line (common in email samples).
+  sentences.forEach(sentence => {
+    // Skip sentences beginning with a subordinating conjunction or prepositional
+    // opener — "Dep/Prep clause, Main clause" is valid comma usage.
+    const firstWord = sentence.trim().split(/\s+/)[0]?.toLowerCase() ?? ''
+    if (CLAUSE_OPENERS.has(firstWord)) return
 
-    const commaSpliceRegex = /,\s+(I|he|she|they|we|it)\s+\w+/gi
+    // [^\S\n]+ matches horizontal whitespace only — prevents matching across paragraph breaks
+    const commaSpliceRegex = /,[^\S\n]+(I|he|she|they|we|it)\s+\w+/gi
     let csMatch
-    while ((csMatch = commaSpliceRegex.exec(line)) !== null) {
+    while ((csMatch = commaSpliceRegex.exec(sentence)) !== null) {
       const pos = csMatch.index
-      const before = line.substring(Math.max(0, pos - 50), pos).toLowerCase()
+      const before = sentence.substring(0, pos).toLowerCase()
       const lastWordMatch = before.match(/(\w+)\s*$/)
       const lastWord = lastWordMatch ? lastWordMatch[1] : ''
       const hasPhrase = SPLICE_SAFE_PHRASES.some(p => before.includes(p))
@@ -87,11 +97,13 @@ export function score(text) {
 
   // Double negatives — match within each sentence, not across the whole text
   // Real e-rater: 99.6% of students get zero penalty (extremely rare trigger)
+  // Max 20-char span prevents false positives when "not" and "no" appear in
+  // separate clauses of a long sentence (e.g. "not the same as X, and ... no Y")
   const doubleNegPatterns = [
-    /\bnot\b.*\bno\b/i,
-    /\bnever\b.*\bno\b/i,
-    /\bdon't\b.*\bnothing\b/i,
-    /\bcan't\b.*\bnone\b/i,
+    /\bnot\b.{0,20}\bno\b/i,
+    /\bnever\b.{0,20}\bno\b/i,
+    /\bdon't\b.{0,20}\bnothing\b/i,
+    /\bcan't\b.{0,20}\bnone\b/i,
   ]
   sentences.forEach((s, i) => {
     for (const p of doubleNegPatterns) {

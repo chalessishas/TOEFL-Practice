@@ -171,6 +171,17 @@ export function score(text) {
       msg: 'Double conjunction: use "although X, Y" OR "X, but Y" — not both conjunctions together' },
     { re: /\b(because|since)\b[^.!?]{5,},\s*(so|therefore|thus|hence)\b/i,
       msg: 'Double conjunction: use "because X, Y" OR "X, so Y" — not both conjunctions together' },
+    // Extended Mandarin paired-conjunction transfer — Loop 21 (JLTR 7:4 corpus study: 65.6% of conjunction errors)
+    { re: /\bsince\b[^.!?;]{5,60}\bthen\b/i,
+      msg: 'Double conjunction: "since...then" — "since" (causal) already implies a result; remove "then"' },
+    { re: /\bas\s+long\s+as\b[^.!?;]{5,60}\b(so|then)\b/i,
+      msg: 'Double conjunction: "as long as...so/then" — "as long as" sets the condition; remove "so/then"' },
+    { re: /\bnot\s+only\b[^.!?;]{5,80}\bbut\s+also\b[^.!?;]{0,40}\band\b/i,
+      msg: 'Connective redundancy: "not only...but also...and" — "but also" already extends the list; remove the trailing "and"' },
+    { re: /\bno\s+matter\b[^.!?;]{5,60}\bstill\b/i,
+      msg: 'Double conjunction: "no matter...still" — the concessive "no matter" does not need a resumptive "still"' },
+    { re: /\beven\s+if\b[^.!?;]{5,60}\balso\b/i,
+      msg: 'Double conjunction: "even if...also" — Mandarin 即使...也 transfer; remove "also": "Even if X, Y"' },
   ]
   DOUBLE_CONJ.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)
@@ -352,6 +363,16 @@ export function score(text) {
     { re: /\bmake\s+research\b/i,           msg: 'Collocation error: "make research" → "do research" or "conduct research"' },
     { re: /\bgive\s+emphasis\b/i,           msg: 'Collocation error: "give emphasis" → "place emphasis" or "emphasize"' },
     { re: /\btake\s+advantage\s+from\b/i,  msg: 'Collocation error: "take advantage from" → "take advantage of"' },
+    // Additional light verb collocation errors — Loop 21 (CLEC+TECCL corpus: 92.3% L1-congruent transfer)
+    { re: /\bdo\s+a\s+researche?s?\b/i,     msg: 'Collocation error: "do a research" → "conduct research" or "do research" (uncountable)' },
+    { re: /\blearn\s+knowledge\b/i,           msg: 'Collocation error: "learn knowledge" → "acquire knowledge" or "gain knowledge"' },
+    { re: /\bstudy\s+knowledge\b/i,           msg: 'Collocation error: "study knowledge" \u2192 "acquire knowledge" or "expand knowledge"' },
+    { re: /\bteach\s+knowledge\b/i,           msg: 'Collocation error: "teach knowledge" → "impart knowledge" or "share knowledge"' },
+    { re: /\bhave\s+(?:a\s+)?good\s+health\b/i, msg: 'Collocation error: "have a good health" → "be in good health" or "enjoy good health" ("health" is uncountable here)' },
+    { re: /\btouch\s+(?:the\s+)?society\b/i, msg: 'Collocation error: "touch society" → "engage with society" or "contribute to society"' },
+    { re: /\bbring\s+forward\s+(?:a\s+)?suggestion\b/i, msg: 'Collocation error: "bring forward a suggestion" → "make a suggestion" or "offer a suggestion"' },
+    { re: /\b(?:get|obtain|achieve)\s+progresses?\b/i, msg: 'Collocation error: "get/obtain progress" → "make progress" (and "progress" is uncountable — no plural)' },
+    { re: /\bdeal\s+(?!with\b)(?:the|this|that|a|an)\b/i, msg: 'Collocation error: "deal [NP]" → "deal with [NP]" (requires preposition "with")' },
   ]
   COLLOCATION_ERRORS.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)

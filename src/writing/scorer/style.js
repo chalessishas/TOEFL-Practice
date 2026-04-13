@@ -208,12 +208,29 @@ export function score(text, taskType = 'general') {
     formulaicPenalty = repeatedGrams >= 2 ? 0.04 : repeatedGrams === 1 ? 0.02 : 0
   }
 
+  // Phrasal embedding bonus (Loop 21, 2026-04-13)
+  // Frontiers in Psychology 2021 (TOEFL11 corpus): phrasal complexity > clausal complexity
+  // as predictor of TOEFL quality at Score-4→5 boundary. Two signals:
+  // 1. Long adj (≥7 chars, academic suffix) + nominalized head noun (≥4 chars, nom suffix)
+  // 2. N-of-N academic chains: "the impact of education", "the quality of research"
+  // Guard: ≥100 tokens (short emails won't accumulate enough phrasal tokens to be penalized)
+  let phrasalEmbeddingBonus = 0
+  if (tokens.length >= 100) {
+    const LONG_ADJ_NOUN_RE = /\b[a-z]{7,}(?:al|ic|ive|ous|ful|less|ary|ory|ent|ant)\s+[a-z]{4,}(?:ment|tion|ness|ity|ism|ance|ence)\b/gi
+    const N_OF_N_RE = /\b(?:quality|impact|importance|effectiveness|significance|consequence|implication|aspect|extent|degree|level|nature|role|function|purpose|process|outcome|challenge|advantage|benefit|limitation|concern|factor|element|feature|mechanism|framework|approach|method|strategy|policy|structure|pattern|relationship|effect|influence|contribution|development|growth|decline|improvement|achievement|problem|solution|cost)\s+of\s+(?:the|a|an|this|these|their|its|our|such)\s+\w+/gi
+    const longAdjNounCount = (text.match(LONG_ADJ_NOUN_RE) || []).length
+    const nOfNCount = (text.match(N_OF_N_RE) || []).length
+    const phrasalRate = ((longAdjNounCount + nOfNCount) / tokens.length) * 100
+    // Score-5 essays: ~4+/100w; Score-4: ~2/100w; below threshold: no bonus
+    phrasalEmbeddingBonus = phrasalRate >= 4 ? Math.min(0.05, (phrasalRate - 2) * 0.015) : phrasalRate >= 2 ? 0.02 : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
   }
 }
 

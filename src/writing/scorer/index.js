@@ -43,7 +43,7 @@ export function scoreWriting(text, taskType = 'general', promptText = '', goals 
     vocabulary:   vocabulary.score(text),
     organization: organization.score(text, taskType, promptText),
     development:  development.score(text, taskType),
-    style:        style.score(text),
+    style:        style.score(text, taskType),
     relevance:    relevance.score(text, promptText, goals),
   }
 

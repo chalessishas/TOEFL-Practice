@@ -33,7 +33,7 @@ const FUNCTION_WORDS = new Set([
   'never','always','often','so','well','back','again','once','yet','not','no',
 ])
 
-export function score(text) {
+export function score(text, taskType = 'general') {
   const tokens = (text.match(/[a-zA-Z']+/g) || []).map(w => w.toLowerCase())
   if (tokens.length === 0) return { value: 0, details: 'No words found' }
 
@@ -127,12 +127,22 @@ export function score(text) {
   else if (nomDensity >= 8)  nomBonus = 0.10
   else if (nomDensity >= 5)  nomBonus = 0.05
 
+  // Email register consistency bonus (Chen 2019: formal register consistency is a
+  // Score-5 differentiator in email tasks; Chinese L1 writers frequently mix registers).
+  // Rewards emails that use both a formal opener phrase and a formal closing phrase.
+  let emailRegisterBonus = 0
+  if (taskType === 'email') {
+    const hasFormalOpener = /\b(I am writing to|I would like to|I am pleased to|I hope this|Please find|With regard to|Regarding|I am contacting)\b/i.test(text)
+    const hasFormalClosing = /\b(I look forward to|please do not hesitate|Thank you for your|I would appreciate|I await your|Best regards|Sincerely|Yours faithfully|Yours truly)\b/i.test(text)
+    emailRegisterBonus = (hasFormalOpener && hasFormalClosing) ? 0.04 : (hasFormalOpener || hasFormalClosing) ? 0.02 : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty + nomBonus + sentLenBonus + subDensityBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${emailRegisterBonus > 0 ? `, email register bonus: +${emailRegisterBonus.toFixed(2)}` : ''}`,
   }
 }
 

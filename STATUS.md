@@ -133,6 +133,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] organization.js semi-formal email register — 7 条专业用语检测（I am writing to / I would appreciate / at your convenience）；+0.04/+0.08；28/28 校准维持 (b976fc6)
 - [100%] development.js TAACO 局部衔接惩罚 — localCohesionPenalty()：连续句对平均 token 重叠 >0.30→-0.03，>0.40→-0.07，>0.55→-0.12；仅限 discussion；重复性 vs 发展性区分 0.500 vs 0.803；28/28 (1498ef6)
 - [100%] grammar.js 中文 L1 迁移 P1 — 3P-单数 -s 脱落（THIRD_PERSON_BARE）+ have been + 裸词干（HAVE_BEEN_BARE）+ 静态动词进行式（STATIVE_PROG）+ 4 条冗余介词（emphasize on/stress on/marry with/enter into [地点]）；8/8 校准维持；suggest() 补入三类新错误提示
+- [100%] grammar.js 中文 L1 迁移 P2 — 话题评论式赘词主语（TOPIC_COMMENT_RE）："This problem, it needs attention" → 错；两层守卫（38 个话语/时间副词 + 介词短语开头排除）；11/11 测试通过（7 假正→0，4 真错误→命中）；8/8 校准维持 (7400394)
+- [100%] organization.js 动态同伴名称提取 — score() 新增 promptText 参数；从实际题目文本中提取大写专有名词替代硬编码 PEER_NAMES 列表；index.js 传入 promptText；前向兼容新题目中的任何新姓名
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

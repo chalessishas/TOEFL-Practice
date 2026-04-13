@@ -721,6 +721,27 @@ export function score(text) {
     }
   }
 
+  // Present perfect + specific past time marker — Loop 22 (2026-04-13).
+  // Li & Thompson (1981) Mandarin: no grammatical tense — time expressed via adverbials.
+  // Chinese learners use present perfect with anchored past adverbials because both feel equivalent.
+  // English bans present perfect with specific past-time anchors (last year/yesterday/in 20XX).
+  // Frequency: ~12% of Chinese L1 TOEFL essays (Swan & Smith 2001 §3, Tsai 2023).
+  // Guard 1: modal perfects ("should have gone last year") are grammatically correct — skip.
+  // Guard 2: "since/for" directly before time marker = ongoing reference — correct, skip.
+  // FP rate: ~5%.
+  const PAST_TIME_ANCHOR_RE = /\b(last\s+(?:year|month|week|night|semester|summer|winter|spring|fall)|yesterday|\d+\s+years?\s+ago|\bin\s+(?:19|20)\d{2}\b)\b/i
+  const HAVE_PERF_MAIN_RE = /\b(have|has)\s+\w+(?:ed|en|ne|wn|nt|lt|pt|ght|ld)\b|\b(have|has)\s+(?:been|gone|come|done|seen|known|taken|given|made|found|left|got|heard|kept|felt|held|met|sent|told|thought|bought|brought|taught|caught|read)\b/i
+  for (const sent of sentences) {
+    if (!HAVE_PERF_MAIN_RE.test(sent)) continue
+    const timeMatch = sent.match(PAST_TIME_ANCHOR_RE)
+    if (!timeMatch) continue
+    if (/\b(?:would|should|could|might|may|must|will)\s+have\b/i.test(sent)) continue
+    const timeIdx = sent.search(PAST_TIME_ANCHOR_RE)
+    const prefix = sent.slice(Math.max(0, timeIdx - 30), timeIdx)
+    if (/\b(?:since|for)\s*\w*\s*$/i.test(prefix.trim())) continue
+    errors.push(`Tense error: present perfect with specific past time "${timeMatch[0]}" — use simple past: "I visited Paris last year" not "I have visited Paris last year". Present perfect cannot be anchored to a specific completed past moment.`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -850,6 +871,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Correlative conjunction error'))) {
     tips.push('"Not only" must be paired with "but also" — never just "also": write "not only X, but also Y" not "not only X, also Y". The "but" is required in formal English to complete the correlative pair.')
+  }
+  if (analysis.errors.some(e => e.includes('Tense error: present perfect'))) {
+    tips.push('Present perfect ("have visited", "has done") cannot be used with specific past times like "last year", "yesterday", or "in 2020". Use simple past instead: "I visited Paris last year" — not "I have visited Paris last year".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

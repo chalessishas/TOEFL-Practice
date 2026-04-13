@@ -142,9 +142,13 @@ function argumentStructureScore(text, wordCount, taskType) {
   // Thin essay penalty: long but ≤1 example marker and ≤1 reason marker
   let base
   if (taskType === 'discussion' && hasThesis) {
-    // Discussion: stating a position (or engaging with a peer) is the primary criterion.
-    // Details/reasons are secondary — only penalise if truly undeveloped (zero of both).
-    base = (detailCount === 0 && reasonCount === 0) ? 0.65 : 1.0
+    // Discussion: stating a position is primary, but concrete examples are required for full credit.
+    // ETS rubric: Score-5 = "well-elaborated"; Score-3 = "may not be well-developed" (thin/vague).
+    // detailCount=0 means no "for example/such as/research shows/%" — connector-only essays
+    // that look well-organised but lack specifics should be capped, not rewarded.
+    if (detailCount === 0 && reasonCount === 0) base = 0.60
+    else if (detailCount === 0) base = 0.75  // connectors only, no concrete evidence → cap
+    else base = 1.0
   } else if (!hasThesis && detailCount <= 1 && reasonCount <= 1) {
     base = 0.35
   } else if (detailCount === 0 && reasonCount <= 1) {

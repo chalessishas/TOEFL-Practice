@@ -135,6 +135,8 @@ function argumentStructureScore(text, wordCount, taskType) {
   const repetitionPenalty = bareClaims.length >= 3 ? 0.15 : 0
   // Circular reasoning: intra-paragraph token overlap proxy (P3)
   const circPenalty = circularReasoningPenalty(text, wordCount, taskType)
+  // Adjacent-sentence local cohesion: high avg overlap = shallow paraphrasing (TAACO)
+  const cohesionPenalty = localCohesionPenalty(text, wordCount, taskType)
 
   // Full score: has thesis + ≥2 examples/details + ≥2 reason markers
   // Thin essay penalty: long but ≤1 example marker and ≤1 reason marker
@@ -152,7 +154,7 @@ function argumentStructureScore(text, wordCount, taskType) {
   } else {
     base = 1.0
   }
-  return Math.max(0, base - repetitionPenalty - circPenalty)
+  return Math.max(0, base - repetitionPenalty - circPenalty - cohesionPenalty)
 }
 
 // P3 — Circular reasoning penalty (Research Loop 6).
@@ -194,6 +196,49 @@ function circularReasoningPenalty(text, wordCount, taskType) {
   // >80% overlap = very likely repetition; 60-80% = suspicious
   if (maxOverlap > 0.80) return 0.15
   if (maxOverlap > 0.60) return 0.08
+  return 0
+}
+
+// Adjacent-sentence local cohesion penalty (TAACO / Crossley et al. 2016).
+// For Academic Discussion, high sentence-to-sentence content-word overlap
+// correlates NEGATIVELY with score — it signals shallow paraphrasing rather
+// than development. Essay-wide adjacent-sentence overlap > threshold = penalty.
+// Email skipped; only applies to essays ≥80 words.
+function localCohesionPenalty(text, wordCount, taskType) {
+  if (taskType === 'email' || taskType !== 'discussion' || wordCount < 80) return 0
+
+  const sentences = text
+    .split(/[.!?]+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 10)
+  if (sentences.length < 3) return 0
+
+  const tokenSets = sentences.map(s =>
+    new Set(
+      (s.match(/[a-zA-Z']+/g) || [])
+        .map(w => w.toLowerCase())
+        .filter(w => w.length >= 4 && !OVERLAP_STOPWORDS.has(w))
+    )
+  )
+
+  // Average overlap between consecutive sentence pairs
+  let totalOverlap = 0
+  let pairs = 0
+  for (let i = 0; i < tokenSets.length - 1; i++) {
+    const a = tokenSets[i], b = tokenSets[i + 1]
+    if (a.size === 0 || b.size === 0) continue
+    const shared = [...a].filter(t => b.has(t)).length
+    totalOverlap += shared / Math.min(a.size, b.size)
+    pairs++
+  }
+  if (pairs === 0) return 0
+  const avgOverlap = totalOverlap / pairs
+
+  // Penalty only kicks in for clearly repetitive patterns (avg overlap > 0.35)
+  // — below this threshold, adjacent sentences naturally share topic vocabulary
+  if (avgOverlap > 0.55) return 0.12
+  if (avgOverlap > 0.40) return 0.07
+  if (avgOverlap > 0.30) return 0.03
   return 0
 }
 

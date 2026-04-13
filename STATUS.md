@@ -140,7 +140,8 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] organization.js 认识立场 tier-2 hedging bonus — HEDGING_TIER2 7 个模式（I would argue / one might / it could be argued 等）；discussion 专属；+0.06 (1 hit) / +0.10 (2+ hits)；tier-1 hedging 列表重构避免双重计分；8/8 校准维持
 - [100%] grammar.js 邮件称呼逗号粘连误报修复 — "Dear Professor Chen, I am writing..." 被误标为逗号粘连；在逗号粘连检测前添加 salutationPattern 守卫（Dear/Hello/Hi/Hey/Greetings 开头跳过）；E2E 实测发现，4/4 测试通过，8/8 校准维持
 - [100%] tests/scorer-calibration.js 邮件回归测试 — EMAIL_SALUTATION_REGRESSION（grammar extraCheck ≥0.99）+ SCORE5_EMAIL（≥4.2）；Runner 新增 extraCheck callback 支持；10/10 通过，gaps 3→4:+0.70 / 4→5:+0.50 (616ffde)
-- [SKIP] grammar.js 时态不一致检测 — Loop 9 建议；grammar.score() 无 taskType 参数，邮件 FP 率高；ROI 0.03-0.04 不值得架构变更
+- [100%] grammar.js 时态不一致检测 — 背景 Agent 实现（896621d）；保守阈值 0.35 + 时态锚词排除（in 20XX/last year/ago 等）；tensTotal ≥ 8 触发；FP=0/4 验证；10/10 校准维持
+- [100%] style.js 从属连词密度奖励 — ≥3/100w → +0.04，≥1.5/100w → +0.02；COMPLEX_PATTERNS 只检测存在性，density 补充深度区分；10/10 校准维持 (896621d)
 - [0%] 笔记本后端同步（跨设备）
 - [0%] 用户认证系统
 - [0%] Listening 模块（需用户决策：真实音频 or 浏览器 TTS）

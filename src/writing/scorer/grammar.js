@@ -742,6 +742,37 @@ export function score(text) {
     errors.push(`Tense error: present perfect with specific past time "${timeMatch[0]}" — use simple past: "I visited Paris last year" not "I have visited Paris last year". Present perfect cannot be anchored to a specific completed past moment.`)
   }
 
+  // Redundant "about" after transitive reporting verbs — Loop 23 (2026-04-13).
+  // Liu (2011) Chinese L1 TOEFL corpus: "discuss about" ~15%, "mention about" ~10%,
+  // "explain about" ~8%. Calque from Chinese 讨论关于/提到关于 — 关于 (about) is a
+  // separate preposition in Chinese but is redundant in English transitive verb patterns.
+  // "discuss/mention/describe/explain" are already transitive — "about" is categorically wrong.
+  // FP rate: ~0% (native speakers virtually never produce "discuss about").
+  const REDUNDANT_ABOUT_RE = /\b(discuss(?:es|ed|ing)?|mention(?:s|ed|ing)?|describe(?:s|d|ing)?|explain(?:s|ed|ing)?|address(?:es|ed|ing)?|consider(?:s|ed|ing)?)\s+about\b/gi
+  let raMatch
+  while ((raMatch = REDUNDANT_ABOUT_RE.exec(text)) !== null) {
+    const verb = raMatch[1].replace(/(?:es|ed|s|ing)$/, '')
+    errors.push(`Redundant preposition: "${raMatch[0].trim()}" — "${verb}" is already transitive; remove "about". Write "${raMatch[1]} the issue" not "${raMatch[1]} about the issue"`)
+  }
+
+  // Correlative conjunction mismatch — Loop 23 (2026-04-13).
+  // Leacock et al. (2014) Chinese L1 TOP errors: "neither...or" (~6%) and "either...nor" (~3%).
+  // Chinese 既不...也不 / 或者...或者 do not grammatically encode the or/nor distinction.
+  // Rule: "neither...nor" (both negative) / "either...or" (affirmative choice).
+  // Guard for NEITHER_OR: skip if "nor" also appears between "neither" and "or" (three-part list).
+  const NEITHER_OR_RE = /\bneither\b(.{0,120}?)\bor\b/gi
+  let noCorMatch
+  while ((noCorMatch = NEITHER_OR_RE.exec(text)) !== null) {
+    if (!/\bnor\b/i.test(noCorMatch[1])) {
+      errors.push(`Correlative error: "neither...or" — the correct pair is "neither...nor": "neither X nor Y"`)
+    }
+  }
+  const EITHER_NOR_RE = /\beither\b(.{0,120}?)\bnor\b/gi
+  let enMatch
+  while ((enMatch = EITHER_NOR_RE.exec(text)) !== null) {
+    errors.push(`Correlative error: "either...nor" — the correct pair is "either...or": "either X or Y"`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -874,6 +905,16 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Tense error: present perfect'))) {
     tips.push('Present perfect ("have visited", "has done") cannot be used with specific past times like "last year", "yesterday", or "in 2020". Use simple past instead: "I visited Paris last year" — not "I have visited Paris last year".')
+  }
+  if (analysis.errors.some(e => e.includes('Redundant preposition') && e.includes('transitive'))) {
+    const re = analysis.errors.find(e => e.includes('Redundant preposition') && e.includes('transitive'))
+    tips.push(re ? re.replace('Redundant preposition: ', '') : '"Discuss", "mention", "describe", and "explain" are transitive — remove "about": write "discuss the issue" not "discuss about the issue".')
+  }
+  if (analysis.errors.some(e => e.includes('Correlative error') && e.includes('neither'))) {
+    tips.push('"Neither" pairs with "nor" — not "or": write "neither X nor Y". Remember: neither/nor = both negative; either/or = affirmative choice.')
+  }
+  if (analysis.errors.some(e => e.includes('Correlative error') && e.includes('either'))) {
+    tips.push('"Either" pairs with "or" — not "nor": write "either X or Y". "Nor" is only used with "neither": "neither X nor Y".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

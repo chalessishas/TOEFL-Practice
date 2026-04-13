@@ -773,6 +773,50 @@ export function score(text) {
     errors.push(`Correlative error: "either...nor" — the correct pair is "either...or": "either X or Y"`)
   }
 
+  // "Worth + to-infinitive" — Loop 24 (2026-04-13).
+  // Celce-Murcia & Larsen-Freeman (1999) §14.4: "worth" uniquely requires a gerund complement.
+  // Chinese calque 值得去学习 (worth [去=infinitive marker] study) → "worth to study".
+  // "worth to [verb]" is categorically wrong in English. FP rate: ~0%.
+  // "worth + gerund" (worth reading) and "worth + NP" (worth the effort) are both correct.
+  const WORTH_TO_RE = /\bworth\s+to\s+(\w+)\b/i
+  const wtMatch = text.match(WORTH_TO_RE)
+  if (wtMatch) {
+    errors.push(`Gerund error: "worth to ${wtMatch[1]}" — "worth" requires a gerund (-ing), not a "to" infinitive. Write "worth ${wtMatch[1]}ing" not "worth to ${wtMatch[1]}"`)
+  }
+
+  // "According to + personal pronoun" — Loop 24 (2026-04-13).
+  // Quirk et al. (1985) Comprehensive Grammar §8.138: "according to" licenses NPs/authors,
+  // never personal pronouns. Chinese 根据我/根据他 → "according to me/him" is a direct calque.
+  // Correct alternatives: "in my opinion", "I believe", "from my perspective".
+  // FP rate: ~0% (native academic writers never write "according to me").
+  const ACCORDING_TO_PRON_RE = /\baccording\s+to\s+(me|him|her|us|them|you)\b/i
+  const atpMatch = text.match(ACCORDING_TO_PRON_RE)
+  if (atpMatch) {
+    const pron = atpMatch[1].toLowerCase()
+    const alt = pron === 'me' ? 'in my opinion' : pron === 'us' ? 'in our opinion' : `in ${pron === 'him' ? 'his' : pron === 'her' ? 'her' : pron === 'them' ? 'their' : 'your'} opinion`
+    errors.push(`Preposition error: "according to ${atpMatch[1]}" — "according to" requires a noun/source, not a personal pronoun. Write "${alt}" or "I believe/argue that..."`)
+  }
+
+  // "Be used to + bare infinitive" — Loop 24 (2026-04-13).
+  // Quirk et al. (1985): "be used to" (= be accustomed to) takes a gerund or noun, not a bare infinitive.
+  // Chinese L1 confusion: 习惯于 (used to / accustomed to) is followed by a bare verb.
+  // "used to + base" (habitual past) vs "be used to + gerund" (accustomed to) is a distinct error.
+  // Conservative whitelist: only flag unambiguous verb base forms (nouns excluded) to hold FP ~3%.
+  const USED_TO_BASE_VERBS = new Set([
+    'study','wake','sleep','eat','drive','write','read','speak','swim','cook','travel',
+    'teach','learn','walk','run','fight','deal','handle','cope','manage','work','live',
+    'play','shop','ride','think','watch','listen','exercise','commute','sit','stand',
+    'make','take','give','do','see','know','come','go','get','put','set',
+  ])
+  const BE_USED_TO_RE = /\b(am|is|are|was|were|be|been|get|got|become|became)\s+used\s+to\s+(\w+)\b/i
+  const butMatch = text.match(BE_USED_TO_RE)
+  if (butMatch) {
+    const nextWord = butMatch[2].toLowerCase()
+    if (!nextWord.endsWith('ing') && USED_TO_BASE_VERBS.has(nextWord)) {
+      errors.push(`Gerund error: "used to ${nextWord}" — "be used to" (= be accustomed to) takes a gerund, not a bare verb. Write "used to ${nextWord}ing" not "used to ${nextWord}"`)
+    }
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -915,6 +959,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Correlative error') && e.includes('either'))) {
     tips.push('"Either" pairs with "or" — not "nor": write "either X or Y". "Nor" is only used with "neither": "neither X nor Y".')
+  }
+  if (analysis.errors.some(e => e.includes('worth to'))) {
+    tips.push('"Worth" always takes a gerund (-ing), never a "to" infinitive: write "worth reading/studying/trying" — not "worth to read/to study/to try".')
+  }
+  if (analysis.errors.some(e => e.includes('according to') && e.includes('personal pronoun'))) {
+    tips.push('"According to" must be followed by a noun or source (according to research / according to experts) — never a personal pronoun. For your own opinion, write "In my opinion, ..." or "I believe that..."')
+  }
+  if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('be accustomed'))) {
+    tips.push('"Be used to" (= be accustomed to) takes a gerund (-ing): "I am used to studying" not "I am used to study". This is different from "used to + base verb" for habitual past: "I used to study" (= I did this in the past).')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

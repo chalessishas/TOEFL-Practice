@@ -108,7 +108,10 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] mechanics.js 误报修复 — 字典未加载时跳过拼写检查（原行为：15k fallback 将 "commute/eliminates/mentorship" 等正确词误标为拼写错误）(54bab35)
 - [100%] grammar.js SVA 扩展 — 新增 3 条高精度模式：he/she/it have→has、he/she/it are→is、you/we/they was→were；0 误报 (ed87925)
 - [100%] development.js DETAIL_MARKERS 扩展 — 补入学术引证模式（research shows/suggests、as evidenced by 等），高分段不再因回避 "for example" 被低估 (76be0ea)
-- [100%] style.js 缩写惩罚 — 添加 23 条缩写词（it's/can't/don't/I'm/you're 等）到 CASUAL_TERMS；缩写原先因 TTR 唯一 token 误增分，现正确下调；重度缩写文本 0.40 vs 正式文本 0.74 (55cd1d6) — 补入学术引证模式（"research shows", "studies suggest", "as evidenced by", "based on" 等），高分段写作不再因回避 "for example" 被低估 (76be0ea)：he/she/it have→has、he/she/it are→is、you/we/they was→were；0 误报（modal 构式通过）(ed87925) — 字典未加载时跳过拼写检查（原行为：15k fallback 将 "commute/eliminates/mentorship" 等正确词误标为拼写错误）(54bab35) — 7/7 真错误命中，0 误报（排除 university/European/unique 等 /j/ 音词）(78fa6b1)
+- [100%] style.js 缩写惩罚 — 添加 23 条缩写词到 CASUAL_TERMS，修复 TTR 虚增 bug (55cd1d6)
+- [100%] grammar.js 介词搭配错误 — 8 条高精度模式（depend of/interested on/discuss about 等），ESL #3 错误类型 (a67669c)
+- [100%] development.js 反驳论证标记 — REASON_MARKERS 新增 "one might argue/critics argue/admittedly" 等；AESPA 2025 确认有无反驳意识分差 0.3-0.5 分 (a67669c)
+- [100%] relevance.js 同义词扩展 — 11 个 TOEFL 话题同义词组，近义词击中计 0.6 分，配套设置 floor=0.4（≥2 组命中时），释义式回答不再被过度惩罚 (a67669c) — 添加 23 条缩写词（it's/can't/don't/I'm/you're 等）到 CASUAL_TERMS；缩写原先因 TTR 唯一 token 误增分，现正确下调；重度缩写文本 0.40 vs 正式文本 0.74 (55cd1d6) — 补入学术引证模式（"research shows", "studies suggest", "as evidenced by", "based on" 等），高分段写作不再因回避 "for example" 被低估 (76be0ea)：he/she/it have→has、he/she/it are→is、you/we/they was→were；0 误报（modal 构式通过）(ed87925) — 字典未加载时跳过拼写检查（原行为：15k fallback 将 "commute/eliminates/mentorship" 等正确词误标为拼写错误）(54bab35) — 7/7 真错误命中，0 误报（排除 university/European/unique 等 /j/ 音词）(78fa6b1)
 - [100%] vocabulary.js AWL 扩展 — sublists 4-6+ 补入 ~100 新词（inevitable/empirical/contradict/explicit 等），AWL_CORE 从 ~100 扩至 ~200 词 (020b338)
 - [100%] style.js COMPLEX_PATTERNS — 5→10 模式，修复大写首字母大小写 bug（Despite/Whether 等句首词原本不命中），高级文章 6/10 vs 简单文章 1/10，区分度显著提升 (020b338)
 - [100%] E2E 实测通过 — Discussion 4.3/5、Email 4.9/5，7 维 breakdown 正常，On-Topic 维度展示正确

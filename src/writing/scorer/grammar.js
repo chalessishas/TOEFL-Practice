@@ -99,6 +99,13 @@ export function score(text) {
       const lastWordMatch = before.match(/(\w+)\s*$/)
       const lastWord = lastWordMatch ? lastWordMatch[1] : ''
       const hasPhrase = SPLICE_SAFE_PHRASES.some(p => before.includes(p))
+      // Skip expletive "it is/was worth/important/clear/..." — these follow a fronted
+      // adverbial phrase and use "it" as an impersonal subject, not as a splice pronoun.
+      // e.g. "...from labor economics, it is worth noting" is grammatically correct.
+      if (csMatch[1].toLowerCase() === 'it') {
+        const afterComma = sentence.slice(csMatch.index + csMatch[0].length)
+        if (/^\s*(?:worth|important|necessary|essential|clear|evident|obvious|true|possible|likely|certain|notable|interesting|natural|common|widely|generally|well)\b/i.test(afterComma)) continue
+      }
       if (!SPLICE_SAFE_WORDS.has(lastWord) && !hasPhrase) {
         errors.push(`Possible comma splice: "${csMatch[0].trim()}"`)
       }
@@ -295,6 +302,9 @@ export function score(text) {
     'surprisingly','consequently','hence','thus','therefore','however','moreover',
     'furthermore','additionally','meanwhile','nevertheless','otherwise','instead',
     'historically','traditionally','economically','politically','socially',
+    // Additive/sequential discourse markers (Loop 19, 2026-04-13)
+    'also','first','second','third','next','then','lastly','finally',
+    'additionally','moreover','besides','likewise','equally',
   ])
   // Verb alternation: copula/modals + common 3P-sg action verbs that commonly appear in topic-comment errors
   const TOPIC_COMMENT_RE = /\b(\w+(?:\s+\w+){0,3}),\s+(it|he|she|they)\s+(is|are|was|were|has|have|needs|requires|should|must|can|will|would|affects|helps|shows|makes|causes|allows|enables|involves|represents|demonstrates|illustrates|provides|offers|suggests|indicates|plays|serves|works|depends|relies|exists|matters|remains|stands)\b/gi
@@ -305,6 +315,14 @@ export function score(text) {
     if (TOPIC_COMMENT_EXCLUSIONS.has(firstWord)) continue
     // Skip prepositional/subordinate clause fronting (correct English construction)
     if (/^(in|at|on|by|for|as|when|if|although|since|after|before|during|despite|without|regarding|concerning|given|according|based|with|from|through|across|among|between|under|over|along|around|beyond|within)\b/i.test(topic)) continue
+    // Skip expletive "it is worth/important/clear/notable..." constructions (Loop 19, 2026-04-13).
+    // "Drawing on evidence from labor economics, it is worth noting" — the "it" here is
+    // an impersonal/expletive pronoun opening a matrix clause, not a resumptive pronoun.
+    // These predicative-adjective frames are never Chinese L1 topic-comment errors.
+    if (tcMatch[2] === 'it') {
+      const afterMatch = text.slice(tcMatch.index + tcMatch[0].length)
+      if (/^\s+(?:worth|important|necessary|essential|clear|evident|obvious|true|possible|likely|certain|notable|interesting|natural|common|widely|generally|well)\b/i.test(afterMatch)) continue
+    }
     errors.push(`Topic-comment error: "${tcMatch[0].trim()}" — avoid resumptive pronouns; state the subject once: use "This problem needs attention" not "This problem, it needs"`)
   }
 

@@ -134,19 +134,39 @@ export function score(text, taskType = 'general') {
     if (hasBodyEvidence) zoneBonus += 0.05
   }
 
+  // Semi-formal email register bonus (Research Loop 7 P3).
+  // ETS Score-5 emails consistently use professional opening/closing phrases beyond
+  // "Dear X / Best regards" — these signal awareness of formal register conventions.
+  let semiFormalBonus = 0
+  if (taskType === 'email') {
+    const SEMI_FORMAL = [
+      /\bi am writing to\b/i,
+      /\bi would (appreciate|like to|be grateful)\b/i,
+      /\bplease (let me know|feel free|do not hesitate)\b/i,
+      /\bi hope (this email|to hear|you are|you will)\b/i,
+      /\bthank you for (your|the|considering|taking)\b/i,
+      /\bi (kindly |humbly )?(request|ask|inquire)\b/i,
+      /\bat your (earliest )?(convenience|opportunity)\b/i,
+    ]
+    const hits = SEMI_FORMAL.filter(re => re.test(lower)).length
+    if (hits >= 2) semiFormalBonus = 0.08
+    else if (hits === 1) semiFormalBonus = 0.04
+  }
+
   // Email tasks: structure (paragraphs + greeting/closing) dominates over academic markers.
   // Academic essays need discourse markers; emails use transactional phrasing not in our list.
   const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
   const value = Math.min(
     1,
-    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus),
+    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus),
   )
 
-  const zonePart  = zoneBonus  > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`  : ''
-  const ratioPart = ratioBonus > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}` : ''
+  const zonePart       = zoneBonus       > 0 ? `, zoneBonus=+${zoneBonus.toFixed(2)}`             : ''
+  const ratioPart      = ratioBonus      > 0 ? `, inferentialRatio=+${ratioBonus.toFixed(2)}`     : ''
+  const semiFormalPart = semiFormalBonus > 0 ? `, semiFormal=+${semiFormalBonus.toFixed(2)}`      : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}`,
   }
 }
 

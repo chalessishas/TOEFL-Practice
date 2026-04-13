@@ -581,6 +581,30 @@ export function score(text) {
     }
   }
 
+  // Existential "there is/was" + plural quantifier — Chinese L1 SVA transfer.
+  // Leacock et al. (2014): existential-there SVA is in top 10 Chinese L1 TOEFL errors (~12% essays).
+  // Celce-Murcia & Larsen-Freeman (1999) §20.2: copula must agree with post-copula subject.
+  // Count quantifiers (many/several/few/various/multiple/numerous) always require plural "are/were".
+  // Excluded: "a lot of" — ambiguous (mass noun "a lot of research IS" is correct).
+  const EXIST_SVA_RE = /\bthere\s+(is|was)\s+(?:still\s+|also\s+|now\s+|currently\s+)?(many|several|few|various|multiple|numerous|a\s+number\s+of)\b/gi
+  let esvMatch
+  while ((esvMatch = EXIST_SVA_RE.exec(text)) !== null) {
+    const copula = esvMatch[1]
+    const quant = esvMatch[2]
+    const correctCopula = copula === 'is' ? 'are' : 'were'
+    errors.push(`SVA error: "there ${copula}" + plural quantifier — should be "there ${correctCopula} ${quant}..."`)
+  }
+
+  // Preposition "to" before "home" — Swan & Smith (2001) Chinese section §4: calque of 回到家.
+  // "home" as a goal-of-motion adverb absorbs the directional preposition — categorically barred.
+  // "go/come/return/get home" — ~8% of Chinese L1 TOEFL essays contain "go to home".
+  // FP guard: only triggered when a motion verb immediately precedes "to home".
+  const TO_HOME_RE = /\b(go|come|return|get|arrive|walk|drive|travel|fly|head|rush|hurry|move)\s+to\s+home\b/i
+  if (TO_HOME_RE.test(text)) {
+    const m = text.match(TO_HOME_RE)
+    errors.push(`Preposition error: "${m[0]}" — "home" as a destination takes no preposition. Write "${m[1]} home" (not "to home")`)
+  }
+
   // Causative make/let/have + pronoun object + to-infinitive — Laufer & Waldman (2011):
   // ~12% of Chinese L1 essays contain causative infinitive errors. English causative verbs
   // (make/let/have) take bare infinitive after the object — never "to". Chinese causatives
@@ -698,6 +722,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Passive voice error'))) {
     tips.push('In passive voice, use the past participle (not simple past): "was written" not "was wrote", "was seen" not "was saw", "was taken" not "was took". Simple past and past participle are different forms for irregular verbs.')
+  }
+  if (analysis.errors.some(e => e.includes('SVA error') && e.includes('plural quantifier'))) {
+    tips.push('"there is/was" must agree with the noun that follows: use "there are many reasons" not "there is many reasons". Count quantifiers (many/several/few/various) always require plural "are/were".')
+  }
+  if (analysis.errors.some(e => e.includes('"home"') && e.includes('no preposition'))) {
+    tips.push('"home" as a destination is a bare adverb — no preposition needed. Write "go home", "come home", "return home" — never "go to home" or "come to home".')
+  }
+  if (analysis.errors.some(e => e.includes('Causative verb error'))) {
+    tips.push('Causative verbs (make/let/have) take a bare infinitive after the object — never "to". Write "make him understand" not "make him to understand", "let her go" not "let her to go".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

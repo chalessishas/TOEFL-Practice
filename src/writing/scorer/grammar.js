@@ -1392,6 +1392,66 @@ export function score(text) {
     errors.push('Preposition error: "congratulate [person] to" → "congratulate [person] on". Write "congratulate her on winning", "congratulate them on their success". Chinese 祝贺某人做某事 transfers as "congratulate ... to" — but English always uses "on".')
   }
 
+  // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
+  // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
+  // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
+  // ICNALE (Zhang & Sung 2019): "less + countable" in 10.3% of Chinese L1 essays vs 1.4% native.
+  // Guard 1: exclude "less than [number]" — "less than 5 students" is idiomatic, not an error.
+  // Guard 2: closed whitelist of high-frequency TOEFL countable nouns only, no ambiguous nouns.
+  // FP: LOW-MED (~3-5%).
+  const LESS_COUNTABLE_RE = /\bless\s+(students?|people|persons?|individuals?|workers?|employees?|teachers?|children|citizens?|countries|nations?|cities|schools?|companies|organizations?|cases?|examples?|reasons?|problems?|issues?|options?|opportunities?|ways?|methods?|approaches?|solutions?|challenges?|benefits?|factors?|aspects?|arguments?|points?|steps?|ideas?|plans?|goals?|effects?|results?|changes?|improvements?)\b/gi
+  const lessCountableMatch = text.match(LESS_COUNTABLE_RE)
+  if (lessCountableMatch) {
+    const lessThanGuard = /\bless\s+than\s+\d/i.test(text)
+    if (!lessThanGuard) {
+      const noun = lessCountableMatch[0].replace(/^less\s+/i, '').toLowerCase()
+      errors.push(`Quantifier error: "less ${noun}" — "${noun}" is a countable noun; use "fewer": "fewer ${noun}". ("Less" is for uncountable/mass nouns: less water, less time, less information. Chinese 少 translates to both "fewer" and "less", but English requires "fewer" for countable nouns.)`)
+    }
+  }
+
+  // "very + comparative adjective" — Loop 37 (2026-04-13).
+  // Chinese 非常 (very) modifies both positive and comparative adjectives; English requires
+  // degree adverbs (much/far/considerably) before comparatives. Yang (2022): 4.1% essay frequency.
+  // Swan & Smith (2001): "very + comparative" listed as a productive Chinese L1 error.
+  // FP: VERY LOW (~0-1%) — no standard English uses "very better/worse/higher".
+  // Guard: "very much better" excluded — regex requires "very" directly before the comparative.
+  const VERY_COMP_RE = /\bvery\s+(better|worse|higher|lower|bigger|smaller|larger|longer|shorter|faster|slower|stronger|weaker|harder|easier|wider|narrower|deeper|heavier|lighter|older|younger|richer|poorer|healthier|smarter|louder|quieter|more\s+\w+|less\s+\w+)\b/i
+  const veryCompMatch = text.match(VERY_COMP_RE)
+  if (veryCompMatch) {
+    const comp = veryCompMatch[1]
+    const replacement = comp.startsWith('more ') || comp.startsWith('less ') ? `much ${comp}` : `much ${comp}`
+    errors.push(`Intensifier error: "very ${comp}" — use "much/far" before comparatives: "${replacement}", "far ${comp}". "Very" modifies positive adjectives ("very good"), not comparatives ("much better"). Chinese 非常 translates to both "very" and "much", but English uses different intensifiers for comparatives.`)
+  }
+
+  // "interested to + activity verb" → "interested in + gerund" — Loop 37 (2026-04-13).
+  // Chinese 对...感兴趣 + bare verb calque produces "interested to study" instead of
+  // "interested in studying". City University HK ELSS: #5 most frequent adjective-preposition error.
+  // CLEC-based analysis (BCP Publishing 2023): adjective-preposition errors = 16% of all CLEC errors.
+  // Guard: exclude "would be interested to" — valid formal request form ("I'd be interested to hear").
+  // FP: LOW-MED (~4-6%) with the would-be guard applied.
+  const INTERESTED_TO_RE = /\binterested\s+to\s+(study|learn|explore|pursue|participate|develop|improve|solve|apply|achieve|research|investigate|work|practice|engage|contribute|create|build|understand|analyze|address|discuss)\b/i
+  const interestedToMatch = text.match(INTERESTED_TO_RE)
+  if (interestedToMatch) {
+    const wouldBeGuard = /\bwould\s+(?:\w+\s+){0,4}interested\s+to\b/i.test(text)
+    if (!wouldBeGuard) {
+      const verb = interestedToMatch[1]
+      errors.push(`Preposition error: "interested to ${verb}" → "interested in ${verb}ing". "Interested" takes "in" + gerund: "interested in studying", "interested in learning". (Chinese 感兴趣 + bare verb transfers as "interested to do" — but English requires "interested in doing".)`)
+    }
+  }
+
+  // "improve + negative prosody noun" — semantic prosody violation — Loop 37 (2026-04-13).
+  // English "improve" carries positive-outcome prosody — it is restricted to positive/neutral collocates.
+  // Chinese 改善 collocates freely with negative nouns (改善污染 = "improve pollution").
+  // City University HK ELSS: documents "improve + air pollution" as systematic Chinese L1 error.
+  // Louw (1993) / Xiao & McEnery (2006): Chinese EFL learners show highest rate of prosody violation.
+  // FP: LOW (~1-3%) — "improve + bare negative noun" is essentially always wrong in academic English.
+  const IMPROVE_NEGATIVE_RE = /\b(?:improve|improving|improved|improves)\s+(?:the\s+)?(?:air\s+)?(pollution|unemployment|poverty|crime|inequality|discrimination|corruption|violence|obesity|deforestation|congestion|inflation|recession|deficit|shortage)\b/i
+  const improveNegMatch = text.match(IMPROVE_NEGATIVE_RE)
+  if (improveNegMatch) {
+    const noun = improveNegMatch[1]
+    errors.push(`Semantic prosody error: "improve ${noun}" — "improve" requires a positive collocate. Write "reduce ${noun}" or "improve ${noun === 'pollution' ? 'air quality' : noun === 'crime' ? 'public safety' : 'living conditions'}". Chinese 改善 collocates with negative nouns (改善污染), but English "improve" only collocates with positive/neutral outcomes.`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1645,6 +1705,18 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('congratulate'))) {
     tips.push('"Congratulate" takes "on" — not "to": write "congratulate her on winning", "congratulate the team on their success". The structure is "congratulate [person] on [achievement/gerund]".')
+  }
+  if (analysis.errors.some(e => e.includes('Quantifier error') && e.includes('fewer'))) {
+    tips.push('Use "fewer" before countable nouns, "less" before uncountable/mass nouns: "fewer students" (countable), but "less water" (uncountable). Chinese 少 translates to both — always ask: can I count it? If yes, use "fewer".')
+  }
+  if (analysis.errors.some(e => e.includes('Intensifier error') && e.includes('very'))) {
+    tips.push('"Very" modifies positive adjectives ("very good", "very fast"), not comparatives. Before comparatives, use "much/far/considerably": "much better", "far higher", "considerably more effective". Chinese 非常 fills both roles, but English uses different intensifiers.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('interested to'))) {
+    tips.push('"Interested" takes "in" + gerund for expressing ongoing interest: "interested in studying", "interested in learning". Write "I am interested in improving" — not "interested to improve". (The form "would be interested to hear" is valid in formal requests, but is not standard in general academic writing.)')
+  }
+  if (analysis.errors.some(e => e.includes('Semantic prosody error') && e.includes('improve'))) {
+    tips.push('"Improve" collocates with positive or neutral outcomes only: "improve quality", "improve conditions", "improve efficiency". For negative phenomena, use "reduce/decrease/combat/address/alleviate": "reduce pollution", "combat crime", "alleviate poverty". Chinese 改善 is neutral-valence, but English "improve" is positive-valence.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

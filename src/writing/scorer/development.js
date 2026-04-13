@@ -2,6 +2,12 @@ const DETAIL_MARKERS = [
   'for example','for instance','such as','specifically','in particular',
   'according to','namely','to illustrate','as evidence','as shown','as demonstrated',
   'in fact','as an example','including','like',
+  // Academic evidence citation patterns — reward students who cite research/data
+  // without using textbook "for example" openers (common in higher-band responses)
+  'research shows','research suggests','studies show','studies suggest',
+  'studies have shown','research has shown','data shows','data suggests',
+  'as evidenced by','as illustrated by','in the case of','to demonstrate',
+  'as seen in','based on','evidence shows','evidence suggests',
 ]
 
 // Opinion/thesis markers — signals the essay has a stated position

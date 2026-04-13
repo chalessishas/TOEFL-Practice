@@ -91,6 +91,29 @@ Admittedly, critics argue that remote arrangements undermine spontaneous collabo
   expectMin: 4.0,
 }
 
+// ─── Email regression tests ───────────────────────────────────────────────────
+// Regression: "Dear X, I am writing..." was flagged as comma splice before fix (d871b27).
+// Score-5 email with salutation + semi-formal register should reach grammar=1.0.
+const EMAIL_SALUTATION_REGRESSION = {
+  text: `Dear Professor Chen, I am writing to request an extension on the research paper due next Friday. I would be grateful if you could grant me an additional three days, as I have been dealing with a family emergency this week. I understand that late submissions are generally not permitted, and I sincerely apologize for the inconvenience. I would appreciate the opportunity to demonstrate my best work on this assignment. Please let me know if this request is feasible at your convenience. Thank you for your understanding. Best regards, Alex`,
+  taskType: 'email',
+  label: 'Email: salutation comma-splice regression (grammar must = 1.0)',
+  expectMin: 4.0,
+  extraCheck: r => {
+    const g = r.breakdown.grammar
+    const grammarScore = g ? (g.score || g.value || 0) : 0
+    return { ok: grammarScore >= 0.99, msg: `grammar=${grammarScore.toFixed(3)} (expected ≥ 0.99)` }
+  },
+}
+
+// Score-5 email: full structure, semi-formal register, specific details
+const SCORE5_EMAIL = {
+  text: `Dear Ms. Thompson, I am writing to formally report a persistent noise issue in my apartment that has significantly disrupted my daily routine. For the past three weeks, construction work beginning at 6:00 AM has made it impossible for me to maintain adequate sleep before my morning classes. I would be grateful if building management could investigate whether the work schedule complies with city noise ordinances and, if possible, delay the start time until 8:00 AM. I have documented several instances with timestamps and would be happy to provide this information upon request. Please do not hesitate to contact me at your earliest convenience to discuss a resolution. Thank you for your attention to this matter. Best regards, Jordan`,
+  taskType: 'email',
+  label: 'Score-5 email: full semi-formal structure, specific details (~130 words)',
+  expectMin: 4.2,
+}
+
 // ─── Runner ──────────────────────────────────────────────────────────────────
 const tests = [
   SCORE1_OFFOPIC,
@@ -101,6 +124,8 @@ const tests = [
   SCORE3_EMAIL,
   SCORE4_DISCUSSION,
   SCORE5_DISCUSSION,
+  EMAIL_SALUTATION_REGRESSION,
+  SCORE5_EMAIL,
 ]
 
 let passed = 0
@@ -120,6 +145,11 @@ for (const t of tests) {
   if (t.expectMin !== undefined && score < t.expectMin) {
     ok = false
     checks.push(`expected ≥ ${t.expectMin}, got ${score.toFixed(2)}`)
+  }
+
+  if (t.extraCheck) {
+    const { ok: extraOk, msg } = t.extraCheck(r)
+    if (!extraOk) { ok = false; checks.push(msg) }
   }
 
   const status = ok ? '✓ PASS' : '✗ FAIL'

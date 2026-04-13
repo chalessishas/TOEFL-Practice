@@ -170,9 +170,16 @@ export function score(text) {
     // Matches MTLD's implicit de-duplication via segment diversity.
     const uniqueContent = new Set(contentTokens)
     const rareTypes = new Set([...uniqueContent].filter(w => !commonWords.has(w)))
-    const rareRatio = uniqueContent.size > 0 ? rareTypes.size / uniqueContent.size : 0
-    diversityScore = linearMap(rareRatio, 0, 0.25, 0.2, 1.0)
-    diversityLabel = `rare word ratio: ${(rareRatio * 100).toFixed(1)}% (${rareTypes.size}/${uniqueContent.size} types)`
+    if (uniqueContent.size < 8) {
+      // Too few content words for rare-ratio to be meaningful (1 rare word / 1 total = 100%
+      // but signals nothing). Gate: linearly ramp from 0 at 0 words to 0.4 at 8 words.
+      diversityScore = linearMap(uniqueContent.size, 0, 8, 0, 0.4)
+      diversityLabel = `too few content words (${uniqueContent.size} unique)`
+    } else {
+      const rareRatio = rareTypes.size / uniqueContent.size
+      diversityScore = linearMap(rareRatio, 0, 0.25, 0.2, 1.0)
+      diversityLabel = `rare word ratio: ${(rareRatio * 100).toFixed(1)}% (${rareTypes.size}/${uniqueContent.size} types)`
+    }
   }
 
   // AWL depth tier bonus (Loop 8, 2026-04-12).

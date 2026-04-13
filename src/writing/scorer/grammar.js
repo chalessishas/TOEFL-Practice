@@ -1037,6 +1037,25 @@ export function score(text) {
     errors.push(`Conjunction error: "despite + finite clause" — "despite" is a preposition and needs a noun phrase or gerund: use "although/even though + clause" or "despite + noun/gerund" ("despite the challenges" / "despite facing challenges")`)
   }
 
+  // "Make/makes/making + adjective" without NP object — Loop 28 (2026-04-13).
+  // Yip & Matthews (2007) §6.3: Chinese 使/让 + predicate adjective directly transfers to
+  // "technology makes convenient" (missing object NP "things/life/it").
+  // Detection strategy: adjective must IMMEDIATELY follow make/makes/making (no intervening NP).
+  // "makes life convenient" → no match (life intervenes). "makes convenient" → match.
+  // Passive guard: "was/were/is/are/been made [adj]" skipped — "was made available" is correct.
+  // Conservative adjective whitelist: only adjectives where direct placement is always an error.
+  // Frequency: ~8%. FP rate: ~3-5% after guards (main FP: "make possible" as a stock phrase in
+  // formal text, e.g. "technology makes possible a new era" — poetic inversion, rare in TOEFL).
+  const MAKE_ADJ_WHITELIST = /\b(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/
+  const MAKE_ADJ_RE = /\b(make|makes|making)\s+(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/i
+  const MADE_ADJ_RE = /\b(made)\s+(convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/i
+  const MADE_PASSIVE_RE = /\b(?:was|were|is|are|been|being|get|got|getting|have|has|had)\s+made\s+(?:convenient|possible|easier|harder|necessary|essential|beneficial|effective|efficient|meaningful|acceptable|affordable|comfortable|successful|available)\b/i
+  const makeAdjMatch = text.match(MAKE_ADJ_RE) || (!MADE_PASSIVE_RE.test(text) ? text.match(MADE_ADJ_RE) : null)
+  if (makeAdjMatch) {
+    const adj = makeAdjMatch[2].toLowerCase()
+    errors.push(`Missing object: "${makeAdjMatch[0].trim()}" — "make" needs an object before the adjective. Write "make things ${adj}" or "make it ${adj}" not "make ${adj}" directly.`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1212,6 +1231,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('as far as I concern'))) {
     tips.push('The correct frozen phrase is "as far as I am concerned" — not "as far as I concern". The adjective "concerned" always needs the copula "am": "As far as I\'m concerned, this is the best approach."')
+  }
+  if (analysis.errors.some(e => e.includes('Missing object') && e.includes('make'))) {
+    tips.push('"Make" needs an object before an adjective: write "make things convenient", "make it possible", or "make life easier" — not "makes convenient", "make possible", "make easier" directly. Chinese 使...方便 transfers the adjective directly, but English requires the object NP.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

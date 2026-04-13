@@ -373,6 +373,20 @@ export function score(text) {
     { re: /\bbring\s+forward\s+(?:a\s+)?suggestion\b/i, msg: 'Collocation error: "bring forward a suggestion" → "make a suggestion" or "offer a suggestion"' },
     { re: /\b(?:get|obtain|achieve)\s+progresses?\b/i, msg: 'Collocation error: "get/obtain progress" → "make progress" (and "progress" is uncountable — no plural)' },
     { re: /\bdeal\s+(?!with\b)(?:the|this|that|a|an)\b/i, msg: 'Collocation error: "deal [NP]" → "deal with [NP]" (requires preposition "with")' },
+    // Extended collocations — Loop 23 (David Publishing 2024 + ERIC EJ1334553 corpus study)
+    // Top-ranked Chinese L1 collocational errors unresolved even at C1 proficiency level.
+    { re: /\bmake\s+contribution\s+to\b/i,
+      msg: 'Collocation error: "make contribution to" → "make a contribution to" (article required) or "contribute to"' },
+    { re: /\bplay\s+important\s+role\b/i,
+      msg: 'Collocation error: "play important role" → "play an important role" (article required before "important")' },
+    { re: /\bdo\s+(?:great\s+|much\s+|hard\s+)?efforts?\b/i,
+      msg: 'Collocation error: "do effort/efforts" → "make an effort" or "make efforts"' },
+    { re: /\bmake\s+(?:a\s+|an\s+|great\s+|big\s+)?influence\s+on\b/i,
+      msg: 'Collocation error: "make influence on" → "have an influence on" or "influence [noun]"' },
+    { re: /\bbring\s+benefit\s+to\b/i,
+      msg: 'Collocation error: "bring benefit to" → "bring benefits to" or "benefit [noun]"' },
+    { re: /\b(?:cause|produce|create)\s+(?:\w+\s+)?effect\s+on\b/i,
+      msg: 'Collocation error: "cause/produce/create effect on" → "have an effect on" or "affect [noun]"' },
   ]
   COLLOCATION_ERRORS.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)
@@ -512,6 +526,44 @@ export function score(text) {
   if (UNCOUNTABLE_ART_RE.test(text)) {
     const m = text.match(UNCOUNTABLE_ART_RE)
     errors.push(`Uncountable noun error: "${m[0]}" — "${m[2]}" is uncountable and cannot take "a/an". Write "some ${m[2]}" or just "${m[2]}"`)
+  }
+
+  // Pluralized uncountable nouns — Loop 23 (2026-04-13)
+  // Frontiers in Psychology 2022 + Nature/HSSC 2025: systematic Chinese L1 error —
+  // mass nouns treated as count nouns. "researches" is most distinctive Chinese L1
+  // academic error vs native speakers (corpus confirmed).
+  // FP guard: "researches" as 3rd-person verb is rare in academic writing; accept <0.5% FP.
+  const PLURAL_UNCOUNTABLE = [
+    { re: /\bresearches\b/i,   msg: 'Plural error: "researches" — "research" is uncountable; write "research findings", "studies", or "research"' },
+    { re: /\binformations\b/i, msg: 'Plural error: "informations" — "information" is uncountable; write "pieces of information" or "information"' },
+    { re: /\bknowledges\b/i,   msg: 'Plural error: "knowledges" — "knowledge" is uncountable; write "areas of knowledge" or "knowledge"' },
+    { re: /\badvices\b/i,      msg: 'Plural error: "advices" — "advice" is uncountable; write "pieces of advice" or "advice"' },
+    { re: /\bequipments\b/i,   msg: 'Plural error: "equipments" — "equipment" is uncountable; write "pieces of equipment" or "equipment"' },
+    { re: /\bfurnitures\b/i,   msg: 'Plural error: "furnitures" — "furniture" is uncountable; write "pieces of furniture" or "furniture"' },
+    { re: /\bhomeworks\b/i,    msg: 'Plural error: "homeworks" — "homework" is uncountable; write "homework assignments" or "homework"' },
+    { re: /\bfeedbacks\b/i,    msg: 'Plural error: "feedbacks" — "feedback" is uncountable; write "pieces of feedback" or "feedback"' },
+    { re: /\btraffics\b/i,     msg: 'Plural error: "traffics" — "traffic" is uncountable; write "traffic conditions" or "traffic"' },
+    { re: /\bluggages\b/i,     msg: 'Plural error: "luggages" — "luggage" is uncountable; write "bags/suitcases" or "luggage"' },
+  ]
+  PLURAL_UNCOUNTABLE.forEach(({ re, msg }) => {
+    if (re.test(text)) errors.push(msg)
+  })
+
+  // Generic "the" overuse with abstract domain nouns — Loop 23 (2026-04-13)
+  // Cogent Education 2023 + Sino-US Teaching 2015: Chinese learners overuse definite article
+  // in generic societal-category statements (Chinese has zero-article generics).
+  // Safe version: sentence-initial only, followed by copula/modal — low FP rate.
+  // "The society is" / "The technology can" — these are always wrong as generic claims.
+  // Exclude: "The technology of X" / "The society that" (specific reference).
+  const THE_GENERIC_SAFE = /(?:^|[.!?]\s+)The\s+(technology|society|education|environment|economy|culture|science|nature|poverty)\s+(?:is|are|was|were|has|have|can|could|should|must|will|would|needs?|plays?|helps?|affects?|influences?|changes?)/gm
+  const genericTheMatches = text.match(THE_GENERIC_SAFE)
+  if (genericTheMatches) {
+    // Only flag if no specific-reference marker follows (of/in/that/which)
+    const trueGeneric = genericTheMatches.filter(m => !/of|in|that|which/.test(m))
+    if (trueGeneric.length > 0) {
+      const noun = trueGeneric[0].match(/The\s+(\w+)/i)?.[1] || 'abstract noun'
+      errors.push(`Article error: "The ${noun}..." — use zero article for generic statements: "${noun.charAt(0).toUpperCase() + noun.slice(1)} is..." (Cogent Ed 2023: #2 Chinese L1 article error)`)
+    }
   }
 
   // Gerund vs infinitive after specific verbs — Laufer & Waldman (2011): Chinese EFL writers

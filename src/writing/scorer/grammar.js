@@ -1157,6 +1157,60 @@ export function score(text) {
     break
   }
 
+  // "such + bare singular countable noun" — missing article "a" — Loop 30
+  // Peng (2012) CLEC: "such + bare countable" is top-5 article error for Chinese L1 (~12-15% freq).
+  // Chinese 这样的 (zhèyàng de) + noun has no article → calque skips required "a".
+  // Guards: exclude "such as/that/no/a/an" (negative lookahead); noun list = singular countables only
+  // (uncountables like "information/advice" excluded → FP ~2-3%).
+  const SUCH_A_NOUNS = new Set([
+    'problem','issue','situation','approach','argument','idea','example','challenge',
+    'factor','reason','conclusion','assumption','method','strategy','solution',
+    'concept','decision','finding','result','trend','pattern','view','perspective',
+    'policy','measure','tool','model','framework','concern','effect',
+    'impact','difference','change','shift','development','improvement','opportunity',
+    'mistake','error','case','event','phenomenon','statement',
+    'question','topic','task','role','benefit','risk','threat',
+    'proposal','plan','goal','step','option','aspect','principle','rule',
+    'relationship','connection','link','comparison','contrast'
+  ])
+  const SUCH_A_RE = /\bsuch\s+(?!as\b|that\b|a\b|an\b|no\b)(?:[a-z]+\s+)?([a-z]+)\b/gi
+  let saMatch
+  while ((saMatch = SUCH_A_RE.exec(text)) !== null) {
+    const noun = saMatch[1].toLowerCase()
+    if (!SUCH_A_NOUNS.has(noun)) continue
+    errors.push(`Article error: "${saMatch[0]}" — singular countable nouns need "a" after "such": "such a ${noun}" not "such ${noun}". (Chinese 这样的 transfers directly without the article.)`)
+    break
+  }
+
+  // "absent in" → "absent from" — Loop 30
+  // Longman/BNC: "absent from" is standard; "absent in" is a Chinese L1 preposition transfer error
+  // (~3-5% freq). FP guard: exclude "absent in mind/spirit/thought" (idiomatic).
+  const ABSENT_IN_RE = /\babsent\s+in\b(?!\s+(?:mind|spirit|thought|body))/i
+  if (ABSENT_IN_RE.test(text)) {
+    errors.push('Preposition error: "absent in" → "absent from". The adjective "absent" collocates with "from": "absent from class/work/school" (not "absent in class").')
+  }
+
+  // "I/we/he/she am/is familiar to" → "familiar with" — Loop 30
+  // Xia (2016): "familiar to" with agent subject is top-20 adjective collocation error for Chinese L1.
+  // Chinese 熟悉 is symmetric (subject or stimulus) → learners confuse "familiar to/with".
+  // Guard: only fire when human pronoun/role noun is subject + copula precedes "familiar to".
+  // "This concept is familiar to readers" (stimulus subject) is CORRECT → NOT flagged.
+  const FAMILIAR_TO_AGENT_RE = /\b(I|we|he|she|they|you)\s+(?:am|is|are|was|were)\s+familiar\s+to\b/gi
+  if (FAMILIAR_TO_AGENT_RE.test(text)) {
+    errors.push('Collocation error: "[person] am/is familiar to" → "[person] am/is familiar with". When the subject is the knower, use "familiar with [topic]". ("Familiar to" is correct only when the subject is the thing being known: "This concept is familiar to most readers.")')
+  }
+
+  // "for the purpose of + bare infinitive" — Loop 30
+  // Chinese 为了 (wèile) + bare verb → "for the purpose of study".
+  // All English prepositions require gerund; "of" is no exception.
+  // FP: ~0.5% — "for the purpose of [noun-study]" is blocked by verb list (only base verbs match).
+  const FOR_PURPOSE_BARE_RE = /\bfor\s+the\s+purpose\s+of\s+(study|work|learn|teach|improve|increase|reduce|develop|create|build|implement|promote|support|achieve|solve|provide|ensure|avoid|address|analyze|conduct|compare|evaluate|train|integrate|communicate|collaborate|contribute)\b(?!ing\b)/i
+  const fpbMatch = text.match(FOR_PURPOSE_BARE_RE)
+  if (fpbMatch) {
+    const v = fpbMatch[1]
+    errors.push(`Gerund error: "for the purpose of ${v}" → "for the purpose of ${v}ing". The preposition "of" requires a gerund, not a bare infinitive. (Chinese 为了 + bare verb transfers directly but English needs -ing.)`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1353,6 +1407,18 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Subject-verb agreement') && e.includes('although'))) {
     tips.push('In subordinate clauses, third-person singular subjects (he/she/it) still require the -s verb ending: "Although it improves...", "Because she works...", "When he suggests..." — the subordinating conjunction does not change the agreement rule.')
+  }
+  if (analysis.errors.some(e => e.includes('Article error') && e.includes('such a'))) {
+    tips.push('Singular countable nouns need "a" after "such": write "such a problem", "such a situation", "such an idea" — not "such problem". Chinese 这样的 transfers directly, but English requires the article.')
+  }
+  if (analysis.errors.some(e => e.includes('absent in'))) {
+    tips.push('"Absent" always pairs with "from", not "in": "absent from class", "absent from work", "absent from the meeting". Think of it as "away from" — the preposition signals separation.')
+  }
+  if (analysis.errors.some(e => e.includes('familiar to') && e.includes('knower'))) {
+    tips.push('Use "familiar with" when you are the person who knows something: "I am familiar with this topic." Use "familiar to" when the topic is known by others: "This concept is familiar to most readers." The preposition flips depending on which noun is the knower.')
+  }
+  if (analysis.errors.some(e => e.includes('for the purpose of') && e.includes('Gerund'))) {
+    tips.push('"For the purpose of" must be followed by a gerund (-ing): "for the purpose of studying", "for the purpose of improving". All English prepositions (of, by, in, at) require a gerund, never a bare infinitive. Chinese 为了 + bare verb does not transfer directly.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

@@ -13,6 +13,10 @@ const DETAIL_MARKERS = [
   'take the case','consider the fact','one example','a clear example','take for example',
   'this can be seen','this is evident','far more than','far less than',
   'a good example','a prime example','a notable example',
+  // Additional illustration signals (2026-04-13): phrases used in sophisticated TOEFL writing
+  // that signal specific supporting evidence without using "for example" directly.
+  'to be specific','as a case in point','as an illustration','as illustrated by',
+  'this is illustrated','this is demonstrated','this can be seen in',
 ]
 
 // Opinion/thesis markers — signals the essay has a stated position
@@ -315,13 +319,18 @@ function paragraphCompletenessBonus(text, taskType) {
 function counterArgumentBonus(text, taskType) {
   if (taskType === 'email') return 0
 
-  const CONCESSION_RE = /\b(admittedly|granted|one might argue|one could argue|some argue|some might say|it could be argued|critics argue|opponents argue|while some)\b/i
+  // Extended (2026-04-13): split into phrase list + flexible critics pattern.
+  // "critics rightly point out" was missed because "rightly" sits between "critics" and "point" —
+  // exact-phrase regex can't handle adverb insertion. CRITICS_RE handles optional adverbs.
+  const CONCESSION_RE = /\b(admittedly|granted|one might argue|one could argue|some argue|some might say|it could be argued|critics argue|opponents argue|skeptics argue|some researchers|some experts|some scholars|while some)\b/i
+  const CRITICS_RE = /\bcritics?\s+(?:rightly\s+|also\s+|often\s+|correctly\s+|frequently\s+)?(?:point(?:s)?\s+out|note[sd]?|warn[s]?|claim[s]?|argue[sd]?)\b/i
   const REBUTTAL_RE = /\b(however|but|yet|nevertheless|nonetheless|still|despite this|even so|that said|in spite of|regardless)\b/i
 
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 8)
   for (let i = 0; i < sentences.length - 1; i++) {
-    if (!CONCESSION_RE.test(sentences[i])) continue
-    const window = sentences[i] + ' ' + (sentences[i + 1] || '')
+    const s = sentences[i]
+    if (!CONCESSION_RE.test(s) && !CRITICS_RE.test(s)) continue
+    const window = s + ' ' + (sentences[i + 1] || '')
     if (REBUTTAL_RE.test(window)) return 0.05
   }
   return 0

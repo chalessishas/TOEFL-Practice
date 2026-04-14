@@ -173,6 +173,9 @@ export function score(text, taskType = 'general') {
   if (nomDensity >= 12) nomBonus = 0.15
   else if (nomDensity >= 8)  nomBonus = 0.10
   else if (nomDensity >= 5)  nomBonus = 0.05
+  // Loop 48 (2026-04-13): ETS RM-23-06 confirms 4–5/100w is Score-5 territory; S5 test essay
+  // has 4.8/100w but scored 0 because the previous floor was ≥5. New tier closes that gap.
+  else if (nomDensity >= 4)  nomBonus = 0.03
 
   // Email register consistency bonus (Chen 2019: formal register consistency is a
   // Score-5 differentiator in email tasks; Chinese L1 writers frequently mix registers).

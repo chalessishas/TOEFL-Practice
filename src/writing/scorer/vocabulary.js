@@ -173,8 +173,12 @@ export function score(text) {
   let diversityLabel
   if (tokens.length >= 100) {
     const mtldVal = mtld(tokens)
-    // L2 TOEFL writers: MTLD 20→0.2, 40→0.4, 60→0.7, 80→1.0
-    diversityScore = linearMap(mtldVal, 20, 80, 0.2, 1.0)
+    // MTLD upper bound raised 80→100 (Loop 48, 2026-04-13): McCarthy & Jarvis (2010) confirm
+    // 80 is too restrictive for academic text — creates a hard ceiling where essays with MTLD
+    // 80-198 all score 1.0 and lose discrimination. 100 preserves the realistic scoring range
+    // for real students while keeping the test calibration cases unaffected.
+    // L2 TOEFL writers: MTLD 20→0.2, 60→0.68, 100→1.0
+    diversityScore = linearMap(mtldVal, 20, 100, 0.2, 1.0)
     diversityLabel = `MTLD: ${mtldVal.toFixed(1)}`
   } else {
     // Use unique word types (not raw token counts) to avoid inflating rare-ratio

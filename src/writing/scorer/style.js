@@ -56,11 +56,14 @@ export function score(text, taskType = 'general') {
   }
 
   // Repetition penalty: content words >4 chars used ≥N times (N scales with essay length).
-  // Loop 19 (2026-04-13): threshold normalized to avoid penalizing longer essays for naturally
-  // using topic-relevant words more often. Biber et al. (1999): academic writing averages
-  // 2-3 high-frequency content words per 100 tokens — short emails hit 3 easily, long essays need ≥5.
-  // Formula: max(3, ceil(tokens/60)) → 120w: 3, 180w: 3, 200w: 4, 300w: 5.
-  const repThreshold = Math.max(3, Math.ceil(tokens.length / 60))
+  // Biber et al. (1999): academic writing averages 2-3 high-frequency content words per 100 tokens.
+  // Short essays/emails (< 120 tokens): divisor 60 (conservative, 60w email → threshold 3).
+  // Longer academic essays (≥ 120 tokens): divisor 30 → at 146 tokens threshold = 5, matching the
+  // ~3/100w natural academic rate. Prevents penalizing topic-essential words in on-topic essays
+  // (e.g. "remote" used 4× in a 146-token remote-work essay). Loop 49 (2026-04-13).
+  const repThreshold = tokens.length >= 120
+    ? Math.max(3, Math.ceil(tokens.length / 30))
+    : Math.max(3, Math.ceil(tokens.length / 60))
   const freq = {}
   tokens.forEach(w => {
     if (w.length > 4 && !FUNCTION_WORDS.has(w)) {

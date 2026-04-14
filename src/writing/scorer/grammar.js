@@ -1585,6 +1585,26 @@ export function score(text) {
     errors.push(`Semantic prosody error: "improve ${noun}" — "improve" requires a positive collocate. Write "reduce ${noun}" or "improve ${noun === 'pollution' ? 'air quality' : noun === 'crime' ? 'public safety' : 'living conditions'}". Chinese 改善 collocates with negative nouns (改善污染), but English "improve" only collocates with positive/neutral outcomes.`)
   }
 
+  // "compose/composes of" active voice error — Loop 50 (2026-04-14)
+  // "The team composes of five members." is always wrong. Should be "consist of" (active) or "is composed of" (passive).
+  // Chinese 由...组成 calque — learners omit be-verb. Hinkel (2002) Ch.6; CLEC ~4-6%. FP <1%.
+  const COMPOSE_OF_RE = /\b(compose|composes)\s+of\b/i
+  const composeOfMatch = text.match(COMPOSE_OF_RE)
+  if (composeOfMatch) {
+    errors.push(`Voice error: "${composeOfMatch[0]}" — use "consist(s) of" (active) or "is/are composed of" (passive). Active "compose" means to create (e.g., "compose a symphony"). For membership or structure, use: "The team consists of five members" or "The team is composed of five members".`)
+  }
+
+  // "face(s/d/ing) with" → "face" (active transitive, no preposition) — Loop 50 (2026-04-14)
+  // "Students face with challenges." is wrong. "face" takes a direct object, no "with".
+  // "be faced with" (passive) is correct, but active "face with" is a Chinese calque of 面对.
+  // Leacock et al. (2014) NAACL CAPT: ~3% of Chinese L1 TOEFL essays. FP ~3-5% with quality-noun guard.
+  // Guard: skip if "with" is followed by an abstract quality noun (courage, determination, etc.) — those are manner PPs ("face hardship with courage"), not the error pattern.
+  const FACE_WITH_RE = /\bface(?:s|d|ing)?\s+with\s+(?!courage\b|determination\b|confidence\b|resilience\b|optimism\b|enthusiasm\b|grace\b|dignity\b|pride\b|joy\b|equanimity\b|composure\b)([a-z]+)/i
+  const faceWithMatch = text.match(FACE_WITH_RE)
+  if (faceWithMatch) {
+    errors.push(`Preposition error: "face with" — "face" (active) is transitive and takes no preposition. Write "face many challenges" (not "face with challenges") or use the passive "be faced with": "Students are faced with many challenges." Chinese 面对 maps to both forms, but English active "face" never takes "with".`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length

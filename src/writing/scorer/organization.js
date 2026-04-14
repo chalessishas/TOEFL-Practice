@@ -82,6 +82,7 @@ function lexicalChainBonus(text) {
 export function score(text, taskType = 'general', promptText = '') {
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0)
   const sentenceCount = Math.max(sentences.length, 1)
+  const wordCount = text.trim().split(/\s+/).length
 
   // Discourse marker score: 60% density + 40% functional category diversity
   // Diversity rewards essays that use contrast + addition + conclusion + example
@@ -181,6 +182,40 @@ export function score(text, taskType = 'general', promptText = '') {
     if (hasConclusion)   zoneBonus += 0.03
   }
 
+  // Macro-structure completeness for general tasks (Loop 46, P2)
+  // Research pivot 2026-04-13: reward correct intro/body/conclusion placement in general essays.
+  // Discussion already handled by zoneBonus above. Email exempt (transactional structure differs).
+  // Distinct from taskSpecific (checks presence anywhere) — this checks positional correctness.
+  let macroStructureBonus = 0
+  if (taskType === 'general' && wordCount >= 100 && paragraphCount >= 2) {
+    const firstParaLower = paragraphs[0].toLowerCase()
+    const lastParaLower  = paragraphs[paragraphCount - 1].toLowerCase()
+    const INTRO_MARKERS_GEN = ['this essay', 'in this essay', 'one reason', 'i believe', 'i think',
+      'in my opinion', 'i agree', 'i disagree', 'i will', 'this paper', 'first of all', 'to begin']
+    const hasIntroInFirst = INTRO_MARKERS_GEN.some(m => firstParaLower.includes(m))
+    const hasConcInLast   = CLOSING_MARKERS.some(m => lastParaLower.includes(m)) ||
+      /\b(overall|therefore|in short|to wrap up)\b/.test(lastParaLower)
+    if (hasIntroInFirst && hasConcInLast) {
+      macroStructureBonus = paragraphCount >= 3 ? 0.05 : 0.03
+    }
+  }
+
+  // Conclusion quality — intro keyword restatement (Loop 46, P1)
+  // Research pivot 2026-04-13: Chinese L1 weakness is trailing generic "In conclusion, I think X
+  // is good" without referencing intro argument. Detect 5+ char content keywords from first paragraph
+  // appearing in last paragraph as a semantic coherence signal.
+  // Distinct from lexChainBonus (adjacent-pair coherence) — this checks the intro→conclusion bridge.
+  let conclusionQualityBonus = 0
+  if (taskType !== 'email' && paragraphCount >= 2 && wordCount >= 100) {
+    const introContentWords = (paragraphs[0].toLowerCase().match(/\b[a-z]{5,}\b/g) || [])
+      .filter(w => !commonWords.has(w))
+    const introSet = new Set(introContentWords)
+    const lastParaLower = paragraphs[paragraphCount - 1].toLowerCase()
+    const sharedCount = [...introSet].filter(w => lastParaLower.includes(w)).length
+    if (sharedCount >= 3)      conclusionQualityBonus = 0.08
+    else if (sharedCount >= 1) conclusionQualityBonus = 0.04
+  }
+
   // Semi-formal email register bonus (Research Loop 7 P3).
   // ETS Score-5 emails consistently use professional opening/closing phrases beyond
   // "Dear X / Best regards" — these signal awareness of formal register conventions.
@@ -230,7 +265,7 @@ export function score(text, taskType = 'general', promptText = '') {
   const [mW, pW, tW] = taskType === 'email' ? [0.2, 0.4, 0.4] : [0.5, 0.3, 0.2]
   const rawValue = Math.min(
     1,
-    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus + hedgingTierBonus + paraInitBonus + lexChainBonus),
+    Math.max(0, markerScore * mW + paragraphScore * pW + taskSpecific * tW + placementBonus + zoneBonus + ratioBonus + semiFormalBonus + hedgingTierBonus + paraInitBonus + lexChainBonus + macroStructureBonus + conclusionQualityBonus),
   )
 
   // Connector misuse penalty — Granger & Tyson (1996): Chinese L1 writers use "however"
@@ -267,11 +302,13 @@ export function score(text, taskType = 'general', promptText = '') {
   const hedgingTierPart    = hedgingTierBonus    > 0 ? `, hedgingTier=+${hedgingTierBonus.toFixed(2)}`                : ''
   const paraInitPart       = paraInitBonus       > 0 ? `, paraInit=+${paraInitBonus.toFixed(2)}`                      : ''
   const connectorMisusePart = connectorMisusePenalty > 0 ? `, connectorMisuse=-${connectorMisusePenalty.toFixed(2)}`  : ''
-  const lexChainPart        = lexChainBonus        > 0 ? `, lexChain=+${lexChainBonus.toFixed(2)}`                   : ''
-  const paraBalancePart     = paraBalancePenalty    > 0 ? `, paraBalance=-${paraBalancePenalty.toFixed(2)}`               : ''
+  const lexChainPart             = lexChainBonus             > 0 ? `, lexChain=+${lexChainBonus.toFixed(2)}`                         : ''
+  const paraBalancePart          = paraBalancePenalty         > 0 ? `, paraBalance=-${paraBalancePenalty.toFixed(2)}`                  : ''
+  const macroStructurePart       = macroStructureBonus        > 0 ? `, macroStructure=+${macroStructureBonus.toFixed(2)}`              : ''
+  const conclusionQualityPart    = conclusionQualityBonus     > 0 ? `, conclusionQuality=+${conclusionQualityBonus.toFixed(2)}`        : ''
   return {
     value,
-    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}${lexChainPart}${paraBalancePart}`,
+    details: `${uniqueMarkers} unique discourse markers, ${categoriesUsed}/${totalCategories} categories, ${paragraphCount} paragraph(s), taskScore=${taskSpecific.toFixed(2)}, taskType=${taskType}${placementBonus !== 0 ? `, closingPlacement=${placementBonus > 0 ? '+' : ''}${placementBonus.toFixed(1)}` : ''}${zonePart}${ratioPart}${semiFormalPart}${hedgingTierPart}${paraInitPart}${connectorMisusePart}${lexChainPart}${paraBalancePart}${macroStructurePart}${conclusionQualityPart}`,
   }
 }
 

@@ -1474,6 +1474,29 @@ export function score(text) {
     errors.push(`Bare infinitive error: "${idiom} to ${verb}" — "${idiom}" takes a bare infinitive (no "to"). Write "${idiom} ${verb}" not "${idiom} to ${verb}". Chinese learners insert "to" by analogy with "need to/want to", but semi-modal idioms (had better, would rather) never take "to".`)
   }
 
+  // "superior/inferior/senior/junior + than" → "to" — Loop 44 (2026-04-13).
+  // Latin-derived comparatives (superior, inferior, senior, junior) are intrinsically comparative
+  // and take "to", never "than". Quirk et al. (1985) §7.75: these adjectives are "defective
+  // comparatives" that uniquely require "to" rather than the English comparative marker "than".
+  // Chinese 优于/劣于/长于/少于 directly calques 比...好/差 → learners write "superior than".
+  // CLEC frequency: ~3-5% in formal comparison contexts. FP rate: ~0%.
+  const LATIN_COMP_RE = /\b(superior|inferior|senior|junior)\s+than\b/i
+  const latinCompMatch = text.match(LATIN_COMP_RE)
+  if (latinCompMatch) {
+    const adj = latinCompMatch[1].toLowerCase()
+    errors.push(`Comparative error: "${latinCompMatch[0]}" → "${adj} to". Latin-derived comparatives (superior, inferior, senior, junior) always take "to", not "than": "superior to", "inferior to", "senior to", "junior to". Chinese 优于 maps to "superior to" (correct) — but "than" is the wrong comparison marker here.`)
+  }
+
+  // "affect(s/ed/ing) on" → "affect" is transitive, no preposition — Loop 44 (2026-04-13).
+  // "Affect" is a transitive verb: "this affects our health" — no preposition follows.
+  // Chinese 对...产生影响/影响到 → learners write "affects on" by analogy with "have an effect on".
+  // Celce-Murcia & Larsen-Freeman (1999): transitive verb + spurious preposition is a top-10 Chinese
+  // L1 error category. CLEC frequency: ~2-4%. FP rate: ~0% ("affect on" is always wrong).
+  const AFFECT_ON_RE = /\baffect(?:s|ed|ing)?\s+on\b/i
+  if (AFFECT_ON_RE.test(text)) {
+    errors.push('Verb error: "affect on" — "affect" is a transitive verb and takes no preposition: "this affects our health" not "this affects on our health". For the preposition pattern, use the noun: "has an effect on our health". Chinese 对...有影响 may produce "affect on" — but English "affect" never takes "on".')
+  }
+
   // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
   // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
   // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
@@ -1814,6 +1837,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Semantic prosody error') && e.includes('improve'))) {
     tips.push('"Improve" collocates with positive or neutral outcomes only: "improve quality", "improve conditions", "improve efficiency". For negative phenomena, use "reduce/decrease/combat/address/alleviate": "reduce pollution", "combat crime", "alleviate poverty". Chinese 改善 is neutral-valence, but English "improve" is positive-valence.')
+  }
+  if (analysis.errors.some(e => e.includes('Comparative error') && e.includes('superior'))) {
+    tips.push('Latin-derived comparatives (superior, inferior, senior, junior) always take "to" — not "than": "superior to", "inferior to", "senior to", "junior to". These adjectives are intrinsically comparative and don\'t follow the normal "than" pattern. Chinese 优于/劣于 maps to "superior to" (correct) — but English never uses "superior than".')
+  }
+  if (analysis.errors.some(e => e.includes('Verb error') && e.includes('affect on'))) {
+    tips.push('"Affect" is a transitive verb — no preposition needed: write "this affects our health", "technology affects our daily lives". For the noun, use "has an effect on": "technology has an effect on our lives". Chinese 对...有影响 produces "affects on" — always use the verb directly without "on".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

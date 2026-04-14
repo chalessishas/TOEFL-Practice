@@ -178,6 +178,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] Loop 37 grammar.js (558e799, 2026-04-13) — ① less+countable（少→fewer/less 混淆，ICNALE 10.3% 文章，FP ~3-5%）② very+comparative（非常 overuse，Yang 2022 4.1% 文章，FP ~0%）③ interested-to+activity verb（感兴趣补足语，City University HK ELSS #5，FP ~4-6% 带 would-be guard）④ improve+negative prosody（改善+负面名词 semantic prosody，Louw 1993，FP ~1-3%）；grammar.js 共 104 patterns，10/10 校准，gaps 不变
 - [100%] Loop 39 grammar.js (25e2f74, 2026-04-13) — allow/enable/permit + to-inf（missing mandatory object；Chinese 允许做某事 object-drop calque；Swan & Smith 2001；CLEC ~4-6%，FP <3%）；grammar.js 共 105 patterns，10/10 校准
 - [100%] Loop 40 grammar.js (78c5e17, 2026-04-13) — spend/waste time + to-inf（should be gerund；Chinese 花时间做某事 bare verb calque；Celce-Murcia & Larsen-Freeman 1999；CLEC ~5-8%，FP <2%）；grammar.js 共 106 patterns，10/10 校准
+- [100%] Loop 41 grammar.js (6178380, 2026-04-13) — "in the other hand" → "on the other hand"（固定成语介词错误；Chinese 另一方面 calque；Liu 2011 CLEC ~12%，FP ~0%）；grammar.js 共 107 patterns，10/10 校准
 - [100%] development.js counter-arg 修复 (ca0234c, 2026-04-13) — CONCESSION_RE 拆分 + CRITICS_RE（"critics rightly point out" 副词插入）；DETAIL_MARKERS +7；strong essay 0.693→0.743；10/10 校准
 - [100%] vocabulary.js+style.js 综合扩展 (3fe29d0/af47cb8, 2026-04-13) — vocab: FORMULAIC_BUNDLES +8/PHRASAL_VERBS +4/ACADEMIC_BIGRAMS +4/BG_OPENING_FORMULAS（with the development of 12.4× native，CCSENet 2022）；style: transitionalMonotonyPenalty（≥60% 句子以模板连接词开头，ScienceDirect 2011）；10/10 校准
 - [0%] 笔记本后端同步（跨设备）

@@ -181,6 +181,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 - [100%] Loop 41 grammar.js (6178380, 2026-04-13) — "in the other hand" → "on the other hand"（固定成语介词错误；Chinese 另一方面 calque；Liu 2011 CLEC ~12%，FP ~0%）；grammar.js 共 107 patterns，10/10 校准
 - [100%] Loop 42 grammar.js (12bfaa0, 2026-04-13) — experiencer/stimulus adjective confusion："I feel boring/exciting" → "I feel bored/excited"（-ed experiencer vs -ing stimulus；Quirk §7.15；CLEC ~6-9%，FP ~3% with person-subject guard）；10/10 校准
 - [100%] Loop 43 grammar.js (12bfaa0, 2026-04-13) — "had better/would rather + to-inf" → bare infinitive：去除多余 to（semi-modal idioms never take "to"；CLEC ~4-6%，FP ~0%）；10/10 校准
+- [100%] Loop 44 grammar.js (ce84472, 2026-04-13) — P1: Latin comparative adjectives (superior/inferior/senior/junior + than → to)（Quirk §7.75，FP ~0%）；P2: "affect on" → transitive verb（no preposition，CLEC ~2-4%）；6/6 unit tests，10/10 校准，gaps 0.70/0.60，112 patterns total
 - [100%] AWL elite tier vocabulary.js (12bfaa0, 2026-04-13) — AWL sublists 8-10 拆为 AWL_ELITE（0.06/word，cap 0.06）；与 AWL_ADVANCED（0.04/word）分层，Score-5 更精细识别；10/10 校准
 - [100%] development.js counter-arg 修复 (ca0234c, 2026-04-13) — CONCESSION_RE 拆分 + CRITICS_RE（"critics rightly point out" 副词插入）；DETAIL_MARKERS +7；strong essay 0.693→0.743；10/10 校准
 - [100%] vocabulary.js+style.js 综合扩展 (3fe29d0/af47cb8, 2026-04-13) — vocab: FORMULAIC_BUNDLES +8/PHRASAL_VERBS +4/ACADEMIC_BIGRAMS +4/BG_OPENING_FORMULAS（with the development of 12.4× native，CCSENet 2022）；style: transitionalMonotonyPenalty（≥60% 句子以模板连接词开头，ScienceDirect 2011）；10/10 校准

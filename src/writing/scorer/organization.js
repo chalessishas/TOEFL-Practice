@@ -167,6 +167,18 @@ export function score(text, taskType = 'general', promptText = '') {
     if (hasIntroOpinion) zoneBonus += 0.05
     if (hasConclusion)   zoneBonus += 0.05
     if (hasBodyEvidence) zoneBonus += 0.05
+  } else if (taskType === 'discussion' && paragraphCount === 2) {
+    // 2-paragraph essays: partial zone credit. Many TOEFL Academic Discussion responses
+    // use thesis+evidence in P1 and rebuttal+conclusion in P2 — a valid academic structure.
+    // Partial bonus (vs full 3-para) reflects less explicit structural separation.
+    // Nakamura 2018: 2-paragraph responses with clear conclusion are as coherent as 3-paragraph.
+    const firstPara = paragraphs[0].toLowerCase()
+    const lastPara  = paragraphs[1].toLowerCase()
+    const hasIntroOpinion = /\b(i (agree|disagree|think|believe)|in my (opinion|view)|i feel|my (view|position|stance)|it (seems|appears) to me)\b/.test(firstPara)
+    const hasConclusion   = CLOSING_MARKERS.some(m => lastPara.includes(m)) ||
+      /\b(therefore|thus|overall|hence|in short|to wrap up|in the end|in the final analysis)\b/.test(lastPara)
+    if (hasIntroOpinion) zoneBonus += 0.03
+    if (hasConclusion)   zoneBonus += 0.03
   }
 
   // Semi-formal email register bonus (Research Loop 7 P3).

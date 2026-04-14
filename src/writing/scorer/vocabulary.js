@@ -56,6 +56,14 @@ const AWL_ADVANCED = new Set([
   'convert','couple','deny','differentiate','dominant','facilitate','found',
   'grant','hence','maintain','negate','parameter','project','scope',
   'secure','tense','trace','trend',
+])
+
+// AWL sublists 8–10: highest-register academic vocabulary — Score-5 elite signal.
+// Earns 0.06/word (vs 0.04 for sublists 4-7), cap 0.06. Loop 40 (2026-04-13).
+// Rationale: sublist-8/9/10 words (ambiguity, coherent, preliminary, equilibrium) signal
+// the deepest lexical control — ETS Score-5 criterion "precise, idiomatic word choice."
+// Split from AWL_ADVANCED to create a third discriminative tier vs Score-4 essays.
+const AWL_ELITE = new Set([
   // Sublist 8
   'accommodate','accumulate','ambiguity','analogy','anticipate','approximate',
   'attain','capable','cease','collapse','compile','concurrent','confine',
@@ -192,10 +200,13 @@ export function score(text) {
   // Same dedup as AWL_BASIC: exclude words also in commonWords (task/goal/ensure/obvious etc.
   // are not "advanced academic" vocabulary and shouldn't earn the 0.04/word bonus).
   const advancedCount = contentTokens.filter(w => AWL_ADVANCED.has(w) && !commonWords.has(w)).length
+  // Elite tier (sublists 8-10): 0.06/word, cap 0.06. Loop 40 (2026-04-13).
+  const eliteCount    = contentTokens.filter(w => AWL_ELITE.has(w) && !commonWords.has(w)).length
   const basicBonus    = Math.min(0.12, basicCount * 0.015)
   const advancedBonus = Math.min(0.08, advancedCount * 0.04)
-  const awlBonus      = Math.min(0.20, basicBonus + advancedBonus)
-  const awlCount      = basicCount + advancedCount
+  const eliteBonus    = Math.min(0.06, eliteCount * 0.06)
+  const awlBonus      = Math.min(0.20, basicBonus + advancedBonus + eliteBonus)
+  const awlCount      = basicCount + advancedCount + eliteCount
 
   // Phrasal verb idiomaticity bonus (Loop 9, 2026-04-12).
   // ETS Score-5 criterion: "precise, idiomatic word choice." Research (Nesselhauf 2003):
@@ -287,7 +298,7 @@ export function score(text) {
   const value = Math.min(1, Math.max(0, (avgLenScore + diversityScore) / 2 + awlBonus + phrasalBonus + bigramBonus - formulaicBundlePenalty - bgOpeningPenalty))
   return {
     value,
-    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}${bigramHits > 0 ? `, acadBigrams: ${bigramHits}` : ''}${formulaicBundlePenalty > 0 ? `, formulaicBundles:-${formulaicBundlePenalty.toFixed(2)}` : ''}${bgOpeningPenalty > 0 ? `, bgOpening:-${bgOpeningPenalty.toFixed(2)}` : ''}`,
+    details: `Avg word length: ${avgLen.toFixed(2)}, ${diversityLabel}, AWL basic: ${basicCount}, advanced: ${advancedCount}${eliteCount > 0 ? `, elite: ${eliteCount}` : ''}${phrasalHits > 0 ? `, phrasalVerbs: ${phrasalHits}` : ''}${bigramHits > 0 ? `, acadBigrams: ${bigramHits}` : ''}${formulaicBundlePenalty > 0 ? `, formulaicBundles:-${formulaicBundlePenalty.toFixed(2)}` : ''}${bgOpeningPenalty > 0 ? `, bgOpening:-${bgOpeningPenalty.toFixed(2)}` : ''}`,
   }
 }
 

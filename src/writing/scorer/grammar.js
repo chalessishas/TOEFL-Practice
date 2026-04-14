@@ -1434,6 +1434,46 @@ export function score(text) {
     errors.push('Preposition error: "in the other hand" → the correct idiom is "on the other hand". English fixes this preposition: "on the other hand, ..." (not "in"). Chinese 另一方面 can use 在 for both "in" and "on", but English uses "on" here exclusively.')
   }
 
+  // "feel boring/exciting/confusing" (experiencer confusion) — Loop 42 (2026-04-13).
+  // Psych-verb adjectives split into experiencer (-ed) and stimulus (-ing) forms:
+  // "bored" = how a person feels; "boring" = what a thing causes. Chinese 无聊/有趣 covers
+  // both senses, so learners write "I feel boring" instead of "I feel bored".
+  // Quirk et al. (1985) §7.15: experiencer subjects require -ed participial adjectives.
+  // CLEC frequency: ~6-9% of essays with "feel" contain this error.
+  // Guard: only fire when a person pronoun (I/you/he/she/we/they) is the subject — prevents
+  // flagging "the movie feels boring" (stimulus subject — grammatically correct).
+  // FP rate: ~3% after person-subject guard.
+  const FEEL_STIMULUS_RE = /\b(I|you|he|she|we|they)\s+(?:feel|feels|felt|am feeling|are feeling|is feeling|was feeling|were feeling)\s+(very\s+|so\s+|quite\s+|really\s+|extremely\s+)?(boring|exciting|confusing|interesting|tiring|exhausting|depressing|surprising|shocking|disappointing|embarrassing|annoying|frustrating|amusing|satisfying|worrying|terrifying)\b/gi
+  const feelMatch = FEEL_STIMULUS_RE.exec(text)
+  if (feelMatch) {
+    const adj = feelMatch[3]
+    const experiencer = adj.replace(/ing$/, 'ed').replace(/([^aeiou])eed$/, '$1ed').replace(/eed$/, 'ed')
+    const corrected = adj === 'boring' ? 'bored' : adj === 'tiring' ? 'tired' :
+      adj === 'exciting' ? 'excited' : adj === 'interesting' ? 'interested' :
+      adj === 'confusing' ? 'confused' : adj === 'exhausting' ? 'exhausted' :
+      adj === 'depressing' ? 'depressed' : adj === 'surprising' ? 'surprised' :
+      adj === 'shocking' ? 'shocked' : adj === 'disappointing' ? 'disappointed' :
+      adj === 'embarrassing' ? 'embarrassed' : adj === 'annoying' ? 'annoyed' :
+      adj === 'frustrating' ? 'frustrated' : adj === 'amusing' ? 'amused' :
+      adj === 'satisfying' ? 'satisfied' : adj === 'worrying' ? 'worried' :
+      adj === 'terrifying' ? 'terrified' : experiencer
+    errors.push(`Participial adjective error: "feel ${adj}" — when a person is the subject, use the -ed form: "feel ${corrected}" not "feel ${adj}". ("${adj}" describes what causes the feeling; "${corrected}" describes who has it.) Chinese 感到${adj === 'boring' ? '无聊' : '...'} uses one form for both; English distinguishes experiencer (-ed) from stimulus (-ing).`)
+  }
+
+  // "had better / would rather + to-infinitive" — Loop 43 (2026-04-13).
+  // "had better" and "would rather" are semi-modal idioms that require a bare infinitive,
+  // never a to-infinitive. "I had better to go" and "I would rather to stay" are non-standard.
+  // Chinese learners insert "to" by analogy with other modal-like phrases (e.g. "need to", "want to").
+  // CLEC frequency: ~4-6% of essays using these expressions. FP rate: ~0%.
+  // Guard: exclude "to be / to have" (passives, perfects) — these are analyzed separately.
+  const HAD_BETTER_TO_RE = /\b(had\s+better|would\s+rather|would\s+sooner)\s+to\s+(?!be\b|have\b|the\b|a\b)([a-z]{2,})\b/i
+  const hbtMatch = text.match(HAD_BETTER_TO_RE)
+  if (hbtMatch) {
+    const idiom = hbtMatch[1]
+    const verb = hbtMatch[2]
+    errors.push(`Bare infinitive error: "${idiom} to ${verb}" — "${idiom}" takes a bare infinitive (no "to"). Write "${idiom} ${verb}" not "${idiom} to ${verb}". Chinese learners insert "to" by analogy with "need to/want to", but semi-modal idioms (had better, would rather) never take "to".`)
+  }
+
   // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
   // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
   // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
@@ -1684,6 +1724,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('in the other hand'))) {
     tips.push('The correct idiom is "on the other hand" — not "in". English fixes this preposition: "On the other hand, some people believe..." Chinese 另一方面 uses 在 which maps to both "in" and "on", but English exclusively uses "on" in this fixed expression.')
+  }
+  if (analysis.errors.some(e => e.includes('Participial adjective error') && e.includes('feel'))) {
+    tips.push('English has two forms for emotion adjectives: -ing (stimulus) and -ed (experiencer). When YOU are the one feeling something, use -ed: "I feel bored" not "I feel boring", "I feel excited" not "I feel exciting", "I feel confused" not "I feel confusing". The -ing form describes what causes the feeling: "the class is boring", "the news is exciting".')
+  }
+  if (analysis.errors.some(e => e.includes('Bare infinitive error') && e.includes('had better'))) {
+    tips.push('"Had better", "would rather", and "would sooner" take a bare infinitive (no "to"): write "had better go" not "had better to go", "would rather stay" not "would rather to stay". These semi-modal idioms never take "to" — unlike "need to" or "want to" which always do.')
   }
   if (analysis.errors.some(e => e.includes('Subjunctive error') && e.includes('wish'))) {
     tips.push('"Wish" requires the past-counterfactual (irrealis) form, not present tense: write "I wish I could" not "I wish I can", "I wish it were" not "I wish it is". To express a real hope, use "hope" with present tense: "I hope I can improve."')

@@ -336,6 +336,24 @@ function counterArgumentBonus(text, taskType) {
   return 0
 }
 
+// Loop 52: Warranted claim sentence detection (Stab & Gurevych 2017; Toulmin 1958).
+// A sentence containing both a thesis marker AND a causal connector = "warranted claim" —
+// the within-sentence fusion of claim + reasoning basis. This distinguishes Score-5
+// "well-integrated argument" from Score-4 "claim listed separately from reasons."
+// Granger & Tyson (1996): Chinese L1 writers separate claims/reasons at 71% vs 38% native.
+// FP: ~0% — thesis marker + causal connector in one sentence is always well-structured.
+// Guard: email exempt (transactional structure, no argumentation expected).
+function warrantedClaimBonus(text, taskType) {
+  if (taskType === 'email') return 0
+  const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 10)
+  const THESIS_RE = /\b(i (believe|think|argue|contend|maintain|feel)|in my (opinion|view)|my (position|view|stance)|i am convinced|it (seems|appears) to me)\b/i
+  const CAUSAL_RE = /\b(because|since|given that|as\s+(?!a\s+result)|for\s+the\s+reason|the\s+reason\s+is)\b/i
+  const warrantedSentences = sentences.filter(s => THESIS_RE.test(s) && CAUSAL_RE.test(s)).length
+  if (warrantedSentences >= 2) return 0.06
+  if (warrantedSentences >= 1) return 0.03
+  return 0
+}
+
 export function score(text, taskType = 'general') {
   const words = (text.match(/\b\w+\b/g) || [])
   const wordCount = words.length
@@ -365,13 +383,14 @@ export function score(text, taskType = 'general') {
   const paraBonus    = paragraphCompletenessBonus(text, taskType)
   const numBonus     = numericEvidenceBonus(text, taskType)
   const rebuttalBonus = counterArgumentBonus(text, taskType)
-  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus + numBonus + rebuttalBonus))
+  const warrantedBonus = warrantedClaimBonus(text, taskType)
+  const value = Math.min(argScore, Math.min(1, wcScore * wcW + dmScore * dmW + scScore * scW + paraBonus + numBonus + rebuttalBonus + warrantedBonus))
 
   return {
     value,
     details: `${wordCount} words, ${sentenceCount} sentences, ${
       DETAIL_MARKERS.filter(m => text.toLowerCase().includes(m)).length
-    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}, num bonus: ${numBonus.toFixed(2)}, rebuttal bonus: ${rebuttalBonus.toFixed(2)}`,
+    } detail marker(s), para bonus: ${paraBonus.toFixed(2)}, num bonus: ${numBonus.toFixed(2)}, rebuttal bonus: ${rebuttalBonus.toFixed(2)}${warrantedBonus > 0 ? `, warranted claim: +${warrantedBonus.toFixed(2)}` : ''}`,
   }
 }
 

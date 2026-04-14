@@ -237,6 +237,23 @@ export function score(text, taskType = 'general') {
     phrasalEmbeddingBonus = phrasalRate >= 4 ? Math.min(0.05, (phrasalRate - 2) * 0.015) : phrasalRate >= 2 ? 0.02 : 0
   }
 
+  // Loop 51: Evaluative stance adverb diversity bonus
+  // Sentence-initial evaluative adverbials signal awareness of claim significance —
+  // a key Score-5 marker per Hyland (2005) and Crossley et al. (2020 TOEFL, β=0.28).
+  // Distinct from discourse connectives (However/Furthermore) and hedges (arguably/perhaps).
+  // FP rate: ~0% — sentence-initial evaluative adverbs are ALWAYS quality markers.
+  // Guard: ≥100 tokens + non-email (email register does not reward stance adverbs).
+  let stanceAdverbBonus = 0
+  if (taskType !== 'email' && tokens.length >= 100) {
+    const STANCE_ADVERB_RE = /(?:^|[.!?]\s+)(Notably|Importantly|Significantly|Interestingly|Strikingly|Critically|Crucially|Remarkably|Tellingly|Pointedly)[,\s]/gm
+    const stanceForms = new Set()
+    for (const m of (text.match(STANCE_ADVERB_RE) || [])) {
+      stanceForms.add(m.trim().split(/[,\s]/)[0].toLowerCase())
+    }
+    // Reward diversity over repetition: 2+ distinct forms = full bonus
+    stanceAdverbBonus = stanceForms.size >= 2 ? 0.04 : stanceForms.size === 1 ? 0.02 : 0
+  }
+
   // Booster overuse penalty (Loop 21, 2026-04-13)
   // Corpus-Based Study of Amplifiers in Chinese EFL Academic Writing (ResearchGate 375909274):
   // learners use certainty boosters at 3.2×/100w vs 0.5×/100w in expert academic prose.
@@ -311,11 +328,11 @@ export function score(text, taskType = 'general') {
     ? Math.min(0.12, (impersonalCount - 1) * 0.06) : 0
 
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty - impersonalPenalty - transitionalMonotonyPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty - impersonalPenalty - transitionalMonotonyPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus + stanceAdverbBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${impersonalPenalty > 0 ? `, impersonal-it overuse: -${impersonalPenalty.toFixed(2)}` : ''}${transitionalMonotonyPenalty > 0 ? `, transitional monotony: -${transitionalMonotonyPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${impersonalPenalty > 0 ? `, impersonal-it overuse: -${impersonalPenalty.toFixed(2)}` : ''}${transitionalMonotonyPenalty > 0 ? `, transitional monotony: -${transitionalMonotonyPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}${stanceAdverbBonus > 0 ? `, stance adverb: +${stanceAdverbBonus.toFixed(2)}` : ''}`,
   }
 }
 

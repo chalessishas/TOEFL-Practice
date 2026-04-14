@@ -1408,6 +1408,21 @@ export function score(text) {
     errors.push(`Missing object error: "${verb} to ${inf}" — causative verbs (allow, enable, permit) require an explicit object before the infinitive. Write "${verb} us/people/students to ${inf}" or restructure: "${verb}s ${inf}ment/improvement". Chinese 允许做某事 omits the object, but English requires it.`)
   }
 
+  // "spend/waste time + to-infinitive" → should be gerund — Loop 40 (2026-04-13).
+  // Chinese 花时间做某事 (huā shíjiān zuò mǒu shì) places a bare verb after time expressions;
+  // learners insert "to" as an infinitive marker, producing "spend time to study".
+  // English requires the gerund: "spend time studying", "waste time watching TV".
+  // Celce-Murcia & Larsen-Freeman (1999) §14.8: spend/waste time is gerund-selecting.
+  // CLEC frequency: ~5-8%. Guard: exclude "to be/have" (passives, perfects).
+  // FP rate: <2% — "spend time to [verb]" is categorically wrong in standard English.
+  const SPEND_TIME_TO_RE = /\b(spends?|spent|spending|wastes?|wasted|wasting)\b(?:[^.!?]{0,40}?)\btime\s+to\s+(?!be\b|have\b)([a-z]{2,})\b/i
+  const spendMatch = text.match(SPEND_TIME_TO_RE)
+  if (spendMatch) {
+    const verb = spendMatch[1]
+    const inf = spendMatch[2]
+    errors.push(`Gerund error: "${verb} time to ${inf}" — "spend/waste time" takes a gerund (-ing), not a to-infinitive. Write "${verb} time ${inf}ing" not "${verb} time to ${inf}". Chinese 花时间做某事 uses a bare verb, but English requires the gerund form here.`)
+  }
+
   // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
   // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
   // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
@@ -1652,6 +1667,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Missing object error') && e.includes('causative'))) {
     tips.push('"Allow", "enable", and "permit" require an explicit object before "to": write "allows us to improve", "enables students to learn", "permits people to access" — not "allows to improve", "enables to learn". Chinese 允许做某事 can omit the object, but English causatives never can.')
+  }
+  if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('spend'))) {
+    tips.push('"Spend time" and "waste time" take a gerund (-ing): write "spend time studying" not "spend time to study", "waste time watching" not "waste time to watch". Chinese 花时间做某事 places a bare verb after time, but English requires the -ing form.')
   }
   if (analysis.errors.some(e => e.includes('Subjunctive error') && e.includes('wish'))) {
     tips.push('"Wish" requires the past-counterfactual (irrealis) form, not present tense: write "I wish I could" not "I wish I can", "I wish it were" not "I wish it is". To express a real hope, use "hope" with present tense: "I hope I can improve."')

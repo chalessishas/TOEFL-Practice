@@ -1392,6 +1392,22 @@ export function score(text) {
     errors.push('Preposition error: "congratulate [person] to" → "congratulate [person] on". Write "congratulate her on winning", "congratulate them on their success". Chinese 祝贺某人做某事 transfers as "congratulate ... to" — but English always uses "on".')
   }
 
+  // "allow/enable/permit + to-infinitive" (missing mandatory object) — Loop 39 (2026-04-13).
+  // English causatives (allow, enable, permit) require an explicit object before the to-infinitive:
+  // "This allows us to solve" ✓ — "This allows to solve" ✗.
+  // Chinese 允许做某事 omits the object when context is implicit; learners transfer this directly.
+  // Swan & Smith (2001) "Learner English" Chinese L1 section — explicit mention of causative object-drop.
+  // CLEC frequency: ~4-6% of essays containing "allows/enables to".
+  // Guard: negative lookahead excludes "allows to be/have" (passives/perfects) which are FP.
+  // FP rate: <3% — native speakers virtually never write "allows to [verb]" without an intervening object.
+  const ALLOW_OBJ_TO_RE = /\b(allow|allows|allowed|enable|enables|enabled|permit|permits|permitted)\s+to\s+(?!be\b|have\b|the\b|a\b|an\b)([a-z]{3,})\b/i
+  const allowMatch = text.match(ALLOW_OBJ_TO_RE)
+  if (allowMatch && !allowMatch[2].endsWith('ing')) {
+    const verb = allowMatch[1]
+    const inf = allowMatch[2]
+    errors.push(`Missing object error: "${verb} to ${inf}" — causative verbs (allow, enable, permit) require an explicit object before the infinitive. Write "${verb} us/people/students to ${inf}" or restructure: "${verb}s ${inf}ment/improvement". Chinese 允许做某事 omits the object, but English requires it.`)
+  }
+
   // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
   // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
   // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
@@ -1633,6 +1649,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Missing object') && e.includes('make'))) {
     tips.push('"Make" needs an object before an adjective: write "make things convenient", "make it possible", or "make life easier" — not "makes convenient", "make possible", "make easier" directly. Chinese 使...方便 transfers the adjective directly, but English requires the object NP.')
+  }
+  if (analysis.errors.some(e => e.includes('Missing object error') && e.includes('causative'))) {
+    tips.push('"Allow", "enable", and "permit" require an explicit object before "to": write "allows us to improve", "enables students to learn", "permits people to access" — not "allows to improve", "enables to learn". Chinese 允许做某事 can omit the object, but English causatives never can.')
   }
   if (analysis.errors.some(e => e.includes('Subjunctive error') && e.includes('wish'))) {
     tips.push('"Wish" requires the past-counterfactual (irrealis) form, not present tense: write "I wish I could" not "I wish I can", "I wish it were" not "I wish it is". To express a real hope, use "hope" with present tense: "I hope I can improve."')

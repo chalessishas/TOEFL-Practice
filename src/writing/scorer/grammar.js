@@ -1497,6 +1497,34 @@ export function score(text) {
     errors.push('Verb error: "affect on" — "affect" is a transitive verb and takes no preposition: "this affects our health" not "this affects on our health". For the preposition pattern, use the noun: "has an effect on our health". Chinese 对...有影响 may produce "affect on" — but English "affect" never takes "on".')
   }
 
+  // "in the same time" → "at the same time" — Loop 45 (2026-04-13).
+  // Liu (2011): Chinese L1 preposition error category #4 in CLEC (~6-8% essay frequency).
+  // Chinese 在同一时间 / 同时 → direct transfer produces "in the same time".
+  // Guard: "in the same time zone/period/frame/slot/interval/span/block/window/as" are all valid.
+  // FP: ~0%.
+  const IN_SAME_TIME_RE = /\bin\s+the\s+same\s+time\b(?!\s+(?:zone|period|frame|slot|interval|span|block|window|as\b))/i
+  if (IN_SAME_TIME_RE.test(text)) {
+    errors.push('Preposition error: "in the same time" → "at the same time". The fixed English phrase is "at the same time" (not "in"). Chinese 在同一时间 / 同时 transfers directly — but English always uses "at" for this temporal expression.')
+  }
+
+  // "pay attention on" → "pay attention to" — Loop 45 (2026-04-13).
+  // Celce-Murcia & Larsen-Freeman (1999) §9.4: "pay attention to" is a fixed collocation.
+  // Chinese 注意/关注 → learners analogize "focus on" → "pay attention on". CLEC: ~4-6%.
+  // FP: ~0% ("pay attention to" is the only standard form; "on" never follows).
+  const PAY_ATTENTION_ON_RE = /\bpay\s+attention\s+on\b/i
+  if (PAY_ATTENTION_ON_RE.test(text)) {
+    errors.push('Collocation error: "pay attention on" → "pay attention to". "Pay attention" always takes "to": "pay attention to the details", "pay attention to what they say". The analogy with "focus on" does not transfer — "pay attention" collocates only with "to".')
+  }
+
+  // "take advantages of" → "take advantage of" — Loop 45 (2026-04-13).
+  // "Take advantage of" is a fixed idiom in which "advantage" is always singular.
+  // Learners add plural -s by analogy with "there are many advantages". CLEC: ~3-4%.
+  // FP: ~0% (the idiom is invariably singular).
+  const TAKE_ADVANTAGES_RE = /\b(?:take|takes|took|taking)\s+advantages\s+of\b/i
+  if (TAKE_ADVANTAGES_RE.test(text)) {
+    errors.push('Idiom error: "take advantages of" → "take advantage of". The fixed phrase "take advantage of" always uses the singular "advantage" — never "advantages". The plural is used only in "there are many advantages to...", not in this idiom.')
+  }
+
   // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
   // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
   // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
@@ -1843,6 +1871,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Verb error') && e.includes('affect on'))) {
     tips.push('"Affect" is a transitive verb — no preposition needed: write "this affects our health", "technology affects our daily lives". For the noun, use "has an effect on": "technology has an effect on our lives". Chinese 对...有影响 produces "affects on" — always use the verb directly without "on".')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('in the same time'))) {
+    tips.push('"In the same time" is a direct Chinese transfer (在同一时间). The correct English phrase is "at the same time" — always use "at", never "in". Compare: "at the same time", "at that time", "at this moment". "In" is used for longer durations ("in the morning", "in the past"), not for simultaneous actions.')
+  }
+  if (analysis.errors.some(e => e.includes('Collocation error') && e.includes('pay attention on'))) {
+    tips.push('"Pay attention" is a fixed collocation that always takes "to": "pay attention to the details", "pay attention to what they say". Never use "on" — the analogy with "focus on" does not apply here. Chinese 注意到 may lead learners to use "on", but "pay attention to" is the only standard form.')
+  }
+  if (analysis.errors.some(e => e.includes('Idiom error') && e.includes('take advantages of'))) {
+    tips.push('"Take advantage of" is a fixed idiom — "advantage" is always singular: "take advantage of the opportunity", "take advantage of the situation". The plural "advantages" is used in a different structure: "there are many advantages to this approach". Never pluralize the noun inside the idiom.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

@@ -1423,6 +1423,17 @@ export function score(text) {
     errors.push(`Gerund error: "${verb} time to ${inf}" — "spend/waste time" takes a gerund (-ing), not a to-infinitive. Write "${verb} time ${inf}ing" not "${verb} time to ${inf}". Chinese 花时间做某事 uses a bare verb, but English requires the gerund form here.`)
   }
 
+  // "in the other hand" → "on the other hand" — Loop 41 (2026-04-13).
+  // Fixed idiom: English uses "on the other hand" exclusively. "In" is categorically wrong.
+  // Chinese 另一方面 (lìng yī fāngmiàn) → Chinese 在 maps to both "in" and "on", so learners
+  // default to "in". Liu (2011) TOEFL corpus: ~12% of Chinese L1 essays using this idiom err.
+  // Hinkel (2002): preposition substitution is a top-5 Chinese L1 error category.
+  // FP rate: ~0% — no native writer uses "in the other hand" in academic prose.
+  const IN_OTHER_HAND_RE = /\bin\s+the\s+other\s+hand\b/i
+  if (IN_OTHER_HAND_RE.test(text)) {
+    errors.push('Preposition error: "in the other hand" → the correct idiom is "on the other hand". English fixes this preposition: "on the other hand, ..." (not "in"). Chinese 另一方面 can use 在 for both "in" and "on", but English uses "on" here exclusively.')
+  }
+
   // "less + countable noun" → "fewer + countable noun" — Loop 37 (2026-04-13).
   // Chinese 少 (shǎo) translates to both "fewer" and "less"; learners default to "less" for all
   // downward quantification. Swan & Smith (2001): persistent B2-C1 quantifier error.
@@ -1670,6 +1681,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Gerund error') && e.includes('spend'))) {
     tips.push('"Spend time" and "waste time" take a gerund (-ing): write "spend time studying" not "spend time to study", "waste time watching" not "waste time to watch". Chinese 花时间做某事 places a bare verb after time, but English requires the -ing form.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('in the other hand'))) {
+    tips.push('The correct idiom is "on the other hand" — not "in". English fixes this preposition: "On the other hand, some people believe..." Chinese 另一方面 uses 在 which maps to both "in" and "on", but English exclusively uses "on" in this fixed expression.')
   }
   if (analysis.errors.some(e => e.includes('Subjunctive error') && e.includes('wish'))) {
     tips.push('"Wish" requires the past-counterfactual (irrealis) form, not present tense: write "I wish I could" not "I wish I can", "I wish it were" not "I wish it is". To express a real hope, use "hope" with present tense: "I hope I can improve."')

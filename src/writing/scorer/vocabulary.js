@@ -155,9 +155,13 @@ export function score(text) {
   if (tokens.length === 0) return { value: 0, details: 'No words found' }
 
   // Average word length score
+  // Upper bound raised 5.5→6.5 (Loop 47, 2026-04-13): avg-len 5.5 was too easy to hit for
+  // intermediate writers, causing both Score-4 and Score-5 essays to max out and lose
+  // discrimination. A 6.5 ceiling means true academic register (avg ≥6.5 chars) is needed
+  // for a perfect score, while a 6.09 Score-4 essay correctly scores ~0.89.
   const avgLen = tokens.reduce((sum, w) => sum + w.length, 0) / tokens.length
-  // 3.5→0.2, 4.0→0.4, 4.5→0.6, 5.0→0.8, 5.5→1.0
-  const avgLenScore = linearMap(avgLen, 3.5, 5.5, 0.2, 1.0)
+  // 3.5→0.2, 5.0→0.67, 6.5→1.0 (was 3.5→0.2, 5.5→1.0)
+  const avgLenScore = linearMap(avgLen, 3.5, 6.5, 0.2, 1.0)
 
   const contentTokens = tokens.filter(isContentWord)
   const totalContent = contentTokens.length || 1
@@ -185,7 +189,11 @@ export function score(text) {
       diversityLabel = `too few content words (${uniqueContent.size} unique)`
     } else {
       const rareRatio = rareTypes.size / uniqueContent.size
-      diversityScore = linearMap(rareRatio, 0, 0.25, 0.2, 1.0)
+      // Upper bound raised 0.25→0.60 (Loop 47, 2026-04-13): 25% rare ratio was too easy —
+      // even basic essays with simple vocabulary hit it and scored 1.0. With 60% ceiling,
+      // Score-4 essays (~53% rare) score ~0.91 while Score-3 essays (~20–30% rare) score
+      // ~0.47–0.60, restoring discrimination across bands.
+      diversityScore = linearMap(rareRatio, 0, 0.60, 0.2, 1.0)
       diversityLabel = `rare word ratio: ${(rareRatio * 100).toFixed(1)}% (${rareTypes.size}/${uniqueContent.size} types)`
     }
   }

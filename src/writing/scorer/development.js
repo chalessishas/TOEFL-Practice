@@ -269,11 +269,18 @@ function numericEvidenceBonus(text, taskType) {
   const years = (text.match(/\b(19|20)\d{2}\b/g) || []).length
   const bigNumbers = (text.match(/\b\d{1,3}(,\d{3})+|\b\d{4,}\b/g) || []).length
 
+  // L57: Measured-number signals — 2-3 digit integer paired with a measurement unit.
+  // "90 minutes", "30 percent" (written), "150 employees" etc. are specific statistics.
+  // Requiring both a numeric value AND a concrete unit prevents false positives from
+  // bare numbers ("3 things") — the unit pairing is what makes the phrase evidential.
+  const MEASURED_NUM_RE = /\b\d{2,3}\s+(minutes?|hours?|days?|weeks?|months?|years?|percent|dollars?|students?|workers?|employees?|people|countries|miles?|kilometers?|meters?|centimeters?|kilograms?|pounds?|items?|points?|times)\b/gi
+  const measuredNums = (text.match(MEASURED_NUM_RE) || []).length
+
   // Named entity proxy: capitalized words not at sentence start
   // Matches a capitalized word preceded by a lowercase word (not sentence-initial)
   const namedEntityMatches = (text.match(/[a-z]\s+[A-Z][a-z]{2,}/g) || []).length
 
-  const numericSignals = percentages + years + bigNumbers
+  const numericSignals = percentages + years + bigNumbers + (measuredNums >= 1 ? 1 : 0)
   const entitySignals = Math.min(2, namedEntityMatches) // cap to avoid noise
 
   if (numericSignals >= 2 || (numericSignals >= 1 && entitySignals >= 1)) return 0.08

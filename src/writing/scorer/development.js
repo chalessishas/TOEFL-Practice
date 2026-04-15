@@ -354,15 +354,22 @@ function counterArgumentBonus(text, taskType) {
 // Granger & Tyson (1996): Chinese L1 writers separate claims/reasons at 71% vs 38% native.
 // FP: ~0% — thesis marker + causal connector in one sentence is always well-structured.
 // Guard: email exempt (transactional structure, no argumentation expected).
+// Loop 58: Result-clause warrant (, which allows/enables/results in).
+// Non-restrictive relative clause after comma = embedded consequence = Toulmin warrant
+// embedded in the claim. Requires comma + "which" to distinguish from restrictive relatives.
+// "X, which allows Y" = action + consequence fused in one sentence = Score-4 sophistication.
+// FP: ~0% — comma-which + consequence verb is always a result clause in essay context.
 function warrantedClaimBonus(text, taskType) {
   if (taskType === 'email') return 0
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 10)
   const THESIS_RE = /\b(i (believe|think|argue|contend|maintain|feel)|in my (opinion|view)|my (position|view|stance)|i am convinced|it (seems|appears) to me)\b/i
   const CAUSAL_RE = /\b(because|since|given that|as\s+(?!a\s+result)|for\s+the\s+reason|the\s+reason\s+is)\b/i
   const warrantedSentences = sentences.filter(s => THESIS_RE.test(s) && CAUSAL_RE.test(s)).length
-  if (warrantedSentences >= 2) return 0.06
-  if (warrantedSentences >= 1) return 0.03
-  return 0
+  const RESULT_CLAUSE_RE = /,\s+which\s+(allows?|enables?|means?|results?\s+in|leads?\s+to|helps?|makes?\s+it)/i
+  const resultBonus = sentences.some(s => RESULT_CLAUSE_RE.test(s)) ? 0.02 : 0
+  if (warrantedSentences >= 2) return 0.06 + resultBonus
+  if (warrantedSentences >= 1) return 0.03 + resultBonus
+  return resultBonus
 }
 
 export function score(text, taskType = 'general') {

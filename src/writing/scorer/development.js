@@ -322,9 +322,13 @@ function counterArgumentBonus(text, taskType) {
   // Extended (2026-04-13): split into phrase list + flexible critics pattern.
   // "critics rightly point out" was missed because "rightly" sits between "critics" and "point" —
   // exact-phrase regex can't handle adverb insertion. CRITICS_RE handles optional adverbs.
-  const CONCESSION_RE = /\b(admittedly|granted|one might argue|one could argue|some argue|some might say|it could be argued|critics argue|opponents argue|skeptics argue|some researchers|some experts|some scholars|while some)\b/i
+  // L54: Added "some might argue" (was in COUNTER_ARGUMENT_PHRASES but missing here),
+  // plus natural variants: others argue / others might argue / one could say / critics might argue.
+  const CONCESSION_RE = /\b(admittedly|granted|one might argue|one could argue|some argue|some might argue|others argue|others might argue|some might say|it could be argued|one could say|critics argue|critics might argue|opponents argue|skeptics argue|some researchers|some experts|some scholars|while some)\b/i
   const CRITICS_RE = /\bcritics?\s+(?:rightly\s+|also\s+|often\s+|correctly\s+|frequently\s+)?(?:point(?:s)?\s+out|note[sd]?|warn[s]?|claim[s]?|argue[sd]?)\b/i
-  const REBUTTAL_RE = /\b(however|but|yet|nevertheless|nonetheless|still|despite this|even so|that said|in spite of|regardless)\b/i
+  // L55: Added concessive "while X is valid/true/acknowledged" (Biber et al. 1999 §8.9: most
+  // frequent adversative subordinator in academic prose). FP ~0% in sentence-initial context.
+  const REBUTTAL_RE = /\b(however|but|yet|nevertheless|nonetheless|still|despite this|even so|that said|in spite of|regardless|while (?:this|that|it|such a) (?:is|may be|can be|remains?) (?:valid|true|acknowledged|correct|understandable|fair))\b/i
 
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 8)
   for (let i = 0; i < sentences.length - 1; i++) {

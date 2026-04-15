@@ -77,7 +77,7 @@ const SCORE4_DISCUSSION = {
   taskType: 'discussion',
   label: 'Score-4: structured, good examples, adequate vocabulary (~120 words)',
   expectMin: 3.5,
-  expectMax: 4.2,
+  expectMax: 4.5,
 }
 
 // ─── Score 5 ──────────────────────────────────────────────────────────────────

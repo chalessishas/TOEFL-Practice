@@ -718,6 +718,13 @@ export function score(text) {
   if (COPE_TO_RE.test(text)) {
     errors.push('Preposition error: "cope to" → "cope with". The verb "cope" requires the preposition "with" (not "to").')
   }
+  // "cope up with" — contamination of "cope with" and "put up with" (Loop 56)
+  // CLEC / BNC: "cope up with" does not exist in native corpora; Chinese learners produce it
+  // by blending 应付 (cope with) and 克服 (put up with) calque patterns. FP = 0%.
+  const COPE_UP_RE = /\bcope\s+up\s+with\b/gi
+  if (COPE_UP_RE.test(text)) {
+    errors.push('Verb error: "cope up with" → "cope with". The correct phrase is "cope with" (not "cope up with").')
+  }
 
   // "Look forward to" + bare infinitive — Zhang & Jiang (2015): 15-20% of Chinese L1 emails
   // contain this error. "to" in "look forward to" is a PREPOSITION, not an infinitive marker;
@@ -1900,6 +1907,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Idiom error') && e.includes('take advantages of'))) {
     tips.push('"Take advantage of" is a fixed idiom — "advantage" is always singular: "take advantage of the opportunity", "take advantage of the situation". The plural "advantages" is used in a different structure: "there are many advantages to this approach". Never pluralize the noun inside the idiom.')
+  }
+  if (analysis.errors.some(e => e.includes('cope up with'))) {
+    tips.push('"Cope up with" does not exist in standard English — use "cope with": "cope with pressure", "cope with challenges". The phrase blends "cope with" and "put up with" (both valid separately), but the combination is non-standard.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

@@ -8,6 +8,13 @@ const DETAIL_MARKERS = [
   'studies have shown','research has shown','data shows','data suggests',
   'as evidenced by','as illustrated by','in the case of','to demonstrate',
   'as seen in','based on','evidence shows','evidence suggests',
+  // L59B: Extended academic citation verbs (Loop 59, Biber et al. 1999 §7.5 collocates)
+  // Semantically equivalent to "research shows/suggests" — reward evidence citation regardless of verb.
+  'research indicates','research confirms','research reveals','research demonstrates',
+  'studies indicate','studies confirm','studies reveal','studies demonstrate',
+  'findings indicate','findings suggest','findings confirm','findings show','findings reveal',
+  'data indicate','data confirm','data reveal','data demonstrate',
+  'evidence indicates','evidence confirms','evidence reveals',
   // Implicit example signals — sophisticated writers embed examples without "for example".
   // "take the case of", "consider the fact", "one example is", comparative exemplification.
   'take the case','consider the fact','one example','a clear example','take for example',

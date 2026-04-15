@@ -388,8 +388,11 @@ export function score(text) {
     // Top-ranked Chinese L1 collocational errors unresolved even at C1 proficiency level.
     { re: /\bmake\s+contribution\s+to\b/i,
       msg: 'Collocation error: "make contribution to" → "make a contribution to" (article required) or "contribute to"' },
-    { re: /\bplay\s+important\s+role\b/i,
-      msg: 'Collocation error: "play important role" → "play an important role" (article required before "important")' },
+    // L59A: "play [adj] role" — missing article before role adjective (Loop 59, CLEC top-5 article error)
+    // Covers all conjugations (plays/played/playing) and common role adjectives.
+    // "play an important role" → "an" breaks the adj-role chain → no match (correct).
+    { re: /\bplay(?:s|ed|ing)?\s+(?:important|key|crucial|vital|significant|major|central|fundamental|decisive|pivotal)\s+role\b/i,
+      msg: 'Article error: "play [adj] role" → "play a(n) [adj] role" (countable noun "role" requires an article — e.g. "play an important role", "play a key role")' },
     { re: /\bdo\s+(?:great\s+|much\s+|hard\s+)?efforts?\b/i,
       msg: 'Collocation error: "do effort/efforts" → "make an effort" or "make efforts"' },
     { re: /\bmake\s+(?:a\s+|an\s+|great\s+|big\s+)?influence\s+on\b/i,

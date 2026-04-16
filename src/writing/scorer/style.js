@@ -327,12 +327,24 @@ export function score(text, taskType = 'general') {
   const impersonalPenalty = (taskType !== 'email' && impersonalCount >= 2)
     ? Math.min(0.12, (impersonalCount - 1) * 0.06) : 0
 
+  // Paragraph structure bonus (L63, 2026-04-16).
+  // Kuiken & Vedder (2008) TOEFL data: multi-paragraph organization is the clearest
+  // structural differentiator between Score-4 and Score-5 discussion essays.
+  // Two conditions: ≥2 paragraphs (\n\n delimiter) AND second paragraph ≥30 words.
+  // Email exempt: email format is naturally single-block.
+  let paragraphStructureBonus = 0
+  if (taskType !== 'email') {
+    const paragraphs = text.split(/\n\n+/).map(p => p.trim()).filter(p => p.length > 0)
+    const secondParaWords = paragraphs.length >= 2 ? (paragraphs[1].match(/\S+/g) || []).length : 0
+    paragraphStructureBonus = (paragraphs.length >= 2 && secondParaWords >= 30) ? 0.10 : 0
+  }
+
   const ttr = rawTtr // keep raw for display
-  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty - impersonalPenalty - transitionalMonotonyPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus + stanceAdverbBonus))
+  const value = Math.max(0, Math.min(1, ttrScore * 0.35 + varianceScore * 0.35 + syntacticVariety * 0.1 + 0.2 - repetitionPenalty - casualPenalty - passiveOverusePenalty - wordyPhrasePenalty - formulaicPenalty - weakIntPenalty - iOpenerPenalty - boosterPenalty - progressiveOverusePenalty - besidespenalty - impersonalPenalty - transitionalMonotonyPenalty + nomBonus + sentLenBonus + subDensityBonus + emailRegisterBonus + subordDiversityBonus + phrasalEmbeddingBonus + stanceAdverbBonus + paragraphStructureBonus))
 
   return {
     value,
-    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${impersonalPenalty > 0 ? `, impersonal-it overuse: -${impersonalPenalty.toFixed(2)}` : ''}${transitionalMonotonyPenalty > 0 ? `, transitional monotony: -${transitionalMonotonyPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}${stanceAdverbBonus > 0 ? `, stance adverb: +${stanceAdverbBonus.toFixed(2)}` : ''}`,
+    details: `TTR: ${ttr.toFixed(2)}, sentence variance: ${varianceScore.toFixed(2)}, syntactic variety: ${patternHits}/${COMPLEX_PATTERNS.length}, ${repeatedWords} repeated word(s)${casualHits > 0 ? `, ${casualHits} informal term(s)` : ''}, nom density: ${nomDensity.toFixed(1)}/100w, mean sent len: ${meanSentLen.toFixed(1)}, sub density: ${subDensity.toFixed(1)}/100w${passiveRatio > 0.40 ? `, passive overuse: ${(passiveRatio * 100).toFixed(0)}%` : ''}${wordyHits > 0 ? `, wordy phrases: ${wordyHits}` : ''}${formulaicPenalty > 0 ? `, formulaic repetition` : ''}${weakIntHits >= 2 ? `, weak intensifiers: ${weakIntHits}` : ''}${iOpenerPenalty > 0 ? `, i-opener monotony: -${iOpenerPenalty.toFixed(2)}` : ''}${boosterPenalty > 0 ? `, booster overuse: -${boosterPenalty.toFixed(2)}` : ''}${progressiveOverusePenalty > 0 ? `, progressive overuse: -${progressiveOverusePenalty.toFixed(2)}` : ''}${besidespenalty > 0 ? `, besides overuse: -${besidespenalty.toFixed(2)}` : ''}${impersonalPenalty > 0 ? `, impersonal-it overuse: -${impersonalPenalty.toFixed(2)}` : ''}${transitionalMonotonyPenalty > 0 ? `, transitional monotony: -${transitionalMonotonyPenalty.toFixed(2)}` : ''}${emailRegisterBonus > 0 ? `, email register: +${emailRegisterBonus.toFixed(2)}` : ''}${subordDiversityBonus > 0 ? `, subord diversity: +${subordDiversityBonus.toFixed(2)}` : ''}${phrasalEmbeddingBonus > 0 ? `, phrasal embed: +${phrasalEmbeddingBonus.toFixed(2)}` : ''}${stanceAdverbBonus > 0 ? `, stance adverb: +${stanceAdverbBonus.toFixed(2)}` : ''}${paragraphStructureBonus > 0 ? `, paragraph structure: +${paragraphStructureBonus.toFixed(2)}` : ''}`,
   }
 }
 

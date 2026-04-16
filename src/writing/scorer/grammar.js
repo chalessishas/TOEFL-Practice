@@ -1718,6 +1718,24 @@ export function score(text) {
     errors.push('Grammar error: stative verb in progressive form. Verbs like "know / believe / contain / prefer / belong / seem" describe states, not actions — they cannot be progressive. Write "I know" not "I am knowing"; "it contains" not "it is containing". Chinese has no progressive restriction on state verbs (是在知道 is ungrammatical in Chinese too), but the English restriction is absolute in formal writing.')
   }
 
+  // Verb+preposition collocations — Loop 66 (2026-04-16)
+  // CLEC: ~5-8% collectively; transitive verbs that take no preposition in English,
+  // adj+prep pairs where Chinese 'de' does not mark preposition case.
+  // FP guard: word-boundary (\b) + whitespace requirement prevents partial matches.
+  const L66_PATTERNS = [
+    { re: /\bdiscuss\s+about\b/i,           msg: 'Collocation error: "discuss about" → "discuss". "Discuss" is transitive — it takes a direct object with no preposition: "discuss the issue", "discuss this topic". Analogy with "talk about" leads to the error; "talk" is intransitive and requires "about", but "discuss" does not.' },
+    { re: /\bemphasize\s+on\b/i,            msg: 'Collocation error: "emphasize on" → "emphasize". Like "discuss", "emphasize" is transitive: "emphasize the importance", "emphasize this point". Overanalogy with "focus on / insist on" triggers the error; "emphasize" never takes a preposition.' },
+    { re: /\bmention\s+about\b/i,           msg: 'Collocation error: "mention about" → "mention". "Mention" is transitive: "mention the fact", "mention this problem". Analogy with "talk about / write about" inserts a spurious "about" — drop it.' },
+    { re: /\breach\s+to\s+a\s+conclusion\b/i, msg: 'Collocation error: "reach to a conclusion" → "reach a conclusion". "Reach" is transitive when used with "conclusion": "reach a conclusion", "reach an agreement". The preposition "to" is not used here (contrast with "come to a conclusion", which is also correct).' },
+    { re: /\bresponsible\s+of\b/i,          msg: 'Collocation error: "responsible of" → "responsible for". The fixed adjective-preposition pair is "responsible for": "responsible for the decision", "responsible for children". Chinese 对…负责 uses 对 (≈ for/to), leading to "of" substitution.' },
+    { re: /\binterested\s+on\b/i,           msg: 'Collocation error: "interested on" → "interested in". The fixed pair is "interested in": "interested in science", "interested in this topic". Over-generalization from "focused on / rely on" causes this substitution.' },
+    { re: /\bfamiliar\s+of\b/i,             msg: 'Collocation error: "familiar of" → "familiar with". The fixed pair is "familiar with": "familiar with the concept", "familiar with the rules". "Of" is triggered by Chinese 对…熟悉 and analogy with "aware of / fond of" — but "familiar" always takes "with".' },
+    { re: /\bparticipate\s+on\b/i,          msg: 'Collocation error: "participate on" → "participate in". "Participate" always takes "in": "participate in the discussion", "participate in the program". Overanalogy with "focus on / depend on" inserts "on".' },
+  ]
+  for (const { re, msg } of L66_PATTERNS) {
+    if (re.test(text)) errors.push(msg)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -2046,6 +2064,10 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Grammar error') && e.includes('stative verb'))) {
     tips.push('Stative verbs (know, believe, contain, prefer, belong, seem) cannot be progressive. Write "I know" not "I am knowing"; "it contains" not "it is containing". State verbs describe conditions, not actions in progress — the progressive "-ing" is grammatically blocked in standard English.')
+  }
+  if (analysis.errors.some(e => e.includes('Collocation error') && (e.includes('discuss about') || e.includes('emphasize on') || e.includes('mention about') || e.includes('reach to') || e.includes('responsible of') || e.includes('interested on') || e.includes('familiar of') || e.includes('participate on')))) {
+    const collocErr = analysis.errors.find(e => e.includes('Collocation error') && (e.includes('discuss about') || e.includes('emphasize on') || e.includes('mention about') || e.includes('reach to') || e.includes('responsible of') || e.includes('interested on') || e.includes('familiar of') || e.includes('participate on')))
+    if (collocErr) tips.push(collocErr.replace('Collocation error: ', ''))
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

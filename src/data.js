@@ -92,6 +92,20 @@ export const questions = [
   },
   {
     id: 10,
+    type: 'text_insertion',
+    paragraph: 2,
+    text: 'The following sentence can be added to paragraph 3 (the vertical farming paragraph). Where would it best fit?\n\n"Unlike traditional soil-based agriculture, these enclosed environments can also maintain optimal growing conditions throughout the year, unaffected by cold winters or drought."',
+    options: [
+      'Position A — at the very beginning of paragraph 3, before "Despite these benefits"',
+      'Position B — after "cities lack the vast acreage required for traditional agriculture," before "To overcome this limitation"',
+      'Position C — after "These methods involve growing plants in stacked, controlled environments using nutrient-rich water instead of soil, significantly increasing yield per square foot."',
+      'Position D — at the very end of paragraph 3, after the 10 times yield statistic',
+    ],
+    correct: 2,
+    explanation: 'Position C is correct. The inserted sentence uses "these enclosed environments" to refer directly back to the "stacked, controlled environments" described in the preceding sentence. It extends the point about controlled conditions (no soil, nutrient-rich water) by adding the year-round advantage, before the passage moves to its quantitative peak — the 10x yield claim. Position A places the sentence before vertical farming is introduced, so "enclosed environments" has no referent. Position B interrupts before vertical farming is introduced. Position D places a new benefit after the climactic statistic, weakening the paragraph\'s logical arc.',
+  },
+  {
+    id: 11,
     type: 'multiple',
     paragraph: 4,
     text: 'Which of the following are mentioned in the passage as cities with successful urban agriculture models? (Select 3)',

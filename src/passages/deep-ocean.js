@@ -122,6 +122,20 @@ export const questions = [
   },
   {
     id: 10,
+    type: 'text_insertion',
+    paragraph: 3,
+    text: 'The following sentence can be added to paragraph 4 (the mining paragraph). Where would it best fit?\n\n"Critics argue that the long-term economic costs of environmental damage may ultimately outweigh the short-term profits from mineral extraction."',
+    options: [
+      'Position A — at the very beginning of paragraph 4, before "The deep ocean also holds"',
+      'Position B — after "lie scattered across the seafloor," before "Mining companies have proposed"',
+      'Position C — after "Mining companies have proposed extracting these resources to meet growing demand for materials used in electronics and batteries."',
+      'Position D — at the very end of paragraph 4, after the final sentence about toxic plumes',
+    ],
+    correct: 2,
+    explanation: 'Position C is best. The inserted sentence directly follows the statement that mining companies propose extraction "to meet growing demand" — introducing an economic counter-argument (costs vs. profits) before the passage shifts to the specific ecological risk of toxic plumes. Position A would disrupt the topic sentence. Position B interrupts before the mining proposal is even introduced. Position D places the economic argument after the ecological argument, reversing the passage\'s logical order.',
+  },
+  {
+    id: 12,
     type: 'attitude',
     paragraph: null,
     text: "The author's overall attitude toward the future of deep-sea exploration can best be described as:",

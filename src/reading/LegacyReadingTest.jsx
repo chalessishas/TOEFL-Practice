@@ -24,14 +24,15 @@ const clearProgress = (key) => {
   } catch {}
 };
 
-// Legacy Reading Test — Urban Agriculture passage with 10 mixed-type questions
-// Props: { onBack }
-const LegacyReadingTest = ({ onBack }) => {
+// Legacy Reading Test — accepts any passage/questions via props, defaults to Urban Agriculture
+// Props: { onBack, passage?, questions?, storageKey? }
+const LegacyReadingTest = ({ onBack, passage: passageProp, questions: questionsProp, storageKey: storageKeyProp }) => {
   const { colors, isTimerVisible, isShortcutsVisible } = useTheme()
   const TOTAL_TIME = 20 * 60;
-  const saved = useRef(loadProgress(STORAGE_KEY));
-  const questions = legacyQuestions;
-  const paragraphs = legacyPassage.split('\n\n');
+  const activeKey = storageKeyProp || STORAGE_KEY;
+  const saved = useRef(loadProgress(activeKey));
+  const questions = questionsProp || legacyQuestions;
+  const paragraphs = (passageProp || legacyPassage).split('\n\n');
 
   const [currentQuestion, setCurrentQuestion] = useState(saved.current?.currentQuestion || 0);
   const [answers, setAnswers] = useState(saved.current?.answers || {});
@@ -50,11 +51,11 @@ const LegacyReadingTest = ({ onBack }) => {
       const interval = setInterval(() => setTimer(t => t - 1), 1000);
       return () => clearInterval(interval);
     }
-    if (timer === 0 && !showResult) { setShowResult(true); clearProgress(STORAGE_KEY); }
+    if (timer === 0 && !showResult) { setShowResult(true); clearProgress(activeKey); }
   }, [showResult, paused, timer]);
 
   useEffect(() => {
-    if (!showResult) saveProgress(STORAGE_KEY, { currentQuestion, answers, timer });
+    if (!showResult) saveProgress(activeKey, { currentQuestion, answers, timer });
   }, [currentQuestion, answers, timer, showResult]);
 
   useEffect(() => {
@@ -103,13 +104,13 @@ const LegacyReadingTest = ({ onBack }) => {
 
   const handleSubmit = () => {
     if (questions[currentQuestion].type === 'multiple') setAnswers(a => ({ ...a, [currentQuestion]: selectedMultiple }));
-    setShowResult(true); clearProgress(STORAGE_KEY);
+    setShowResult(true); clearProgress(activeKey);
   };
 
   const handleRetry = () => {
     setCurrentQuestion(0); setAnswers({}); setSelectedMultiple([]);
     setShowResult(false); setShowReview(false); setTimer(TOTAL_TIME);
-    setPaused(false); setShowConfirm(false); clearProgress(STORAGE_KEY);
+    setPaused(false); setShowConfirm(false); clearProgress(activeKey);
   };
 
   const isCurrentAnswered = () => {

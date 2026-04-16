@@ -5,6 +5,7 @@ import DailyLifeReading from '../reading/DailyLifeReading.jsx';
 import AcademicPassage from '../reading/AcademicPassage.jsx';
 import LegacyReadingTest from '../reading/LegacyReadingTest.jsx';
 import ReadingHome from '../reading/ReadingHome.jsx';
+import { passage as deepOceanPassage, questions as deepOceanQuestions } from '../passages/deep-ocean.js';
 
 const HISTORY_KEY = 'toefl-completion-history';
 
@@ -46,6 +47,7 @@ const Reading = () => {
   }, [view, timerPaused, moduleTimer]);
 
   const startLegacy = () => setView('legacy');
+  const startOcean = () => setView('ocean');
 
   const startPack = (pack, moduleIdx) => {
     setSelectedPack(pack);
@@ -79,11 +81,22 @@ const Reading = () => {
   };
 
   if (view === 'home') {
-    return <ReadingHome history={history} onStartLegacy={startLegacy} onStartPack={startPack} />;
+    return <ReadingHome history={history} onStartLegacy={startLegacy} onStartOcean={startOcean} onStartPack={startPack} />;
   }
 
   if (view === 'legacy') {
     return <LegacyReadingTest onBack={goHome} />;
+  }
+
+  if (view === 'ocean') {
+    return (
+      <LegacyReadingTest
+        onBack={goHome}
+        passage={deepOceanPassage}
+        questions={deepOceanQuestions}
+        storageKey="toefl-reading-deep-ocean"
+      />
+    );
   }
 
   if (view === 'pack') {

@@ -2,15 +2,15 @@ import { useTheme } from '../shared/ThemeContext.jsx';
 import { pack6 } from '../pack6.js';
 
 // Reading home screen — stateless presentational component
-// Props: { history, onStartLegacy, onStartPack }
-const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
+// Props: { history, onStartLegacy, onStartOcean, onStartPack }
+const ReadingHome = ({ history, onStartLegacy, onStartOcean, onStartPack }) => {
   const { colors } = useTheme()
 
-  const totalSets = 1 + pack6.modules.length;
+  const totalSets = 2 + pack6.modules.length;
   const completedSets = Object.keys(history).length;
   // Find the first incomplete Pack 6 module index for "Next Up" recommendation
   const nextUpIndex = pack6.modules.findIndex(m => !history[m.id]);
-  const totalQuestions = 10 + pack6.modules.reduce((sum, m) => sum + m.sections.reduce((s2, sec) => {
+  const totalQuestions = 20 + pack6.modules.reduce((sum, m) => sum + m.sections.reduce((s2, sec) => {
     if (sec.type === 'complete_words') return s2 + sec.paragraph.filter(p => p.blank).length;
     return s2 + (sec.questions?.length || 0);
   }, 0), 0);
@@ -65,59 +65,75 @@ const ReadingHome = ({ history, onStartLegacy, onStartPack }) => {
             <span style={{
               fontSize: 11, color: colors.textMuted, background: colors.borderLight,
               padding: '2px 8px', borderRadius: 4, fontWeight: 500,
-            }}>1 available</span>
+            }}>2 available</span>
           </div>
 
-          <button onClick={onStartLegacy} style={{
-            width: '100%', textAlign: 'left', padding: 0,
-            background: colors.card, borderRadius: 12,
-            border: `1px solid ${colors.borderLight}`, cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            overflow: 'hidden', display: 'flex',
-            fontFamily: "'DM Sans', sans-serif",
-          }}
-          onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
-          onMouseOut={e => { e.currentTarget.style.borderColor = colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            <div style={{ width: 6, background: colors.primary, flexShrink: 0 }}/>
-            <div style={{ padding: '20px 24px', flex: 1, display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: 10,
-                background: 'rgba(0,105,92,0.06)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                </svg>
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 16, fontWeight: 600, color: colors.text, marginBottom: 4 }}>
-                  Urban Agriculture
+          {[
+            {
+              onClick: onStartLegacy,
+              title: 'Urban Agriculture',
+              desc: 'The practice of cultivating crops within city boundaries and its impact on food security.',
+              types: '5 types',
+            },
+            {
+              onClick: onStartOcean,
+              title: 'Deep Ocean Exploration',
+              desc: 'The challenges, discoveries, and future of exploring Earth\'s least-known environment.',
+              types: '6 types',
+            },
+          ].map((item, i) => (
+            <button key={i} onClick={item.onClick} style={{
+              width: '100%', textAlign: 'left', padding: 0,
+              background: colors.card, borderRadius: 12,
+              border: `1px solid ${colors.borderLight}`, cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              overflow: 'hidden', display: 'flex',
+              fontFamily: "'DM Sans', sans-serif",
+              marginBottom: i === 0 ? 10 : 0,
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              <div style={{ width: 6, background: colors.primary, flexShrink: 0 }}/>
+              <div style={{ padding: '20px 24px', flex: 1, display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 10,
+                  background: 'rgba(0,105,92,0.06)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="1.8" strokeLinecap="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
                 </div>
-                <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5 }}>
-                  The practice of cultivating crops within city boundaries and its impact on food security.
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                {[
-                  { label: '10 Q', sub: 'questions' },
-                  { label: '20m', sub: 'time limit' },
-                  { label: '5', sub: 'types' },
-                ].map((t, i) => (
-                  <div key={i} style={{
-                    textAlign: 'center', padding: '6px 10px',
-                    background: colors.inputBg, borderRadius: 6,
-                  }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: colors.text }}>{t.label}</div>
-                    <div style={{ fontSize: 9, color: colors.textLight, textTransform: 'uppercase' }}>{t.sub}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: colors.text, marginBottom: 4 }}>
+                    {item.title}
                   </div>
-                ))}
+                  <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5 }}>
+                    {item.desc}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  {[
+                    { label: '10 Q', sub: 'questions' },
+                    { label: '20m', sub: 'time limit' },
+                    { label: item.types, sub: 'types' },
+                  ].map((t, j) => (
+                    <div key={j} style={{
+                      textAlign: 'center', padding: '6px 10px',
+                      background: colors.inputBg, borderRadius: 6,
+                    }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: colors.text }}>{t.label}</div>
+                      <div style={{ fontSize: 9, color: colors.textLight, textTransform: 'uppercase' }}>{t.sub}</div>
+                    </div>
+                  ))}
+                </div>
+                <span style={{ fontSize: 20, color: colors.primary, fontWeight: 700, marginLeft: 8 }}>›</span>
               </div>
-              <span style={{ fontSize: 20, color: colors.primary, fontWeight: 700, marginLeft: 8 }}>›</span>
-            </div>
-          </button>
+            </button>
+          ))}
         </div>
 
         {/* Section: Pack 6 */}

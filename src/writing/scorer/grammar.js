@@ -1700,6 +1700,24 @@ export function score(text) {
     errors.push('Article error: "make effort to" → "make an effort to". The noun "effort" as a single instance requires "an": "make an effort to improve", "make an effort to solve". Chinese 努力 has no article, but English requires "an" before a singular count noun.')
   }
 
+  // "already/just/yet + simple past" without auxiliary → missing present perfect — Loop 64A (2026-04-16)
+  // CLEC: ~4-6% of essays; zero FP — "have/had already ..." is correct and excluded by the negative lookbehind.
+  // e.g. "I already finished" → "I have already finished"; "she just arrived" → "she has just arrived"
+  // The regex: (have|has|had) lookbehind prevents flagging correct perfects.
+  const L64A_RE = /(?<!(?:have|has|had)\s{1,3})\b(already|just|yet)\s+\w+ed\b/i
+  if (L64A_RE.test(text)) {
+    errors.push('Tense error: "already/just/yet + past tense" → use present perfect. Write "I have already finished", "she has just arrived". These time adverbs signal present relevance, requiring "have/has + past participle". Chinese 已经 maps to simple past 了, but English requires the perfect auxiliary here.')
+  }
+
+  // Stative verbs in progressive — Loop 64B (2026-04-16)
+  // CLEC: ~2-3% of essays; stative verbs (know/believe/contain/consist/prefer/belong/resemble/seem/appear)
+  // cannot be progressive in standard academic English. "I am knowing" → "I know".
+  // FP guard: "I am considering/planning/thinking" are dynamic uses of mental verbs — excluded by list.
+  const STATIVE_PROGRESSIVE_RE = /\b(?:am|is|are|was|were)\s+(?:knowing|believing|containing|consisting|preferring|belonging|resembling|seeming|appearing|owning|possessing|liking|loving|hating|wanting|needing|understanding|recognizing)\b/i
+  if (STATIVE_PROGRESSIVE_RE.test(text)) {
+    errors.push('Grammar error: stative verb in progressive form. Verbs like "know / believe / contain / prefer / belong / seem" describe states, not actions — they cannot be progressive. Write "I know" not "I am knowing"; "it contains" not "it is containing". Chinese has no progressive restriction on state verbs (是在知道 is ungrammatical in Chinese too), but the English restriction is absolute in formal writing.')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -2022,6 +2040,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Article error') && e.includes('make effort to'))) {
     tips.push('"Make effort to" is missing the article "an". Write "make an effort to [verb]": "make an effort to improve", "make an effort to solve the problem". English treats this as a single countable effort — "an" is required. Chinese 努力 has no article equivalent, causing learners to omit it.')
+  }
+  if (analysis.errors.some(e => e.includes('Tense error') && e.includes('already/just/yet'))) {
+    tips.push('"Already/just/yet" require present perfect, not simple past. Write "I have already finished" (not "I already finished"), "she has just arrived" (not "she just arrived"). The auxiliary "have/has" signals present relevance — the action is complete but connected to now. Chinese 已经 pairs with simple past 了, which causes this transfer error.')
+  }
+  if (analysis.errors.some(e => e.includes('Grammar error') && e.includes('stative verb'))) {
+    tips.push('Stative verbs (know, believe, contain, prefer, belong, seem) cannot be progressive. Write "I know" not "I am knowing"; "it contains" not "it is containing". State verbs describe conditions, not actions in progress — the progressive "-ing" is grammatically blocked in standard English.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

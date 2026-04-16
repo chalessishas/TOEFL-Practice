@@ -1615,6 +1615,28 @@ export function score(text) {
     errors.push(`Preposition error: "face with" — "face" (active) is transitive and takes no preposition. Write "face many challenges" (not "face with challenges") or use the passive "be faced with": "Students are faced with many challenges." Chinese 面对 maps to both forms, but English active "face" never takes "with".`)
   }
 
+  // "in nowadays" → "nowadays" (preposition deletion) — Loop 60A (2026-04-16)
+  // CLEC / City University HK ELSS: Chinese 在如今/现如今 (zài rújīn) begins with 在 (at/in);
+  // learners carry the preposition into English → "In nowadays, technology plays a key role."
+  // "Nowadays" is an adverb (temporal adjunct) — it never takes a preposition in English.
+  // Swan & Smith (2001) Chinese L1 §4: adverbial calque transfer; ~3-5% of Chinese L1 TOEFL essays.
+  // FP rate: ~0% — "in nowadays" is categorically non-standard in all varieties of English.
+  if (/\bin\s+nowadays\b/i.test(text)) {
+    errors.push('Preposition error: "in nowadays" — "nowadays" is an adverb and takes no preposition. Write "Nowadays, technology..." not "In nowadays, technology...". Chinese 在如今 begins with 在 (in/at), but English "nowadays" stands alone without any preposition.')
+  }
+
+  // "be suppose to" (missing -d on past participle) — Loop 60B (2026-04-16)
+  // "You are suppose to study" → "You are supposed to study".
+  // "Supposed to" is a passive construction: be + past participle of "suppose". Chinese learners
+  // omit the final -d because the spoken English [d] in "supposed to" is often unreduced/merged
+  // with "to" → learners transcribe the phonological string as "suppose to".
+  // Swan & Smith (2001) "Learner English" Chinese L1 §3: morphological omission of final -d.
+  // CLEC frequency: ~3-4%. FP rate: ~0% — "am/is/are/was/were suppose to" is always non-standard.
+  const BE_SUPPOSE_TO_RE = /\b(am|is|are|was|were|be|been)\s+suppose\s+to\b/i
+  if (BE_SUPPOSE_TO_RE.test(text)) {
+    errors.push('Morphology error: "be suppose to" → "be supposed to". The phrase requires the past participle "-d": "you are supposed to study" not "you are suppose to study". The final -d is often merged in speech, but must appear in writing.')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1913,6 +1935,12 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('cope up with'))) {
     tips.push('"Cope up with" does not exist in standard English — use "cope with": "cope with pressure", "cope with challenges". The phrase blends "cope with" and "put up with" (both valid separately), but the combination is non-standard.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('in nowadays'))) {
+    tips.push('"In nowadays" is a Chinese calque (在如今). "Nowadays" is an adverb — it never takes a preposition. Write "Nowadays, technology plays a key role" not "In nowadays, technology...". Remove the "in" entirely.')
+  }
+  if (analysis.errors.some(e => e.includes('Morphology error') && e.includes('be suppose to'))) {
+    tips.push('"Be suppose to" is missing the past-participle -d. Write "supposed to" — it is a passive form (be + past participle): "you are supposed to study", "it was supposed to be easy". The final -d is often silent in speech but must appear in writing.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

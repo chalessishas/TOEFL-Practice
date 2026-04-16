@@ -127,6 +127,20 @@ export const questions = [
   },
   {
     id: 10,
+    type: 'text_insertion',
+    paragraph: 2,
+    text: 'The following sentence can be added to paragraph 2 (the seafloor spreading paragraph). Where would it best fit?\n\n"This symmetrical pattern, mirrored on both sides of a ridge, acts like a tape recorder of Earth\'s magnetic history."',
+    options: [
+      'Position A — at the beginning of paragraph 2, before "The mechanism Wegener lacked"',
+      'Position B — after "pushed outward and eventually forced beneath adjacent plates in a process called subduction."',
+      'Position C — after "characteristic magnetic stripe patterns preserved in rocks on either side of mid-ocean ridges,"',
+      'Position D — at the end of paragraph 2, after "plate tectonics had become the foundational framework of modern geology."',
+    ],
+    correct: 2,
+    explanation: 'Position C is best. The inserted sentence elaborates on the "magnetic stripe patterns" just mentioned — describing them as a "tape recorder of Earth\'s magnetic history" provides an analogy that clarifies what those stripes represent before the paragraph concludes. Position A places the analogy before stripes are introduced. Position B inserts it between subduction and magnetic evidence, breaking the flow. Position D places clarification after the conclusion is already drawn.',
+  },
+  {
+    id: 11,
     type: 'multiple',
     paragraph: 5,
     text: 'According to the passage, which THREE of the following are identified as consequences of plate tectonic activity? (Select 3)',

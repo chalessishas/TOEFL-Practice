@@ -19,7 +19,7 @@ createRoot(document.getElementById('root')).render(
       <ThemeProvider>
       <ErrorBoundary>
       <Layout>
-        <Suspense fallback={null}>
+        <Suspense fallback={<div style={{padding:'48px 24px',textAlign:'center',color:'#00695c',fontFamily:"'DM Sans', sans-serif",fontSize:13,letterSpacing:'0.02em'}}>Loading…</div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/reading" element={<Reading />} />

@@ -135,6 +135,20 @@ export const questions = [
     explanation: 'Position C is best. The inserted sentence directly follows the statement that mining companies propose extraction "to meet growing demand" — introducing an economic counter-argument (costs vs. profits) before the passage shifts to the specific ecological risk of toxic plumes. Position A would disrupt the topic sentence. Position B interrupts before the mining proposal is even introduced. Position D places the economic argument after the ecological argument, reversing the passage\'s logical order.',
   },
   {
+    id: 11,
+    type: 'reference',
+    paragraph: 3,
+    text: 'In paragraph 3, the word "these" in the phrase "Surrounding these vents, scientists found thriving ecosystems" refers to:',
+    options: [
+      'Deep-sea sediment layers studied by oceanographers',
+      'Hydrothermal vents discovered along the Galápagos Rift',
+      'Bacteria capable of performing chemosynthesis',
+      'Ecosystems that were previously believed to require sunlight',
+    ],
+    correct: 1,
+    explanation: '"These vents" refers back to "hydrothermal vents — openings in the ocean floor that release superheated water" introduced in the immediately preceding sentence. "These" is a near-demonstrative that points to the most recently mentioned specific noun phrase. The bacteria (C) and ecosystems (D) are introduced after "these vents," not before.',
+  },
+  {
     id: 12,
     type: 'attitude',
     paragraph: null,

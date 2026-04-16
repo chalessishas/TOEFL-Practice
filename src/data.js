@@ -124,6 +124,7 @@ export const typeLabels = {
   negative_fact: 'Negative Fact',
   sentence_simplification: 'Sentence Simplification',
   text_insertion: 'Text Insertion ✦ Pre-2026',
+  reference: 'Reference',
   multiple: 'Select Multiple',
 };
 
@@ -136,5 +137,6 @@ export const typeColors = {
   negative_fact: { bg: 'rgba(160, 100, 80, 0.08)', text: '#a06850', border: 'rgba(160, 100, 80, 0.2)' },
   sentence_simplification: { bg: 'rgba(100, 120, 160, 0.08)', text: '#607090', border: 'rgba(100, 120, 160, 0.2)' },
   text_insertion: { bg: 'rgba(90, 140, 110, 0.08)', text: '#4a8060', border: 'rgba(90, 140, 110, 0.2)' },
+  reference: { bg: 'rgba(110, 100, 150, 0.08)', text: '#6a6098', border: 'rgba(110, 100, 150, 0.2)' },
   multiple: { bg: 'rgba(170, 100, 100, 0.08)', text: '#b06060', border: 'rgba(170, 100, 100, 0.2)' },
 };

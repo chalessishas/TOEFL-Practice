@@ -1637,6 +1637,34 @@ export function score(text) {
     errors.push('Morphology error: "be suppose to" → "be supposed to". The phrase requires the past participle "-d": "you are supposed to study" not "you are suppose to study". The final -d is often merged in speech, but must appear in writing.')
   }
 
+  // "except of" → "except" / "except for" — Loop 61A (2026-04-16)
+  // CLEC / Gu et al. (2013) Chinese EFL preposition atlas; Swan & Smith (2001) §5.
+  // Chinese calque: 除了…之外 (chú le...zhī wài) — the 之外 ("outside of") leads learners to add "of".
+  // "Everyone agreed except of one student" → "except one student" / "except for one student".
+  // FP rate: ~0% — "except of" is categorically non-standard in all English varieties.
+  if (/\bexcept\s+of\b/i.test(text)) {
+    errors.push('Preposition error: "except of" is not standard English. Write "except" alone ("Everyone agreed except one student") or "except for" ("Everyone agreed except for one student"). Chinese 除了…之外 includes 之外 ("outside of"), but English "except" never takes the preposition "of".')
+  }
+
+  // "in contrary" → "on the contrary" — Loop 61B (2026-04-16)
+  // CLEC discourse marker corpus; Liu (2008) Chinese EFL connectives study.
+  // Chinese calque: 相反地 (xiāng fǎn de) + analogy with "in contrast / in addition / in conclusion".
+  // "In contrary, studies show..." → "On the contrary, ..." or "By contrast, ..."
+  // Note: "Contrary to..." (prep phrase, no article) is correct; only "in contrary" is wrong.
+  // FP rate: ~0% — "in contrary" as a sentence-initial marker is never standard English.
+  if (/\bin\s+contrary\b/i.test(text)) {
+    errors.push('Discourse error: "in contrary" is not standard English. The correct fixed phrase is "on the contrary" ("On the contrary, studies show...") or "by contrast". "Contrary to..." (without "in") is also correct: "Contrary to expectations, ...". Analogy with "in contrast / in addition" leads Chinese learners to overgeneralize the "in" preposition.')
+  }
+
+  // "take advantage on" → "take advantage of" — Loop 61C (2026-04-16)
+  // CLEC phrasal collocation errors; Granger (1998) Chinese L1 preposition substitution.
+  // Learners substitute "on" for "of" by analogy with "focus on", "rely on", "depend on".
+  // "Students should take advantage on technology" → "take advantage of technology".
+  // FP rate: ~0% — "take advantage on" is never correct.
+  if (/\btake\s+advantage\s+on\b/i.test(text)) {
+    errors.push('Collocation error: "take advantage on" → "take advantage of". The fixed phrase always uses "of": "take advantage of the opportunity". Analogy with "focus on / rely on / depend on" leads Chinese learners to substitute "on", but this particular idiom is fixed with "of".')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1941,6 +1969,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Morphology error') && e.includes('be suppose to'))) {
     tips.push('"Be suppose to" is missing the past-participle -d. Write "supposed to" — it is a passive form (be + past participle): "you are supposed to study", "it was supposed to be easy". The final -d is often silent in speech but must appear in writing.')
+  }
+  if (analysis.errors.some(e => e.includes('Preposition error') && e.includes('except of'))) {
+    tips.push('"Except of" is not standard English. Write "except" alone ("everyone agreed except one student") or "except for" ("except for one student"). Chinese 除了…之外 contains 之外 ("outside of"), which leads learners to add "of" — but English "except" never takes the preposition "of".')
+  }
+  if (analysis.errors.some(e => e.includes('Discourse error') && e.includes('in contrary'))) {
+    tips.push('"In contrary" is not standard English. The correct phrase is "on the contrary" ("On the contrary, studies show...") or "by contrast". Also correct: "Contrary to expectations, ..." (no "in"). Analogy with "in contrast / in addition" leads to overgeneralizing the "in" preposition.')
+  }
+  if (analysis.errors.some(e => e.includes('Collocation error') && e.includes('take advantage on'))) {
+    tips.push('"Take advantage on" → "take advantage of". The fixed idiom always uses "of": "take advantage of the opportunity". Analogy with "focus on / rely on / depend on" is common, but this particular idiom is fixed: "take advantage of" — never "on".')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

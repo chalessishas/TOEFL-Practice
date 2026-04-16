@@ -141,13 +141,18 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
                     {grade.label}
                   </span>
                 </div>
-                {errors.slice(0, 2).map((err, i) => (
+                {errors.slice(0, 3).map((err, i) => (
                   <p key={i} style={{
                     fontSize: 11, color: '#b06060', margin: '4px 0 0 112px', lineHeight: 1.5,
                   }}>
                     {err}
                   </p>
                 ))}
+                {errors.length > 3 && (
+                  <p style={{ fontSize: 11, color: '#999', margin: '4px 0 0 112px' }}>
+                    +{errors.length - 3} more issue{errors.length - 3 > 1 ? 's' : ''}
+                  </p>
+                )}
               </div>
             )
           })}

@@ -99,5 +99,5 @@ src/
 4. **Grammar 模块误判**: 动词模式匹配阈值已调过一轮，但仍有边界 case
 5. **Dark Mode 已接入**: ThemeContext + useTheme() hook，Settings 面板 toggle 可用，localStorage 持久化
 6. **Error Boundary**: ErrorBoundary.jsx wraps Layout — shows error message + Go Home button on uncaught exceptions
-7. **无输入 sanitization**: textarea 内容未做 XSS 防护
+7. **XSS 防护（2026-04-16 验证）**: 当前依赖 React 自动转义——所有 user text 通过 `{text}` 插值渲染，全项目 `src/` 扫描无 `dangerouslySetInnerHTML`/`innerHTML`/`eval`/`Function`，默认安全。**未来若引入 Markdown 渲染、富文本 WYSIWYG、或第三方 iframe，需重新审查**
 8. **评分权重手动调整**: 未与真实 TOEFL 评分做基准验证

@@ -25,8 +25,8 @@ const clearProgress = (key) => {
 };
 
 // Legacy Reading Test — accepts any passage/questions via props, defaults to Urban Agriculture
-// Props: { onBack, passage?, questions?, storageKey? }
-const LegacyReadingTest = ({ onBack, passage: passageProp, questions: questionsProp, storageKey: storageKeyProp }) => {
+// Props: { onBack, passage?, questions?, storageKey?, onComplete? }
+const LegacyReadingTest = ({ onBack, passage: passageProp, questions: questionsProp, storageKey: storageKeyProp, onComplete }) => {
   const { colors, isTimerVisible, isShortcutsVisible } = useTheme()
   const TOTAL_TIME = 20 * 60;
   const activeKey = storageKeyProp || STORAGE_KEY;
@@ -57,6 +57,12 @@ const LegacyReadingTest = ({ onBack, passage: passageProp, questions: questionsP
   useEffect(() => {
     if (!showResult) saveProgress(activeKey, { currentQuestion, answers, timer });
   }, [currentQuestion, answers, timer, showResult]);
+
+  useEffect(() => {
+    if (!showResult || !onComplete) return;
+    const { correct, total } = calculateScore();
+    onComplete({ correct, total });
+  }, [showResult]); // eslint-disable-line -- calculateScore reads stable state after showResult is set
 
   useEffect(() => {
     setFadeIn(false);

@@ -6,6 +6,7 @@ import AcademicPassage from '../reading/AcademicPassage.jsx';
 import LegacyReadingTest from '../reading/LegacyReadingTest.jsx';
 import ReadingHome from '../reading/ReadingHome.jsx';
 import { passage as deepOceanPassage, questions as deepOceanQuestions } from '../passages/deep-ocean.js';
+import { passage as plateTectonicsPassage, questions as plateTectonicsQuestions } from '../passages/plate-tectonics.js';
 
 const HISTORY_KEY = 'toefl-completion-history';
 
@@ -48,6 +49,12 @@ const Reading = () => {
 
   const startLegacy = () => setView('legacy');
   const startOcean = () => setView('ocean');
+  const startTectonics = () => setView('tectonics');
+
+  const handlePassageComplete = (id) => ({ correct, total }) => {
+    saveHistory(id, [{ correct, total }]);
+    setHistory(loadHistory());
+  };
 
   const startPack = (pack, moduleIdx) => {
     setSelectedPack(pack);
@@ -81,11 +88,11 @@ const Reading = () => {
   };
 
   if (view === 'home') {
-    return <ReadingHome history={history} onStartLegacy={startLegacy} onStartOcean={startOcean} onStartPack={startPack} />;
+    return <ReadingHome history={history} onStartLegacy={startLegacy} onStartOcean={startOcean} onStartTectonics={startTectonics} onStartPack={startPack} />;
   }
 
   if (view === 'legacy') {
-    return <LegacyReadingTest onBack={goHome} />;
+    return <LegacyReadingTest onBack={goHome} onComplete={handlePassageComplete('legacy-urban-agriculture')} />;
   }
 
   if (view === 'ocean') {
@@ -95,6 +102,19 @@ const Reading = () => {
         passage={deepOceanPassage}
         questions={deepOceanQuestions}
         storageKey="toefl-reading-deep-ocean"
+        onComplete={handlePassageComplete('ocean-deep-exploration')}
+      />
+    );
+  }
+
+  if (view === 'tectonics') {
+    return (
+      <LegacyReadingTest
+        onBack={goHome}
+        passage={plateTectonicsPassage}
+        questions={plateTectonicsQuestions}
+        storageKey="toefl-reading-plate-tectonics"
+        onComplete={handlePassageComplete('tectonics-plate-tectonics')}
       />
     );
   }

@@ -2,15 +2,15 @@ import { useTheme } from '../shared/ThemeContext.jsx';
 import { pack6 } from '../pack6.js';
 
 // Reading home screen — stateless presentational component
-// Props: { history, onStartLegacy, onStartOcean, onStartPack }
-const ReadingHome = ({ history, onStartLegacy, onStartOcean, onStartPack }) => {
+// Props: { history, onStartLegacy, onStartOcean, onStartTectonics, onStartPack }
+const ReadingHome = ({ history, onStartLegacy, onStartOcean, onStartTectonics, onStartPack }) => {
   const { colors } = useTheme()
 
-  const totalSets = 2 + pack6.modules.length;
+  const totalSets = 3 + pack6.modules.length;
   const completedSets = Object.keys(history).length;
   // Find the first incomplete Pack 6 module index for "Next Up" recommendation
   const nextUpIndex = pack6.modules.findIndex(m => !history[m.id]);
-  const totalQuestions = 20 + pack6.modules.reduce((sum, m) => sum + m.sections.reduce((s2, sec) => {
+  const totalQuestions = 30 + pack6.modules.reduce((sum, m) => sum + m.sections.reduce((s2, sec) => {
     if (sec.type === 'complete_words') return s2 + sec.paragraph.filter(p => p.blank).length;
     return s2 + (sec.questions?.length || 0);
   }, 0), 0);
@@ -65,7 +65,7 @@ const ReadingHome = ({ history, onStartLegacy, onStartOcean, onStartPack }) => {
             <span style={{
               fontSize: 11, color: colors.textMuted, background: colors.borderLight,
               padding: '2px 8px', borderRadius: 4, fontWeight: 500,
-            }}>2 available</span>
+            }}>3 available</span>
           </div>
 
           {[
@@ -74,42 +74,65 @@ const ReadingHome = ({ history, onStartLegacy, onStartOcean, onStartPack }) => {
               title: 'Urban Agriculture',
               desc: 'The practice of cultivating crops within city boundaries and its impact on food security.',
               types: '5 types',
+              historyId: 'legacy-urban-agriculture',
             },
             {
               onClick: onStartOcean,
               title: 'Deep Ocean Exploration',
               desc: 'The challenges, discoveries, and future of exploring Earth\'s least-known environment.',
               types: '6 types',
+              historyId: 'ocean-deep-exploration',
             },
-          ].map((item, i) => (
+            {
+              onClick: onStartTectonics,
+              title: 'Plate Tectonics',
+              desc: 'Wegener\'s continental drift theory, seafloor spreading, and the forces reshaping Earth\'s surface.',
+              types: '6 types',
+              historyId: 'tectonics-plate-tectonics',
+            },
+          ].map((item, i) => {
+            const done = history[item.historyId];
+            const doneResult = done?.results?.[0];
+            return (
             <button key={i} onClick={item.onClick} style={{
               width: '100%', textAlign: 'left', padding: 0,
-              background: colors.card, borderRadius: 12,
-              border: `1px solid ${colors.borderLight}`, cursor: 'pointer',
+              background: done ? colors.card : 'white', borderRadius: 12,
+              border: `1px solid ${done ? 'rgba(46,125,50,0.2)' : colors.borderLight}`, cursor: 'pointer',
               transition: 'all 0.2s ease',
               overflow: 'hidden', display: 'flex',
               fontFamily: "'DM Sans', sans-serif",
-              marginBottom: i === 0 ? 10 : 0,
+              marginBottom: i < 2 ? 10 : 0,
             }}
             onMouseOver={e => { e.currentTarget.style.borderColor = colors.primary; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,105,92,0.1)'; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = done ? 'rgba(46,125,50,0.2)' : colors.borderLight; e.currentTarget.style.boxShadow = 'none'; }}
             >
-              <div style={{ width: 6, background: colors.primary, flexShrink: 0 }}/>
+              <div style={{ width: 6, background: done ? colors.success : colors.primary, flexShrink: 0 }}/>
               <div style={{ padding: '20px 24px', flex: 1, display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{
                   width: 48, height: 48, borderRadius: 10,
-                  background: 'rgba(0,105,92,0.06)',
+                  background: done ? 'rgba(46,125,50,0.08)' : 'rgba(0,105,92,0.06)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
+                  flexShrink: 0, fontSize: 18, fontWeight: 800,
+                  color: done ? colors.success : colors.primary,
                 }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="1.8" strokeLinecap="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                  </svg>
+                  {done ? '✓' : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.primary} strokeWidth="1.8" strokeLinecap="round">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                  )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: colors.text, marginBottom: 4 }}>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: colors.text, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
                     {item.title}
+                    {done && doneResult && (
+                      <span style={{
+                        fontSize: 10, fontWeight: 700,
+                        color: doneResult.correct / doneResult.total >= 0.8 ? colors.success : doneResult.correct / doneResult.total >= 0.6 ? '#f59e0b' : '#f87171',
+                        background: doneResult.correct / doneResult.total >= 0.8 ? 'rgba(46,125,50,0.08)' : doneResult.correct / doneResult.total >= 0.6 ? 'rgba(245,158,11,0.08)' : 'rgba(248,113,113,0.08)',
+                        padding: '2px 8px', borderRadius: 4,
+                      }}>{doneResult.correct}/{doneResult.total}</span>
+                    )}
                   </div>
                   <div style={{ fontSize: 13, color: colors.textMuted, lineHeight: 1.5 }}>
                     {item.desc}
@@ -133,7 +156,8 @@ const ReadingHome = ({ history, onStartLegacy, onStartOcean, onStartPack }) => {
                 <span style={{ fontSize: 20, color: colors.primary, fontWeight: 700, marginLeft: 8 }}>›</span>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {/* Section: Pack 6 */}

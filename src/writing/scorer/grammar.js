@@ -1665,6 +1665,41 @@ export function score(text) {
     errors.push('Collocation error: "take advantage on" → "take advantage of". The fixed phrase always uses "of": "take advantage of the opportunity". Analogy with "focus on / rely on / depend on" leads Chinese learners to substitute "on", but this particular idiom is fixed with "of".')
   }
 
+  // "be base on" (missing -d on past participle "based") — Loop 62A (2026-04-16)
+  // CLEC morphology corpus; Swan & Smith (2001) Chinese L1 §3: final -d deletion in passive participles.
+  // Chinese calque: 基于 (jī yú) has no participial -d morphology → "is base on facts" instead of "is based on".
+  // "The theory is base on research" → "is based on research".
+  // Passive pattern: be + past participle (based); the -d is often elided in speech → writing transfer.
+  // FP rate: ~0% — "am/is/are/was/were base on" is always non-standard English.
+  const BE_BASE_ON_RE = /\b(am|is|are|was|were|be|been)\s+base\s+on\b/i
+  if (BE_BASE_ON_RE.test(text)) {
+    errors.push('Morphology error: "be base on" → "be based on". The passive form requires the past participle "-d": "the study is based on surveys" not "the study is base on surveys". The final -d is often silent in speech but must appear in writing.')
+  }
+
+  // "be worth of" → "worth [gerund]" or "worthy of [gerund/noun]" — Loop 62B (2026-04-16)
+  // CLEC collocation errors; Gu et al. (2013): conflation of "worth [gerund]" (no "of") with "worthy of [noun/gerund]".
+  // "It is worth of studying" → "it is worth studying" (no "of"); or "it is worthy of study".
+  // Chinese: 值得学习 (zhí de xuéxí) — 值得 maps both to "worth [doing]" and "worthy of [doing]",
+  // leading learners to add "of" after "worth" by analogy with "worthy of".
+  // FP guard: "X worth of Y" in quantity expressions ("fifty dollars worth of goods") never uses a
+  // copula directly before "worth of", so the BE+ guard eliminates these cases.
+  // FP rate: ~0% with copula guard.
+  if (/\b(?:is|are|was|were|be|been|seem[s]?|looked?)\s+worth\s+of\b/i.test(text)) {
+    errors.push('Collocation error: "worth of" → remove "of". Write "it is worth studying" (worth + gerund, no "of") or "it is worthy of study" (worthy of + gerund/noun). Chinese 值得做 maps to "worth doing" in English — "of" is never added after "worth".')
+  }
+
+  // "make effort to" (missing article "an") — Loop 62C (2026-04-16)
+  // CLEC article omission corpus; Hawkins & Buttery (2010): Chinese L1 zero-article transfer for count NPs.
+  // "Effort" as a single instance requires the indefinite article: "make an effort".
+  // "We should make effort to solve this" → "make an effort to solve this".
+  // Chinese 努力 is an uncountable noun-verb without an article equivalent → learners omit "an".
+  // Guard: "make every/more/great effort" (determiner/adjective before "effort") is excluded by the direct
+  // adjacency requirement in the regex — only bare "make effort" is flagged.
+  // FP rate: ~0% — "make effort to" (no article) is never standard academic English.
+  if (/\bmake(?:s|d|ing)?\s+effort\s+to\b/i.test(text)) {
+    errors.push('Article error: "make effort to" → "make an effort to". The noun "effort" as a single instance requires "an": "make an effort to improve", "make an effort to solve". Chinese 努力 has no article, but English requires "an" before a singular count noun.')
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1978,6 +2013,15 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('Collocation error') && e.includes('take advantage on'))) {
     tips.push('"Take advantage on" → "take advantage of". The fixed idiom always uses "of": "take advantage of the opportunity". Analogy with "focus on / rely on / depend on" is common, but this particular idiom is fixed: "take advantage of" — never "on".')
+  }
+  if (analysis.errors.some(e => e.includes('Morphology error') && e.includes('be base on'))) {
+    tips.push('"Be base on" is missing the past-participle -d. Write "based on" — it is a passive form (be + past participle of "base"): "the study is based on surveys", "this conclusion is based on evidence". Chinese 基于 has no participial morphology, but English requires the "-d" ending in writing even when it merges with "on" in speech.')
+  }
+  if (analysis.errors.some(e => e.includes('Collocation error') && e.includes('worth of'))) {
+    tips.push('"Worth of" is not used in predicative position. Write "worth + gerund" (no "of"): "it is worth studying", "it is worth trying". For the adjective form, use "worthy of + noun/gerund": "it is worthy of attention". Chinese 值得做 maps to English "worth doing" — "of" is never inserted after "worth".')
+  }
+  if (analysis.errors.some(e => e.includes('Article error') && e.includes('make effort to'))) {
+    tips.push('"Make effort to" is missing the article "an". Write "make an effort to [verb]": "make an effort to improve", "make an effort to solve the problem". English treats this as a single countable effort — "an" is required. Chinese 努力 has no article equivalent, causing learners to omit it.')
   }
   return tips.length > 0 ? tips : ['Review your sentence structure for grammatical accuracy.']
 }

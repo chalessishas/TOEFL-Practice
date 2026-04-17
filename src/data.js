@@ -140,10 +140,13 @@ export const typeLabels = {
   text_insertion: 'Text Insertion ✦ Pre-2026',
   reference: 'Reference',
   multiple: 'Select Multiple',
+  vocabulary: 'Vocabulary',
+  prose_summary: 'Prose Summary',
 };
 
 export const typeColors = {
   vocab: { bg: 'rgba(191, 131, 72, 0.08)', text: '#b87333', border: 'rgba(191, 131, 72, 0.2)' },
+  vocabulary: { bg: 'rgba(191, 131, 72, 0.08)', text: '#b87333', border: 'rgba(191, 131, 72, 0.2)' },
   detail: { bg: 'rgba(82, 130, 175, 0.08)', text: '#4a7fa5', border: 'rgba(82, 130, 175, 0.2)' },
   inference: { bg: 'rgba(130, 100, 170, 0.08)', text: '#7a5fb0', border: 'rgba(130, 100, 170, 0.2)' },
   attitude: { bg: 'rgba(100, 150, 120, 0.08)', text: '#5a9a6e', border: 'rgba(100, 150, 120, 0.2)' },
@@ -153,4 +156,5 @@ export const typeColors = {
   text_insertion: { bg: 'rgba(90, 140, 110, 0.08)', text: '#4a8060', border: 'rgba(90, 140, 110, 0.2)' },
   reference: { bg: 'rgba(110, 100, 150, 0.08)', text: '#6a6098', border: 'rgba(110, 100, 150, 0.2)' },
   multiple: { bg: 'rgba(170, 100, 100, 0.08)', text: '#b06060', border: 'rgba(170, 100, 100, 0.2)' },
+  prose_summary: { bg: 'rgba(74, 128, 96, 0.08)', text: '#3a7050', border: 'rgba(74, 128, 96, 0.2)' },
 };

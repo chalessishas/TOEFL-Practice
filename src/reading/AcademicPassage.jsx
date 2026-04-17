@@ -26,8 +26,10 @@ const AcademicPassage = ({ section, onComplete }) => {
     return () => clearTimeout(t);
   }, [currentQuestion]);
 
-  const isCurrentAnswered = currentQ.type === 'multiple'
-    ? Array.isArray(answers[currentQuestion]) && answers[currentQuestion].length === currentQ.correct.length
+  const isMultiSelectQ = currentQ.question_type === 'prose_summary' || currentQ.type === 'multiple';
+  const multiMaxSelect = currentQ.question_type === 'prose_summary' ? 3 : Array.isArray(currentQ.correct) ? currentQ.correct.length : 1;
+  const isCurrentAnswered = isMultiSelectQ
+    ? Array.isArray(answers[currentQuestion]) && answers[currentQuestion].length === multiMaxSelect
     : answers[currentQuestion] !== undefined;
 
   // Keyboard navigation
@@ -47,10 +49,13 @@ const AcademicPassage = ({ section, onComplete }) => {
   }, [showResult, currentQuestion, isCurrentAnswered]);
 
   const handleSelect = (idx) => {
-    if (currentQ.type === 'multiple') {
+    if (isMultiSelectQ) {
       const cur = answers[currentQuestion] || [];
-      const next = cur.includes(idx) ? cur.filter(i => i !== idx) : [...cur, idx];
-      setAnswers({ ...answers, [currentQuestion]: next });
+      if (cur.includes(idx)) {
+        setAnswers({ ...answers, [currentQuestion]: cur.filter(i => i !== idx) });
+      } else if (cur.length < multiMaxSelect) {
+        setAnswers({ ...answers, [currentQuestion]: [...cur, idx] });
+      }
     } else {
       setAnswers({ ...answers, [currentQuestion]: idx });
     }
@@ -73,9 +78,23 @@ const AcademicPassage = ({ section, onComplete }) => {
     return ans === q.correct;
   };
 
+  const scoreQuestion = (qIdx) => {
+    const q = qs[qIdx];
+    const ans = answers[qIdx];
+    if (q.question_type === 'prose_summary') {
+      if (!Array.isArray(ans)) return { points: 0, maxPoints: 2 };
+      const hits = ans.filter(a => q.correct.includes(a)).length;
+      return { points: Math.max(0, hits - 1), maxPoints: 2 };
+    }
+    return { points: isCorrect(qIdx) ? 1 : 0, maxPoints: 1 };
+  };
+
   // Review after submit
   if (showResult) {
     const correct = qs.filter((_, i) => isCorrect(i)).length;
+    const totalPoints = qs.reduce((sum, _, i) => sum + scoreQuestion(i).points, 0);
+    const maxPoints = qs.reduce((sum, _, i) => sum + scoreQuestion(i).maxPoints, 0);
+    const hasProseSummary = qs.some(q => q.question_type === 'prose_summary');
     return (
       <div style={{
         minHeight: '100vh', background: colors.bg, fontFamily: "'DM Sans', sans-serif",
@@ -88,11 +107,18 @@ const AcademicPassage = ({ section, onComplete }) => {
             }}>
               {section.title}
             </h2>
-            <p style={{ fontSize: 14, color: colors.textMuted }}>{correct} / {qs.length} correct</p>
+            <p style={{ fontSize: 14, color: colors.textMuted }}>
+              {hasProseSummary ? `${totalPoints} / ${maxPoints} pts` : `${correct} / ${qs.length} correct`}
+            </p>
           </div>
 
           {qs.map((q, qi) => {
             const ok = isCorrect(qi);
+            const sq = scoreQuestion(qi);
+            const isProse = q.question_type === 'prose_summary';
+            const scoreColor = isProse
+              ? (sq.points === 2 ? '#5a9a6e' : sq.points === 1 ? '#C4956A' : '#b06060')
+              : (ok ? '#5a9a6e' : '#b06060');
             const tc = typeColors[q.question_type] || typeColors.detail;
             return (
               <div key={qi} style={{
@@ -104,9 +130,9 @@ const AcademicPassage = ({ section, onComplete }) => {
                   <span style={{
                     width: 24, height: 24, borderRadius: 6, fontSize: 11, fontWeight: 600,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: ok ? 'rgba(90,154,110,0.1)' : 'rgba(176,96,96,0.1)',
-                    color: ok ? '#5a9a6e' : '#b06060',
-                    border: `1.5px solid ${ok ? 'rgba(90,154,110,0.3)' : 'rgba(176,96,96,0.3)'}`,
+                    background: ok ? 'rgba(90,154,110,0.1)' : isProse && sq.points > 0 ? 'rgba(196,149,106,0.1)' : 'rgba(176,96,96,0.1)',
+                    color: scoreColor,
+                    border: `1.5px solid ${ok ? 'rgba(90,154,110,0.3)' : isProse && sq.points > 0 ? 'rgba(196,149,106,0.3)' : 'rgba(176,96,96,0.3)'}`,
                   }}>{qi + 1}</span>
                   {q.question_type && tc && (
                     <span style={{
@@ -116,12 +142,12 @@ const AcademicPassage = ({ section, onComplete }) => {
                   )}
                   <span style={{
                     marginLeft: 'auto', fontSize: 11, fontWeight: 500,
-                    color: ok ? '#5a9a6e' : '#b06060',
-                  }}>{ok ? '✓' : '✗'}</span>
+                    color: scoreColor,
+                  }}>{isProse ? `${sq.points}/${sq.maxPoints} pts` : (ok ? '✓' : '✗')}</span>
                 </div>
                 <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.6, marginBottom: 12 }}>{q.text}</p>
                 {q.options.map((opt, oi) => {
-                  const isUser = q.type === 'multiple'
+                  const isUser = (q.question_type === 'prose_summary' || q.type === 'multiple')
                     ? Array.isArray(answers[qi]) && answers[qi].includes(oi)
                     : answers[qi] === oi;
                   const isAnswer = Array.isArray(q.correct) ? q.correct.includes(oi) : q.correct === oi;
@@ -270,19 +296,24 @@ const AcademicPassage = ({ section, onComplete }) => {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <div style={{ display: 'flex', gap: 4 }}>
-            {qs.map((_, i) => (
-              <button key={i} onClick={() => setCurrentQuestion(i)} style={{
-                width: 26, height: 26, borderRadius: 6,
-                border: i === currentQuestion ? '2px solid #D4A574'
-                  : answers[i] !== undefined ? '1.5px solid rgba(90,154,110,0.3)'
-                  : `1.5px solid ${colors.border}`,
-                background: i === currentQuestion ? 'rgba(212,165,116,0.08)'
-                  : answers[i] !== undefined ? 'rgba(90,154,110,0.05)' : 'white',
-                fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500,
-                color: i === currentQuestion ? '#C4956A' : answers[i] !== undefined ? '#5a9a6e' : colors.textLight,
-                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>{i + 1}</button>
-            ))}
+            {qs.map((q, i) => {
+              const dotDone = (q.question_type === 'prose_summary' || q.type === 'multiple')
+                ? Array.isArray(answers[i]) && answers[i].length === (q.question_type === 'prose_summary' ? 3 : q.correct.length)
+                : answers[i] !== undefined;
+              return (
+                <button key={i} onClick={() => setCurrentQuestion(i)} style={{
+                  width: 26, height: 26, borderRadius: 6,
+                  border: i === currentQuestion ? '2px solid #D4A574'
+                    : dotDone ? '1.5px solid rgba(90,154,110,0.3)'
+                    : `1.5px solid ${colors.border}`,
+                  background: i === currentQuestion ? 'rgba(212,165,116,0.08)'
+                    : dotDone ? 'rgba(90,154,110,0.05)' : 'white',
+                  fontFamily: "'DM Sans', sans-serif", fontSize: 10, fontWeight: 500,
+                  color: i === currentQuestion ? '#C4956A' : dotDone ? '#5a9a6e' : colors.textLight,
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>{i + 1}</button>
+              );
+            })}
           </div>
           <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: colors.textLight }}>
             {Object.keys(answers).length} / {qs.length}
@@ -324,24 +355,47 @@ const AcademicPassage = ({ section, onComplete }) => {
             </div>
           )}
 
+          {currentQ.lead_sentence && (
+            <div style={{
+              padding: '12px 16px', marginBottom: 16,
+              background: 'rgba(74,128,96,0.05)', border: '1.5px solid rgba(74,128,96,0.2)',
+              borderRadius: 8, fontFamily: "'Georgia', serif",
+              fontSize: 14, color: colors.text, lineHeight: 1.7,
+            }}>
+              {currentQ.lead_sentence}
+            </div>
+          )}
+
+          {isMultiSelectQ && (
+            <p style={{
+              fontSize: 11, color: colors.textLight, marginBottom: 8,
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+              Select {multiMaxSelect} answers
+            </p>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {currentQ.options.map((opt, idx) => {
-              const isMultiple = currentQ.type === 'multiple';
-              const isSelected = isMultiple
+              const isSelected = isMultiSelectQ
                 ? Array.isArray(answers[currentQuestion]) && answers[currentQuestion].includes(idx)
                 : answers[currentQuestion] === idx;
+              const isDisabled = isMultiSelectQ && !isSelected
+                && Array.isArray(answers[currentQuestion])
+                && answers[currentQuestion].length >= multiMaxSelect;
               return (
-                <button key={idx} onClick={() => handleSelect(idx)} style={{
+                <button key={idx} onClick={() => !isDisabled && handleSelect(idx)} style={{
                   width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 8,
                   border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.border}`,
                   background: isSelected ? 'rgba(0,105,92,0.04)' : 'white',
-                  cursor: 'pointer', transition: 'all 0.2s ease',
+                  cursor: isDisabled ? 'default' : 'pointer', transition: 'all 0.2s ease',
                   display: 'flex', alignItems: 'center', gap: 10,
                   fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-                  color: isSelected ? colors.text : colors.textMedium,
+                  color: isSelected ? colors.text : isDisabled ? colors.textLight : colors.textMedium,
+                  opacity: isDisabled ? 0.5 : 1,
                 }}>
                   <span style={{
-                    width: 22, height: 22, borderRadius: isMultiple ? 4 : '50%', flexShrink: 0,
+                    width: 22, height: 22, borderRadius: isMultiSelectQ ? 4 : '50%', flexShrink: 0,
                     border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.textLight}`,
                     background: isSelected ? colors.primary : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',

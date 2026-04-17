@@ -1736,6 +1736,19 @@ export function score(text) {
     if (re.test(text)) errors.push(msg)
   }
 
+  // Conjunctive adverb comma-splice — Loop 67A (2026-04-16)
+  // CLEC: comma splice with adverbial conjunctions is a documented error category.
+  // Pattern: ", however/therefore/etc. [independent clause]" — requires semicolon before, not comma.
+  // FP guard: require a subject pronoun / article / demonstrative after the adverb to confirm
+  // an independent clause follows (avoids "however difficult it may be" / parenthetical "however").
+  const L67A_ADVERBS = 'however|moreover|therefore|furthermore|consequently|nevertheless|nonetheless|thus|hence'
+  const L67A_RE = new RegExp(`,\\s+(${L67A_ADVERBS})\\s+(I\\b|he\\b|she\\b|they\\b|we\\b|it\\b|this\\b|that\\b|the\\b|a\\b|an\\b|[A-Z][a-z])`, 'i')
+  const l67aMatch = L67A_RE.exec(text)
+  if (l67aMatch) {
+    const adverb = l67aMatch[1].toLowerCase()
+    errors.push(`Discourse error: comma splice with conjunctive adverb "${adverb}". Write a semicolon before "${adverb}" and a comma after: "The results were poor; however, we continued." Conjunctive adverbs (however, therefore, moreover) are not coordinating conjunctions — a comma alone cannot join two independent clauses.`)
+  }
+
   // Weighted error count: run-ons are 3x more diagnostic than fragments/double-negatives
   // (ETS research: run-ons are pervasive in ESL writing; double-negatives trigger <0.4% of essays)
   const runOnCount = errors.filter(e => e.includes('run-on')).length
@@ -1753,7 +1766,9 @@ export function suggest(analysis) {
     tips.push('Ensure each sentence has a subject and verb.')
   if (analysis.errors.some(e => e.includes('run-on')))
     tips.push('Break long sentences into shorter ones using periods or semicolons.')
-  if (analysis.errors.some(e => e.includes('comma splice')))
+  if (analysis.errors.some(e => e.includes('comma splice') && e.includes('conjunctive adverb')))
+    tips.push('Use a semicolon (not a comma) before conjunctive adverbs: "The results were poor; however, we continued." — "however/therefore/moreover/furthermore" are adverbs, not coordinating conjunctions, so a comma alone cannot join two clauses around them.')
+  else if (analysis.errors.some(e => e.includes('comma splice')))
     tips.push('Use a conjunction (and, but, so) or period instead of a comma between independent clauses.')
   if (analysis.errors.some(e => e.includes('double negative')))
     tips.push('Avoid using two negatives in the same clause.')

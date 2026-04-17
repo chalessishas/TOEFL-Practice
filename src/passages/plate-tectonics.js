@@ -141,6 +141,20 @@ export const questions = [
   },
   {
     id: 11,
+    type: 'reference',
+    paragraph: 3,
+    text: 'In paragraph 3, the word "this" in the phrase "when two continental plates meet, the collision buckles the crust upward, forming mountain ranges such as the Himalayas; when an oceanic plate meets a continental plate, the denser oceanic plate sinks beneath the lighter continental crust" — the word "this process" earlier in the paragraph refers to:',
+    options: [
+      'The formation of transform boundaries where plates slide past each other',
+      'The pulling apart of plates at divergent boundaries, generating new crust',
+      'The collision of oceanic and continental plates causing subduction',
+      'The upward buckling of crust that creates mountain ranges',
+    ],
+    correct: 1,
+    explanation: '"This process" at the end of the divergent boundary sentence refers to the plates pulling apart and magma welling up — the East African Rift exemplifies plates diverging. The sentence structure is: divergent (plates pull apart → new crust → "this process" = the diverging) | convergent | transform. Options C and D describe convergent boundary events introduced later in the same sentence.',
+  },
+  {
+    id: 12,
     type: 'multiple',
     paragraph: 5,
     text: 'According to the passage, which THREE of the following are identified as consequences of plate tectonic activity? (Select 3)',

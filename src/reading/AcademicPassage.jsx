@@ -26,7 +26,9 @@ const AcademicPassage = ({ section, onComplete }) => {
     return () => clearTimeout(t);
   }, [currentQuestion]);
 
-  const isCurrentAnswered = answers[currentQuestion] !== undefined;
+  const isCurrentAnswered = currentQ.type === 'multiple'
+    ? Array.isArray(answers[currentQuestion]) && answers[currentQuestion].length === currentQ.correct.length
+    : answers[currentQuestion] !== undefined;
 
   // Keyboard navigation
   useEffect(() => {
@@ -45,18 +47,31 @@ const AcademicPassage = ({ section, onComplete }) => {
   }, [showResult, currentQuestion, isCurrentAnswered]);
 
   const handleSelect = (idx) => {
-    setAnswers({ ...answers, [currentQuestion]: idx });
+    if (currentQ.type === 'multiple') {
+      const cur = answers[currentQuestion] || [];
+      const next = cur.includes(idx) ? cur.filter(i => i !== idx) : [...cur, idx];
+      setAnswers({ ...answers, [currentQuestion]: next });
+    } else {
+      setAnswers({ ...answers, [currentQuestion]: idx });
+    }
   };
 
   const handleSubmit = () => {
     setShowResult(true);
     if (onComplete) {
-      const correct = qs.filter((q, i) => answers[i] === q.correct).length;
+      const correct = qs.filter((_, i) => isCorrect(i)).length;
       onComplete({ correct, total: qs.length });
     }
   };
 
-  const isCorrect = (qIdx) => answers[qIdx] === qs[qIdx].correct;
+  const isCorrect = (qIdx) => {
+    const q = qs[qIdx];
+    const ans = answers[qIdx];
+    if (Array.isArray(q.correct)) {
+      return Array.isArray(ans) && ans.length === q.correct.length && ans.every(a => q.correct.includes(a));
+    }
+    return ans === q.correct;
+  };
 
   // Review after submit
   if (showResult) {
@@ -106,8 +121,10 @@ const AcademicPassage = ({ section, onComplete }) => {
                 </div>
                 <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.6, marginBottom: 12 }}>{q.text}</p>
                 {q.options.map((opt, oi) => {
-                  const isUser = answers[qi] === oi;
-                  const isAnswer = q.correct === oi;
+                  const isUser = q.type === 'multiple'
+                    ? Array.isArray(answers[qi]) && answers[qi].includes(oi)
+                    : answers[qi] === oi;
+                  const isAnswer = Array.isArray(q.correct) ? q.correct.includes(oi) : q.correct === oi;
                   let bg = 'transparent', border = colors.border, color = colors.textMedium;
                   if (isAnswer) { bg = 'rgba(90,154,110,0.06)'; border = 'rgba(90,154,110,0.3)'; color = '#5a9a6e'; }
                   if (isUser && !isAnswer) { bg = 'rgba(176,96,96,0.06)'; border = 'rgba(176,96,96,0.3)'; color = '#b06060'; }
@@ -309,7 +326,10 @@ const AcademicPassage = ({ section, onComplete }) => {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {currentQ.options.map((opt, idx) => {
-              const isSelected = answers[currentQuestion] === idx;
+              const isMultiple = currentQ.type === 'multiple';
+              const isSelected = isMultiple
+                ? Array.isArray(answers[currentQuestion]) && answers[currentQuestion].includes(idx)
+                : answers[currentQuestion] === idx;
               return (
                 <button key={idx} onClick={() => handleSelect(idx)} style={{
                   width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 8,
@@ -321,7 +341,7 @@ const AcademicPassage = ({ section, onComplete }) => {
                   color: isSelected ? colors.text : colors.textMedium,
                 }}>
                   <span style={{
-                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                    width: 22, height: 22, borderRadius: isMultiple ? 4 : '50%', flexShrink: 0,
                     border: isSelected ? `2px solid ${colors.primary}` : `1.5px solid ${colors.textLight}`,
                     background: isSelected ? colors.primary : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',

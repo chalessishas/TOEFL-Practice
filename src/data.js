@@ -113,6 +113,20 @@ export const questions = [
     correct: [0, 1, 2],
     explanation: 'The passage specifically names Singapore, Amsterdam, and Toronto as cities with successful urban agriculture case studies.',
   },
+  {
+    id: 12,
+    type: 'reference',
+    paragraph: 2,
+    text: 'The phrase "These methods" in paragraph 3 refers to:',
+    options: [
+      'Transportation networks and supply chains',
+      'Vertical farming and hydroponics',
+      'Traditional soil-based agriculture',
+      'Zoning reforms and financial incentives',
+    ],
+    correct: 1,
+    explanation: '"These methods" refers to the innovative farming techniques introduced in the preceding sentence: vertical farming and hydroponics. Both are described as solutions for overcoming the space constraints that prevent traditional agriculture in cities.',
+  },
 ];
 
 export const typeLabels = {

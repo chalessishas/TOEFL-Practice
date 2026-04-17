@@ -242,6 +242,11 @@ export function score(text) {
       msg: 'SVA: "he/she/it" takes "is" not "are"' },
     { re: /\b(you|we|they)\s+was\b/i,
       msg: 'SVA: "you/we/they" takes "were" not "was"' },
+    // L68: collective nouns — always singular in American English academic writing.
+    // FP guard: "government/team/staff" omitted (plural acceptable in British English).
+    // "committee/board/jury/council/cabinet" are unambiguous in TOEFL (AmE) context.
+    { re: /\b(the\s+)?(committee|board|jury|council|cabinet)\s+(are|were|have)\b/i,
+      msg: 'SVA: collective nouns (committee, board, jury) take singular verbs in American English: "the committee is", "the jury has", "the board was"' },
   ]
   SVA_PATTERNS.forEach(({ re, msg }) => {
     if (re.test(text)) errors.push(msg)
@@ -1775,7 +1780,7 @@ export function suggest(analysis) {
   if (analysis.errors.some(e => e.includes('SVA') && e.includes('3rd-person singular')))
     tips.push('Add -s to verbs with "he/she/it" subjects: "he goes", "she wants", "it seems" — third-person singular always requires the -s ending.')
   if (analysis.errors.some(e => e.includes('SVA') && !e.includes('3rd-person singular')))
-    tips.push('Check subject-verb agreement: "everyone/nobody/each" takes a singular verb, and uncountable nouns (information, advice, news) always use "is" not "are".')
+    tips.push('Check subject-verb agreement: "everyone/nobody/each" takes a singular verb; collective nouns like "committee/jury/board" also take singular verbs in American English ("the committee is", "the jury has"); uncountable nouns (information, advice, news) always use "is" not "are".')
   if (analysis.errors.some(e => e.includes('Aspect error')))
     tips.push('After "have/has/had been", use the past participle: "has been finished" not "has been finish", "had been completed" not "had been complete".')
   if (analysis.errors.some(e => e.includes('Stative verb error')))
@@ -1859,6 +1864,9 @@ export function suggest(analysis) {
   }
   if (analysis.errors.some(e => e.includes('SVA error') && e.includes('plural quantifier'))) {
     tips.push('"there is/was" must agree with the noun that follows: use "there are many reasons" not "there is many reasons". Count quantifiers (many/several/few/various) always require plural "are/were".')
+  }
+  if (analysis.errors.some(e => e.includes('SVA') && e.includes('collective noun'))) {
+    tips.push('Collective nouns (committee, board, jury, council, cabinet) take singular verbs in American English: "the committee is meeting" not "the committee are meeting", "the jury has reached a verdict" not "the jury have reached". In British English plural agreement is common, but TOEFL uses American English conventions — always treat these nouns as singular.')
   }
   if (analysis.errors.some(e => e.includes('"home"') && e.includes('no preposition'))) {
     tips.push('"home" as a destination is a bare adverb — no preposition needed. Write "go home", "come home", "return home" — never "go to home" or "come to home".')

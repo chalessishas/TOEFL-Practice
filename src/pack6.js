@@ -1647,6 +1647,20 @@ The CPH has important implications for education policy and language teaching. I
           explanation: 'The passage states critics note that "Genie\'s profound psychological trauma and cognitive deprivation may have confounded results, making it difficult to isolate the effect of age from other variables." Genie was 13 when discovered (not too young), never achieved full grammatical competence (not contradicting CPH), and was formally studied extensively.',
         },
         {
+          id: 25,
+          paragraph: 0,
+          text: 'According to the passage, which of the following is NOT true about the Critical Period Hypothesis?',
+          options: [
+            'It was first formally put forward by a neurologist before being extended by a linguist.',
+            'Lenneberg claimed the hypothesis applied specifically to vocabulary development rather than language as a whole.',
+            'Evidence for the hypothesis comes from case studies of children denied early exposure to language.',
+            'The hypothesis links effective language acquisition to a developmental window that closes around puberty.',
+          ],
+          correct: 1,
+          question_type: 'negative_fact',
+          explanation: 'Option B is false — Lenneberg argued that language acquisition as a whole must occur before puberty, not that vocabulary specifically is constrained. The passage actually shows the opposite: Genie developed vocabulary but failed to acquire grammar, suggesting vocabulary may be less dependent on the critical period. Options A (Penfield, a neurologist, first articulated it; Lenneberg, a linguist, later expanded it), C (evidence from isolated-child case studies like Genie), and D (the window closes around puberty) are all explicitly stated in the passage.',
+        },
+        {
           id: 18,
           paragraph: 1,
           text: 'Based on paragraph 2, what can be inferred about adult second language learners?',

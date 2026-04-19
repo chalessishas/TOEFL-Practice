@@ -1769,3 +1769,228 @@ The CPH has important implications for education policy and language teaching. I
     },
   ],
 });
+
+// ═══════════════════════════════════════════════════════
+// Module 7 — Gut Microbiome / Career Fair / Urban Planning
+// ═══════════════════════════════════════════════════════
+pack6.modules.push({
+  id: 'pack6-m7',
+  name: 'Module 7',
+  time: 9 * 60,
+  sections: [
+    // --- Complete the Words ---
+    {
+      type: 'complete_words',
+      id: 'pack6-m7-cw',
+      title: 'Urban Green Spaces',
+      instructions: 'Fill in the missing letters in the paragraph.',
+      paragraph: [
+        { text: 'Cities around the world are ' },
+        { blank: 'ognizing', prefix: 'rec', answer: 'recognizing' },
+        { text: ' the importance of green spaces for the well-being of their ' },
+        { blank: 'idents', prefix: 'res', answer: 'residents' },
+        { text: '. Parks, community gardens, and tree-lined streets help to ' },
+        { blank: 'uce', prefix: 'red', answer: 'reduce' },
+        { text: ' air ' },
+        { blank: 'ution', prefix: 'poll', answer: 'pollution' },
+        { text: ' and lower ' },
+        { blank: 'eratures', prefix: 'temp', answer: 'temperatures' },
+        { text: ' in dense urban areas. Research shows that access to nature can lower stress and improve mental ' },
+        { blank: 'alth', prefix: 'he', answer: 'health' },
+        { text: '. Despite these benefits, rapid urban ' },
+        { blank: 'elopment', prefix: 'dev', answer: 'development' },
+        { text: ' often reduces the amount of green space ' },
+        { blank: 'ilable', prefix: 'ava', answer: 'available' },
+        { text: ' to city ' },
+        { blank: 'wellers', prefix: 'd', answer: 'dwellers' },
+        { text: '. City planners face the challenge of balancing the need for housing and ' },
+        { blank: 'astructure', prefix: 'infr', answer: 'infrastructure' },
+        { text: ' with the preservation of natural areas that support community health and environmental ' },
+        { blank: 'stainability', prefix: 'su', answer: 'sustainability' },
+        { text: '.' },
+      ],
+    },
+
+    // --- Read in Daily Life: Career Fair Invitation ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m7-dl1',
+      title: 'Career Fair Invitation',
+      material_type: 'email',
+      material: {
+        subject: 'Spring Career Fair — Thursday, April 24',
+        from: 'Career Development Office',
+        to: 'All Students',
+        body: "Dear Students,\n\nWe are pleased to announce the Spring Career Fair on Thursday, April 24, from 10:00 A.M. to 4:00 P.M. in the Student Union Ballroom. Over 60 employers from industries including technology, healthcare, finance, and public service will be in attendance.\n\nTo make the most of the event, please bring several copies of your résumé and dress in professional attire. Pre-registration through the Career Portal is strongly encouraged, as registered students will receive a printed employer directory upon arrival.\n\nIf you have questions, contact the Career Development Office at careers@university.edu.\n\nWe look forward to seeing you there!\n\nCareer Development Office",
+      },
+      questions: [
+        {
+          id: 11,
+          text: 'What is one advantage of pre-registering for the Career Fair?',
+          options: [
+            'Students receive a guaranteed job interview.',
+            'Students are allowed to arrive before other attendees.',
+            'Students receive a printed list of employers at the event.',
+            'Students do not need to bring a résumé.',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'The email states that "registered students will receive a printed employer directory upon arrival." This is the specific advantage of pre-registration mentioned in the notice. No mention is made of guaranteed interviews, early entry, or waiving the résumé requirement.',
+        },
+        {
+          id: 12,
+          text: 'What can be inferred about the career fair from the email?',
+          options: [
+            'It is open only to students in technology and finance programs.',
+            'It is a new event being held for the first time this semester.',
+            'It offers students the opportunity to meet potential employers in person.',
+            'It will take place over multiple days.',
+          ],
+          correct: 2,
+          question_type: 'inference',
+          explanation: 'The email describes over 60 employers attending a single event in the Student Union Ballroom. The phrase "make the most of the event" combined with advice to bring résumés strongly implies face-to-face networking with potential employers. The event is one day (April 24) and open to all students across industries.',
+        },
+      ],
+    },
+
+    // --- Read in Daily Life: Lab Safety Policy Update ---
+    {
+      type: 'daily_life',
+      id: 'pack6-m7-dl2',
+      title: 'Lab Safety Policy Update',
+      material_type: 'email',
+      material: {
+        subject: 'Updated Laboratory Safety Protocol — Effective May 1',
+        from: 'Dr. Sandra Osei, Lab Director',
+        to: 'All Research Staff and Graduate Students',
+        body: "Dear Lab Members,\n\nEffective May 1, all personnel entering the chemistry and biology laboratories must complete the updated online safety training module before accessing the labs. The new module takes approximately 45 minutes and covers revised procedures for chemical disposal, emergency evacuation, and equipment sterilization.\n\nCompletion certificates must be submitted to the lab coordinator no later than April 28. Staff or students who have not submitted a certificate by this date will have their key card access temporarily suspended until training is verified.\n\nPlease note that the previous safety certification completed before January 2026 is no longer valid and does not satisfy this requirement.\n\nFor technical issues with the training portal, contact it-support@university.edu.\n\nBest regards,\nDr. Sandra Osei\nLaboratory Director",
+      },
+      questions: [
+        {
+          id: 13,
+          text: 'What will happen to staff who do not submit their certificate by April 28?',
+          options: [
+            'They will be required to repeat all previous safety training.',
+            'Their access to the laboratories will be temporarily removed.',
+            'They will receive an extension until May 1 to complete the training.',
+            'They will be reassigned to non-laboratory duties.',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'The email states that staff who have not submitted a certificate by April 28 "will have their key card access temporarily suspended until training is verified." This means their lab access is removed, not that they are reassigned, extended, or required to retake previous training.',
+        },
+        {
+          id: 14,
+          text: 'What does the email suggest about the previous safety certification?',
+          options: [
+            'It is still valid if completed after January 2026.',
+            'It covered the same material as the new module.',
+            'It was completed by all current lab members.',
+            'It is acceptable as a substitute for the new training if completed recently.',
+          ],
+          correct: 0,
+          question_type: 'inference',
+          explanation: 'The email states certifications completed "before January 2026 is no longer valid." The logical implication is that certifications completed after January 2026 may still be valid — only pre-January 2026 certifications are explicitly invalidated. Options B, C, and D are not supported by the email text.',
+        },
+        {
+          id: 15,
+          text: 'What is the primary purpose of this email?',
+          options: [
+            'To announce the opening of a new chemistry laboratory',
+            'To remind staff that annual safety reviews are voluntary',
+            'To inform lab personnel of a mandatory training requirement',
+            'To describe updates to chemical disposal procedures in detail',
+          ],
+          correct: 2,
+          question_type: 'purpose',
+          explanation: 'The email\'s main goal is to notify all lab members that they must complete a new safety training module before May 1, with a certificate submission deadline of April 28. It is not announcing a new lab, describing procedures in detail, or suggesting training is optional.',
+        },
+      ],
+    },
+
+    // --- Read an Academic Passage: The Human Gut Microbiome ---
+    {
+      type: 'academic_passage',
+      id: 'pack6-m7-ap',
+      title: 'The Human Gut Microbiome',
+      passage: `The human gut hosts trillions of microorganisms — bacteria, fungi, and viruses — collectively known as the gut microbiome. Far from being passive inhabitants, these microbes actively contribute to digestion, synthesizing vitamins such as B12 and K, and breaking down complex carbohydrates that human enzymes cannot process. The composition of the microbiome varies widely between individuals and is shaped by factors including diet, antibiotic use, and early-life exposures such as breastfeeding.
+
+Research over the past two decades has revealed that the gut microbiome exerts influence well beyond digestion. The gut-brain axis — a bidirectional communication pathway linking gut microbes with the central nervous system — has become a major area of scientific inquiry. Studies in animal models suggest that alterations in gut microbial communities can affect mood, anxiety, and cognitive function. Although direct causal evidence in humans remains limited, researchers have found correlations between disrupted microbiomes and conditions such as depression and autism spectrum disorder.
+
+The therapeutic potential of the microbiome has driven interest in interventions that modify its composition. Probiotics — live beneficial bacteria consumed in food or supplement form — and prebiotics — dietary fibers that feed beneficial microbes — represent two common approaches. A more dramatic intervention, fecal microbiota transplantation (FMT), involves transferring stool from a healthy donor to a patient to restore a disrupted microbial community. FMT has shown remarkable effectiveness against recurrent Clostridioides difficile infections, though its application to other conditions remains experimental.`,
+      questions: [
+        {
+          id: 16,
+          paragraph: 0,
+          text: 'According to the passage, which of the following is a function of gut microbes?',
+          options: [
+            'Producing the human enzymes needed for digestion',
+            'Regulating the absorption of antibiotic medications',
+            'Breaking down complex carbohydrates that humans cannot digest on their own',
+            'Replacing vitamins lost through antibiotic use',
+          ],
+          correct: 2,
+          question_type: 'detail',
+          explanation: 'Paragraph 1 explicitly states that gut microbes contribute to digestion by "breaking down complex carbohydrates that human enzymes cannot process." The passage says microbes synthesize vitamins, not replace ones lost to antibiotics. The passage does not mention microbes producing human enzymes or regulating antibiotic absorption.',
+        },
+        {
+          id: 17,
+          paragraph: 0,
+          text: 'The word "composition" in the first paragraph is closest in meaning to',
+          options: [
+            'location',
+            'activity',
+            'make-up',
+            'growth',
+          ],
+          correct: 2,
+          question_type: 'vocab',
+          highlighted_word: 'composition',
+          explanation: '"Composition" refers to what something is made of — its constituent parts or make-up. The sentence discusses which microorganisms are present in the microbiome and what factors determine that mix. "Location," "activity," and "growth" do not capture this meaning.',
+        },
+        {
+          id: 18,
+          paragraph: 1,
+          text: 'What does the author indicate about the link between the gut microbiome and mental health in humans?',
+          options: [
+            'It has been proven through controlled experiments involving human subjects.',
+            'It is supported by correlational evidence but lacks confirmed causal proof.',
+            'It is considered too speculative to merit serious scientific investigation.',
+            'It has been demonstrated conclusively in animal studies and confirmed in humans.',
+          ],
+          correct: 1,
+          question_type: 'detail',
+          explanation: 'Paragraph 2 states that "direct causal evidence in humans remains limited" but that researchers have found "correlations between disrupted microbiomes and conditions such as depression." This matches option B — correlational evidence exists but causation has not been confirmed. Animal studies have shown effects, but the passage does not say these have been confirmed in humans.',
+        },
+        {
+          id: 19,
+          paragraph: 2,
+          text: 'What can be inferred about fecal microbiota transplantation (FMT)?',
+          options: [
+            'It is currently recommended as the first treatment for all gut-related disorders.',
+            'Its use is well-established for a wide range of medical conditions.',
+            'It has a proven track record for one specific infection but is still being tested for others.',
+            'It works by introducing synthetic bacteria into the patient\'s digestive system.',
+          ],
+          correct: 2,
+          question_type: 'inference',
+          explanation: 'Paragraph 3 says FMT "has shown remarkable effectiveness against recurrent Clostridioides difficile infections" but its "application to other conditions remains experimental." This indicates a proven track record for one condition while broader applications are still being studied. It does not use synthetic bacteria — it transfers stool from a healthy donor.',
+        },
+        {
+          id: 20,
+          paragraph: null,
+          text: 'Which of the following is NOT mentioned in the passage as a way to modify the gut microbiome?',
+          options: [
+            'Consuming live beneficial bacteria in supplement form',
+            'Eating dietary fibers that support beneficial microbes',
+            'Receiving a transfer of microbial material from a healthy person',
+            'Undergoing surgery to remove harmful bacteria from the intestine',
+          ],
+          correct: 3,
+          question_type: 'negative_fact',
+          explanation: 'The passage describes three approaches: probiotics (live bacteria — option A), prebiotics (dietary fibers — option B), and FMT, which involves transferring stool from a healthy donor (option C). Surgical removal of harmful bacteria is never mentioned in the passage, making option D the correct answer.',
+        },
+      ],
+    },
+  ],
+});

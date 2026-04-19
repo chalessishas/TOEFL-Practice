@@ -209,6 +209,7 @@ React 19 + Vite 6 + React Router 7 + Express (可选代理) — 纯 JSX，无 Ty
 | - | english-words.js 单独 chunk | 2.7MB 文件，Vite manual chunk 避免阻塞首屏加载 |
 
 ## 已知问题
+- **⚠️ [2026-04-18] ETS 于 2026-01-21 更新 iBT 阅读格式**：新格式为 adaptive 双模块、约 200 词短文 + 每组 5 题、总题数降至 35–48（旧格式 54）。当前 app 实现的是旧格式（~700 词长文 + 每篇 9–10 题）。**用户待决策**：(a) 保留旧格式作深度练习；(b) 新增 200 词短文 adaptive 模式；(c) 混合。在决策确认前维持现状；旧格式对词汇/推理等核心技能练习仍有效。
 - english-words.js 2.7MB，首次加载可能较慢
 - Reading.jsx 已拆分为 4 个组件 (affb832) ✓
 - Git remote URL 已使用 HTTPS（无嵌入 token），凭证由系统 credential helper 管理

@@ -1337,7 +1337,7 @@ The reconstructive nature of memory carries significant implications across mult
           text: 'The word "fallible" in paragraph 1 is closest in meaning to',
           options: ['unreliable', 'creative', 'unconscious', 'detailed'],
           correct: 0,
-          question_type: 'vocabulary',
+          question_type: 'vocab',
           explanation: '"Fallible" means capable of making errors or being wrong — i.e., unreliable.',
         },
         {
